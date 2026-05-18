@@ -8,3 +8,11 @@ dataset1 = Dataset("MNIST",60000)
 dataset2 = Dataset("HAVOC",14000)
 dataset1.summary()
 dataset2.summary()
+
+
+class Document:
+    def __init__(self,title,text_content):
+        self.title = title
+        self.text_content = text_content
+
+my_doc = Document("NDA_2026","Strictly confidential")        

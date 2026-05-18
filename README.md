@@ -16,3 +16,5 @@ Week 1 — Python, NumPy, Classes, GitHub ✅
 
 ## Tech Stack
 Python | NumPy | Pandas | PyTorch | Transformers | RAG
+
+
