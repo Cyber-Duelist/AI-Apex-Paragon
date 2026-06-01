@@ -32,4 +32,4 @@ print(f"Accuracy: {accuracy*100:.2f}%")
 
 print("\n=====6. CONFUSION MATRIX===========")
 print("Rows = Actual, Columns = Predicted")
-print(confusion_matrix(y_test,predictions))
+print(confusion_matrix(y_test, predictions))
