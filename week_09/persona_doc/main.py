@@ -3,61 +3,63 @@ import sys
 import shutil
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
-# Ensure Python can find our local modules
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
 
 from ingest import ingest_document
 from chunker import chunk_document
 from vector_store import get_collection, add_chunks, search, delete_collection
+from hallucination_control import rag_with_guard
 
-# 1. Initialize the FastAPI Application
 app = FastAPI(title="PersonaDoc API", description="Production RAG API")
 
-# Ensure the temporary uploads directory exists
 UPLOAD_DIR = os.path.join(current_dir, "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# 2. Initialize our Persistent Database Connection
 collection = get_collection()
 
-# 3. Define our Pydantic Data Models (Strict Input/Output validation)
+# Pydantic Models
 class SearchRequest(BaseModel):
     query: str
     top_k: int = 3
+    source: Optional[str] = None
 
-class SearchResult(BaseModel):
-    rank: int
+class Citation(BaseModel):
     source: str
     page: int
-    text: str
 
-# 4. Define the Endpoints
+class SearchResponse(BaseModel):
+    question: str
+    answer: str
+    grounded: bool
+    citations: List[Citation]
 
+# Endpoints
 @app.get("/")
 def root():
-    """Health check endpoint to ensure the API is alive."""
     return {"status": "PersonaDoc API is running"}
+
+@app.get("/documents")
+def list_documents():
+    """Lists all unique documents currently indexed in ChromaDB."""
+    results = collection.get(include=["metadatas"])
+    sources = list({m["source"] for m in results["metadatas"]}) if results["metadatas"] else []
+    return {"documents": sources}
 
 @app.post("/upload")
 async def upload_document(file: UploadFile = File(...)):
-    """
-    Accepts a file upload, saves it to disk, extracts text, 
-    chunks it, embeds it, and stores it in ChromaDB.
-    """
+    """Upload any PDF or TXT file and index it."""
     try:
-        # Save the uploaded file temporarily
         file_path = os.path.join(UPLOAD_DIR, file.filename)
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        # Execute our RAG ingestion pipeline
         pages = ingest_document(file_path)
         if not pages:
-            raise HTTPException(status_code=400, detail="Failed to extract text from document.")
-        
+            raise HTTPException(status_code=400, detail="Failed to extract text.")
+
         chunks = chunk_document(pages, chunk_size=400, overlap=80)
         add_chunks(chunks, collection)
 
@@ -67,34 +69,31 @@ async def upload_document(file: UploadFile = File(...)):
             "chunks": len(chunks),
             "status": "indexed"
         }
-        
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
-@app.post("/search", response_model=List[SearchResult])
+@app.post("/search", response_model=SearchResponse)
 def search_documents(req: SearchRequest):
-    """
-    Takes a natural language query, converts it to a vector, 
-    and searches the ChromaDB database for the closest chunks.
-    """
-    # Query our database
-    raw_results = search(req.query, collection, top_k=req.top_k)
-    
-    # Format the results strictly according to our Pydantic model
-    formatted_results = []
-    for idx, res in enumerate(raw_results, 1):
-        formatted_results.append(
-            SearchResult(
-                rank=idx,
-                source=res["metadata"]["source"],
-                page=res["metadata"]["page"],
-                text=res["text"]
-            )
-        )
-    return formatted_results
+    """Ask a question. Get a cited, grounded answer."""
+    result = rag_with_guard(req.query, collection)
+    citations = []
+    if result.get("grounded"):
+        raw = search(req.query, collection, top_k=req.top_k)
+        if req.source:
+            raw = [r for r in raw if r["metadata"]["source"] == req.source]
+        citations = [
+            Citation(source=r["metadata"]["source"], page=r["metadata"]["page"])
+            for r in raw
+        ]
+
+    return SearchResponse(
+        question=req.query,
+        answer=result["answer"],
+        grounded=result["grounded"],
+        citations=citations
+    )
 
 @app.delete("/delete")
 def delete_all():
-    """Wipes the database cleanly."""
     delete_collection(collection)
     return {"status": "collection cleared"}
