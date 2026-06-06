@@ -6,36 +6,35 @@ A FastAPI service that performs AI-powered document risk analysis using the Groq
 
 ## Tech Stack
 
-- *FastAPI* — REST API framework
-- *Groq* — LLM inference provider
-- *LLaMA 3.3 70B Versatile* — language model
-- *Pydantic* — request/response validation
-- *python-dotenv* — environment config
+- **FastAPI** — REST API framework
+- **Groq** — LLM inference provider
+- **LLaMA 3.3 70B Versatile** — language model
+- **Pydantic** — request/response validation
+- **python-dotenv** — environment config
 
 ---
 
 ## Project Structure
 
-
+```
 week_07/
   llm_assistant_api/
-    main.py       # FastAPI app with all 3 endpoints
+    main.py               # FastAPI app with all 3 endpoints
   llm_apis/
     first_call.py         # Basic LLM call
     structured_output.py  # JSON-mode outputs
     streaming.py          # Token-by-token streaming
     tool_calling.py       # Function/tool calling
     retries.py            # Retry with exponential backoff
-    cost_tracker.py       # Token usage and cost tracking
-
+```
 
 ---
 
 ## Setup
 
-bash
+```bash
 # Clone the repo and enter project root
-git clone https://github.com/your-username/AI-APEX-PARAGON.git
+git clone https://github.com/Cyber-Duelist/AI-APEX-PARAGON.git
 cd AI-APEX-PARAGON
 
 # Activate virtual environment
@@ -47,15 +46,15 @@ pip install fastapi uvicorn groq python-dotenv
 
 # Add your Groq API key to .env at project root
 GROQ_API_KEY=your_key_here
-
+```
 
 ---
 
 ## Run Locally
 
-bash
+```bash
 uvicorn week_07.llm_assistant_api.main:app --reload
-
+```
 
 API will be live at http://localhost:8000
 
@@ -66,51 +65,50 @@ API will be live at http://localhost:8000
 ### GET /health
 Returns service status and active model.
 
-bash
+```bash
 curl http://localhost:8000/health
+```
 
-
-json
+```json
 {
   "status": "ok",
   "model": "llama-3.3-70b-versatile"
 }
-
+```
 
 ---
 
 ### POST /analyze
 Analyzes a document and returns structured risk data as JSON. Includes retry logic and cost tracking per call.
 
-bash
+```bash
 curl -X POST http://localhost:8000/analyze \
   -H "Content-Type: application/json" \
-  -d '{"document_title": "Merger Agreement", "department": "Legal", "num_pages": 105}'
+  -d '{"document_id": "DOC-001", "title": "Merger Agreement", "department": "Legal", "num_pages": 105}'
+```
 
-
-json
+```json
 {
-  "document_title": "Merger Agreement",
-  "department": "Legal",
+  "document_id": "DOC-001",
+  "title": "Merger Agreement",
   "risk_level": "high",
-  "risk_score": 0.92,
-  "reason": "Merger agreements involve complex legal and financial obligations that pose significant risk.",
-  "input_tokens": 68,
-  "output_tokens": 45,
-  "cost_usd": 0.000076
+  "risk_score": 0.8,
+  "reason": "The document contains sensitive legal information regarding a merger, which poses a significant risk if not handled properly.",
+  "tokens_used": 210,
+  "session_cost": 0.00014
 }
-
+```
 
 ---
 
 ### POST /analyze/stream
 Streams a detailed risk assessment report token by token. Same request body as /analyze.
 
-bash
+```bash
 curl -X POST http://localhost:8000/analyze/stream \
   -H "Content-Type: application/json" \
-  -d '{"document_title": "Merger Agreement", "department": "Legal", "num_pages": 105}'
-
+  -d '{"document_id": "DOC-001", "title": "Merger Agreement", "department": "Legal", "num_pages": 105}'
+```
 
 Response streams live to the terminal as the model generates it.
 
