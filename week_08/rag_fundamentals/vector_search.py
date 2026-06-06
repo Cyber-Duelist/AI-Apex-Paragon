@@ -1,3 +1,4 @@
+import numpy as np
 from sentence_transformers import SentenceTransformer, util
 
 # 1. Load the embedding model (This will load instantly from your cache this time)
@@ -37,7 +38,7 @@ def search(query, top_k=3):
     query_embedding = model.encode(query)
     
     # Extract all the document vectors from our store into a single list
-    store_embeddings = [item["embedding"] for item in vector_store]
+    store_embeddings = np.array([item["embedding"] for item in vector_store])
     
     # Calculate cosine similarity between the query and ALL documents simultaneously
     cosine_scores = util.cos_sim(query_embedding, store_embeddings)[0]
