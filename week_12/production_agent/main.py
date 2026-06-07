@@ -1,81 +1,122 @@
-from fastapi import FastAPI, HTTPException
+import os
+import sys
+from fastapi import FastAPI
 from pydantic import BaseModel
-import uvicorn
-import datetime
-import time
 
-# Import the core agent logic and our bulletproof logger
+# Fix import path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(current_dir)
+
 from agent import ProductionAgent
-from logs import system_logger
 
-# ==========================================
-# 1. INITIALIZE API & AGENT
-# ==========================================
-app = FastAPI(
-    title="Enterprise Compliance Auditor API",
-    description="Autonomous AI microservice for legal risk assessment and policy enforcement.",
-    version="1.0.0"
-)
+app = FastAPI(title="Production Agent API")
+agent = ProductionAgent()
 
-print("Booting Compliance Auditor Service...")
-auditor_agent = ProductionAgent()
+# Pydantic Models
+class TaskRequest(BaseModel):
+    task: str
 
-# ==========================================
-# 2. DEFINE DATA MODELS
-# ==========================================
-class AuditRequest(BaseModel):
-    query: str
-    user_id: str = "system_default"
-
-class AuditResponse(BaseModel):
-    status: str
-    timestamp: str
+class TaskResponse(BaseModel):
+    task: str
     response: str
+    status: str
+    steps_taken: int
 
-# ==========================================
-# 3. API ENDPOINTS
-# ==========================================
+# Track steps globally
+step_counter = {"count": 0}
+original_process = agent.process_request
+
+def tracked_process(task: str) -> str:
+    step_counter["count"] = 0
+    original_fn = agent.process_request
+
+    # Patch tool call to count steps
+    import json
+    from tools import TOOL_SCHEMAS, AVAILABLE_FUNCTIONS
+    from groq import Groq
+
+    input_check = agent.guardrails.validate_input(task)
+    if not input_check.get("safe"):
+        return f"[SECURITY BLOCK] {input_check['reason']}"
+
+    scope_check = agent.guardrails.validate_scope(task)
+    if not scope_check.get("in_scope"):
+        return f"[OUT OF SCOPE] {scope_check['reason']}"
+
+    agent.memory.add_message("user", task)
+
+    messages = [
+        {"role": "system", "content": agent.system_prompt},
+        {"role": "user", "content": task}
+    ]
+
+    while True:
+        response = agent.client.chat.completions.create(
+            model=agent.model,
+            messages=messages,
+            tools=TOOL_SCHEMAS,
+            tool_choice="auto",
+            parallel_tool_calls=False
+        )
+
+        msg = response.choices[0].message
+
+        if msg.tool_calls:
+            messages.append(msg)
+            for tool_call in msg.tool_calls:
+                fn_name = tool_call.function.name
+                raw_args = tool_call.function.arguments
+                fn_args = json.loads(raw_args) if raw_args else {}
+                fn_result = AVAILABLE_FUNCTIONS[fn_name](**fn_args)
+                step_counter["count"] += 1
+                agent.memory.update_context(fn_name, fn_result)
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "name": fn_name,
+                    "content": json.dumps(fn_result)
+                })
+        else:
+            final_answer = msg.content or "Task completed via tools."
+            break
+
+    output_check = agent.guardrails.validate_output(final_answer)
+    if not output_check.get("valid"):
+        return f"[OUTPUT INVALID] {output_check['reason']}"
+
+    agent.memory.add_message("assistant", final_answer)
+    return final_answer
+
+
+# Endpoints
+@app.get("/")
+def root():
+    return {"status": "Production Agent API is running"}
+
 @app.get("/health")
-def health_check():
-    """DevOps endpoint to verify the service is running."""
-    return {"service": "Compliance Auditor", "status": "online"}
+def health():
+    return {"status": "ok", "model": agent.model}
 
-@app.post("/audit", response_model=AuditResponse)
-def audit_endpoint(request: AuditRequest):
-    """The main communication port for the Audit Agent."""
-    start_time = time.time()
-    
-    try:
-        # 1. Execute the ReAct loop
-        agent_answer = auditor_agent.process_request(request.query)
-        duration_ms = int((time.time() - start_time) * 1000)
-        
-        # 2. Check Security Guardrails & Log
-        if "[SECURITY BLOCK]" in agent_answer:
-            system_logger.log_trace(request.user_id, request.query, "blocked_by_policy", agent_answer, duration_ms)
-            return {
-                "status": "blocked_by_policy",
-                "timestamp": datetime.datetime.utcnow().isoformat(),
-                "response": agent_answer
-            }
-            
-        # 3. Log Success & Return
-        system_logger.log_trace(request.user_id, request.query, "success", agent_answer, duration_ms)
-        return {
-            "status": "success",
-            "timestamp": datetime.datetime.utcnow().isoformat(),
-            "response": agent_answer
-        }
-        
-    except Exception as e:
-        duration_ms = int((time.time() - start_time) * 1000)
-        error_msg = str(e)
-        system_logger.log_trace(request.user_id, request.query, "server_error", error_msg, duration_ms)
-        raise HTTPException(status_code=500, detail=f"Agent Processing Error: {error_msg}")
+@app.post("/run", response_model=TaskResponse)
+def run_task(req: TaskRequest):
+    response = tracked_process(req.task)
 
-# ==========================================
-# 4. SERVER RUNNER
-# ==========================================
-if __name__ == "__main__":
-    print("🚀 Starting Enterprise Compliance API on port 8000...")
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    if response.startswith("[SECURITY BLOCK]") or response.startswith("[OUT OF SCOPE]"):
+        status = "blocked"
+    else:
+        status = "completed"
+
+    return TaskResponse(
+        task=req.task,
+        response=response,
+        status=status,
+        steps_taken=step_counter["count"]
+    )
+
+@app.get("/memory")
+def get_memory():
+    return {
+        "history_length": len(agent.memory.get_history()),
+        "context": agent.memory.context,
+        "session_id": agent.memory.session_id
+    }
