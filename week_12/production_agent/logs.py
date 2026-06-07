@@ -1,43 +1,83 @@
-import json
 import os
-import uuid
+import logging
 from datetime import datetime
 
-class AuditLogger:
-    """
-    Production-grade structured logger for the Enterprise Compliance Agent.
-    Writes telemetry data to a JSON-Lines (.jsonl) file.
-    """
-    def __init__(self, log_folder_name="logs"):
-        # 1. Get the absolute path to the 'production_agent' directory
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        
-        # 2. Define the exact path to the new 'logs' folder
-        self.log_dir = os.path.join(current_dir, log_folder_name)
-        
-        # 3. Force the OS to create the folder
-        os.makedirs(self.log_dir, exist_ok=True)
-        
-        # 4. Define the file path
-        self.log_file = os.path.join(self.log_dir, "telemetry.jsonl")
-        
-        # Print a confirmation to the terminal so we know it worked!
-        print(f"[*] Telemetry Logger active. File path: {self.log_file}")
+# Create logs directory automatically
+LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+LOG_FILE = os.path.join(LOG_DIR, "agent.log")
 
-    def log_trace(self, user_id: str, query: str, status: str, response: str, duration_ms: int):
-        """Appends a single structured trace to the log file."""
-        log_entry = {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
-            "request_id": f"req_{uuid.uuid4().hex[:8]}",
-            "user_id": user_id,
-            "query": query,
-            "status": status,
-            "duration_ms": duration_ms,
-            "response_preview": response[:100] + "..." if len(response) > 100 else response
-        }
-        
-        with open(self.log_file, "a") as f:
-            f.write(json.dumps(log_entry) + "\n")
-            
-# Instantiate a global logger for the app to use
-system_logger = AuditLogger()
+class AgentLogger:
+    def __init__(self):
+        self.logger = logging.getLogger("ProductionAgent")
+        self.logger.setLevel(logging.DEBUG)
+
+        # Avoid duplicate handlers on reload
+        if not self.logger.handlers:
+            formatter = logging.Formatter(
+                "%(asctime)s - %(levelname)-5s - %(message)s",
+                datefmt="%Y-%m-%d %H:%M:%S"
+            )
+
+            # Console handler
+            console_handler = logging.StreamHandler()
+            console_handler.setFormatter(formatter)
+            self.logger.addHandler(console_handler)
+
+            # File handler
+            file_handler = logging.FileHandler(LOG_FILE)
+            file_handler.setFormatter(formatter)
+            self.logger.addHandler(file_handler)
+
+    def log_request(self, task: str):
+        self.logger.info(f"[REQUEST] Task: {task[:100]}")
+
+    def log_tool_call(self, tool_name: str, args: dict, result: dict):
+        self.logger.info(f"[TOOL] {tool_name} | Args: {args} | Result: {result}")
+
+    def log_guardrail(self, check_type: str, passed: bool, reason: str = None):
+        status = "PASSED" if passed else f"BLOCKED - {reason}"
+        self.logger.info(f"[GUARDRAIL] {check_type}: {status}")
+
+    def log_response(self, response: str, model_used: str, steps: int):
+        self.logger.info(f"[RESPONSE] Model: {model_used} | Steps: {steps} | Response: {response[:80]}")
+
+    def log_error(self, error: str):
+        self.logger.error(f"[ERROR] {error}")
+
+
+def get_last_logs(n: int = 20) -> list:
+    """Read last N lines from the log file."""
+    if not os.path.exists(LOG_FILE):
+        return []
+    with open(LOG_FILE, "r") as f:
+        lines = f.readlines()
+    return [line.strip() for line in lines[-n:]]
+
+
+if __name__ == "__main__":
+    logger = AgentLogger()
+
+    logger.log_request("Analyze the Merger Agreement from Legal with 105 pages.")
+    logger.log_guardrail("input_check", True)
+    logger.log_guardrail("scope_check", True)
+    logger.log_tool_call(
+        "assess_document_risk",
+        {"title": "Merger Agreement", "department": "Legal", "num_pages": 105},
+        {"risk_level": "high", "risk_score": 0.9}
+    )
+    logger.log_tool_call(
+        "create_escalation_ticket",
+        {"title": "Merger Agreement", "risk_level": "high", "reason": "High risk document"},
+        {"ticket_id": "ESC-123", "status": "created"}
+    )
+    logger.log_response(
+        "The Merger Agreement has been escalated.",
+        "llama-3.1-8b-instant",
+        3
+    )
+    logger.log_error("Rate limit exceeded")
+
+    print("\n=== LAST LOG ENTRIES ===")
+    for line in get_last_logs():
+        print(line)
