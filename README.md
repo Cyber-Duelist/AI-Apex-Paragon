@@ -18,3 +18,6 @@ Week 1 — Python, NumPy, Classes, GitHub ✅
 Python | NumPy | Pandas | PyTorch | Transformers | RAG
 
 
+## Portfolio Case Studies
+- [PersonaDoc (RAG System)](case_studies/persona_doc.md)
+- [Enterprise Compliance Auditor](case_studies/compliance_auditor.md)
