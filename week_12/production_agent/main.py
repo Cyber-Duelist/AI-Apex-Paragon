@@ -13,9 +13,11 @@ sys.path.append(current_dir)
 
 from agent import ProductionAgent
 from tools import TOOL_SCHEMAS, AVAILABLE_FUNCTIONS
+from logs import AgentLogger, get_last_logs
 
 app = FastAPI(title="Production Agent API")
 agent = ProductionAgent()
+logger = AgentLogger()
 
 # Pydantic Models
 class TaskRequest(BaseModel):
@@ -51,17 +53,25 @@ def classify_query(task: str) -> str:
         return "llama-3.1-8b-instant"
 
 def tracked_process(task: str) -> tuple[str, int, str]:
-    """Run agent with step tracking and smart model routing."""
     step_counter["count"] = 0
 
     # Guardrails
     input_check = agent.guardrails.validate_input(task)
     if not input_check.get("safe"):
-        return f"[SECURITY BLOCK] {input_check['reason']}", 0, "none"
+        reason = input_check["reason"]
+        logger.log_guardrail("input_check", False, reason)
+        return f"[SECURITY BLOCK] {reason}", 0, "none"
+
+    logger.log_guardrail("input_check", True)
 
     scope_check = agent.guardrails.validate_scope(task)
     if not scope_check.get("in_scope"):
-        return f"[OUT OF SCOPE] {scope_check['reason']}", 0, "none"
+        reason = scope_check["reason"]
+        logger.log_guardrail("scope_check", False, reason)
+        return f"[OUT OF SCOPE] {reason}", 0, "none"
+
+    logger.log_guardrail("scope_check", True)
+    logger.log_request(task)
 
     # Route to correct model
     selected_model = classify_query(task)
@@ -74,41 +84,49 @@ def tracked_process(task: str) -> tuple[str, int, str]:
         {"role": "user", "content": task}
     ]
 
-    while True:
-        response = agent.client.chat.completions.create(
-            model=selected_model,
-            messages=messages,
-            tools=TOOL_SCHEMAS,
-            tool_choice="auto",
-            parallel_tool_calls=False
-        )
+    try:
+        while True:
+            response = agent.client.chat.completions.create(
+                model=selected_model,
+                messages=messages,
+                tools=TOOL_SCHEMAS,
+                tool_choice="auto",
+                parallel_tool_calls=False
+            )
 
-        msg = response.choices[0].message
+            msg = response.choices[0].message
 
-        if msg.tool_calls:
-            messages.append(msg)
-            for tool_call in msg.tool_calls:
-                fn_name = tool_call.function.name
-                raw_args = tool_call.function.arguments
-                fn_args = json.loads(raw_args) if raw_args else {}
-                fn_result = AVAILABLE_FUNCTIONS[fn_name](**fn_args)
-                step_counter["count"] += 1
-                print(f"  TOOL CALL: {fn_name}")
-                agent.memory.update_context(fn_name, fn_result)
-                messages.append({
-                    "role": "tool",
-                    "tool_call_id": tool_call.id,
-                    "name": fn_name,
-                    "content": json.dumps(fn_result)
-                })
-        else:
-            final_answer = msg.content or "Task completed via tools."
-            break
+            if msg.tool_calls:
+                messages.append(msg)
+                for tool_call in msg.tool_calls:
+                    fn_name = tool_call.function.name
+                    raw_args = tool_call.function.arguments
+                    fn_args = json.loads(raw_args) if raw_args else {}
+                    fn_result = AVAILABLE_FUNCTIONS[fn_name](**fn_args)
+                    step_counter["count"] += 1
+                    print(f"  TOOL CALL: {fn_name}")
+                    logger.log_tool_call(fn_name, fn_args, fn_result)
+                    agent.memory.update_context(fn_name, fn_result)
+                    messages.append({
+                        "role": "tool",
+                        "tool_call_id": tool_call.id,
+                        "name": fn_name,
+                        "content": json.dumps(fn_result)
+                    })
+            else:
+                final_answer = msg.content or "Task completed via tools."
+                break
+
+    except Exception as e:
+        logger.log_error(str(e))
+        return f"[ERROR] {str(e)}", step_counter["count"], selected_model
 
     output_check = agent.guardrails.validate_output(final_answer)
     if not output_check.get("valid"):
-        return f"[OUTPUT INVALID] {output_check['reason']}", step_counter["count"], selected_model
+        reason = output_check["reason"]
+        return f"[OUTPUT INVALID] {reason}", step_counter["count"], selected_model
 
+    logger.log_response(final_answer, selected_model, step_counter["count"])
     agent.memory.add_message("assistant", final_answer)
     return final_answer, step_counter["count"], selected_model
 
@@ -128,6 +146,8 @@ def run_task(req: TaskRequest):
 
     if response.startswith("[SECURITY BLOCK]") or response.startswith("[OUT OF SCOPE]"):
         status = "blocked"
+    elif response.startswith("[ERROR]"):
+        status = "error"
     else:
         status = "completed"
 
@@ -146,3 +166,7 @@ def get_memory():
         "context": agent.memory.context,
         "session_id": agent.memory.session_id
     }
+
+@app.get("/logs")
+def get_logs():
+    return {"logs": get_last_logs(20)}
