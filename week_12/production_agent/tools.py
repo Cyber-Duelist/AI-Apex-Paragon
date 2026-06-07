@@ -1,82 +1,64 @@
 import random
-import json
 
-# ==========================================
-# 1. MOCK DATABASE
-# ==========================================
-KNOWLEDGE_BASE = [
-    {"title": "Merger Agreement", "department": "Legal", "pages": 105, "content": "Confidential merger details between Company A and Company B."},
-    {"title": "Q3 Financial Report", "department": "Finance", "pages": 120, "content": "Quarterly earnings and revenue projections."},
-    {"title": "Employee Handbook", "department": "HR", "pages": 45, "content": "Standard operating procedures and code of conduct."},
-    {"title": "Vendor Contract", "department": "Legal", "pages": 15, "content": "Agreement with IT service provider."},
-    {"title": "Tax Audit 2023", "department": "Finance", "pages": 250, "content": "IRS audit findings and compliance notes."},
-    {"title": "Onboarding Guide", "department": "HR", "pages": 10, "content": "Welcome guide for new hires."},
-    {"title": "Non-Disclosure Agreement", "department": "Legal", "pages": 8, "content": "Standard NDA for contractors."},
-    {"title": "Cloud Architecture", "department": "Engineering", "pages": 60, "content": "AWS deployment diagrams and security policies."}
-]
+# --- Tool Functions ---
 
-# ==========================================
-# 2. TOOLS
-# ==========================================
 def search_knowledge_base(query: str) -> dict:
-    """Searches the knowledge base and returns relevant documents."""
-    query_words = set(query.lower().split())
-    results = []
-    for doc in KNOWLEDGE_BASE:
-        doc_text = f"{doc['title']} {doc['department']} {doc['content']}".lower()
-        if any(word in doc_text for word in query_words):
-            results.append(doc)
+    docs = [
+        {"title": "Q3 Legal Review", "department": "Legal", "pages": 60},
+        {"title": "Employee Handbook", "department": "HR", "pages": 20},
+        {"title": "Financial Audit 2025", "department": "Finance", "pages": 120},
+        {"title": "Tax Compliance", "department": "Finance", "pages": 40},
+        {"title": "Merger Agreement", "department": "Legal", "pages": 80},
+        {"title": "Security Policy", "department": "IT", "pages": 10},
+        {"title": "Q4 Budget Planning", "department": "Finance", "pages": 150},
+        {"title": "Hiring Strategy", "department": "HR", "pages": 5},
+    ]
+    query_words = query.lower().split()
+    results = [
+        d for d in docs 
+        if any(word in d["title"].lower() or word in d["department"].lower() for word in query_words)
+    ]
     return {"results": results[:3]}
 
 def assess_document_risk(title: str, department: str, num_pages: int) -> dict:
-    """Calculates risk level."""
-    if department.lower() == "legal" and num_pages > 50:
+    if department == "Legal" and num_pages > 50:
         return {"risk_level": "high", "risk_score": 0.9}
-    elif department.lower() == "finance" and num_pages > 100:
+    elif department == "Finance" and num_pages > 100:
         return {"risk_level": "high", "risk_score": 0.85}
     return {"risk_level": "low", "risk_score": 0.2}
 
 def get_compliance_policy(department: str) -> dict:
-    policies = {"Legal": "Docs > 50 pages require senior review.", "Finance": "Docs > 100 pages require CFO approval."}
-    return {"policy": policies.get(department.capitalize(), "Standard review applies.")}
+    policies = {
+        "Legal": "All documents over 50 pages require senior review",
+        "Finance": "All high-risk documents require CFO approval",
+        "HR": "Standard review process applies"
+    }
+    return {"policy": policies.get(department, "No specific policy found")}
 
 def create_escalation_ticket(title: str, risk_level: str, reason: str) -> dict:
-    return {"ticket_id": f"ESC-{random.randint(100, 999)}", "status": "created"}
+    ticket_id = f"ESC-{random.randint(100, 999)}"
+    return {"ticket_id": ticket_id, "status": "created", "priority": "high"}
 
 def send_notification(recipient: str, subject: str, message: str) -> dict:
-    return {"sent": True, "recipient": recipient}
+    msg_id = f"MSG-{random.randint(100, 999)}"
+    return {"sent": True, "recipient": recipient, "message_id": msg_id}
 
-AVAILABLE_FUNCTIONS = {
-    "search_knowledge_base": search_knowledge_base,
-    "assess_document_risk": assess_document_risk,
-    "get_compliance_policy": get_compliance_policy,
-    "create_escalation_ticket": create_escalation_ticket,
-    "send_notification": send_notification
-}
+# --- Tool Schemas for Groq ---
 
-# ==========================================
-# 3. REFINED TOOL SCHEMAS
-# ==========================================
 TOOL_SCHEMAS = [
     {
         "type": "function",
         "function": {
             "name": "search_knowledge_base",
-            "description": "Always call this first to get document metadata (department, pages) before risk assessment.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "query": {"type": "string", "description": "The document title or keywords."}
-                },
-                "required": ["query"]
-            }
+            "description": "Search for documents in the knowledge base",
+            "parameters": {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}
         }
     },
     {
         "type": "function",
         "function": {
             "name": "assess_document_risk",
-            "description": "Assesses risk. REQUIRED: Use search_knowledge_base first to get accurate department and num_pages.",
+            "description": "Assess risk of a document based on metadata",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -92,21 +74,15 @@ TOOL_SCHEMAS = [
         "type": "function",
         "function": {
             "name": "get_compliance_policy",
-            "description": "Gets department policy.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "department": {"type": "string"}
-                },
-                "required": ["department"]
-            }
+            "description": "Get compliance policy for a department",
+            "parameters": {"type": "object", "properties": {"department": {"type": "string"}}, "required": ["department"]}
         }
     },
     {
         "type": "function",
         "function": {
             "name": "create_escalation_ticket",
-            "description": "Creates a ticket for high risk items.",
+            "description": "Create an escalation ticket for high-risk documents",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -122,7 +98,7 @@ TOOL_SCHEMAS = [
         "type": "function",
         "function": {
             "name": "send_notification",
-            "description": "Sends email notification.",
+            "description": "Send email notification",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -135,3 +111,20 @@ TOOL_SCHEMAS = [
         }
     }
 ]
+
+AVAILABLE_FUNCTIONS = {
+    "search_knowledge_base": search_knowledge_base,
+    "assess_document_risk": assess_document_risk,
+    "get_compliance_policy": get_compliance_policy,
+    "create_escalation_ticket": create_escalation_ticket,
+    "send_notification": send_notification
+}
+
+# --- Test Execution ---
+
+if __name__ == "__main__":
+    print(search_knowledge_base("legal"))
+    print(assess_document_risk("Audit", "Finance", 120))
+    print(get_compliance_policy("Legal"))
+    print(create_escalation_ticket("Q3 Audit", "high", "High page count"))
+    print(send_notification("cfo@company.com", "Alert", "High risk doc created"))
