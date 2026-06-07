@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+groq
+python-dotenv
+pydantic
+chromadb
+sentence-transformers
+pypdf
+scikit-learn
+pandas
+numpy
+pytest
+httpx
+tenacity

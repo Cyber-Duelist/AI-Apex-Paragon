@@ -3,7 +3,7 @@ services:
     name: persona-doc-api
     env: python
     buildCommand: pip install -r week_09/requirements.txt
-    startCommand: gunicorn -w 4 -k uvicorn.workers.UvicornWorker week_09.main:app
+    startCommand: gunicorn -w 4 -k uvicorn.workers.UvicornWorker week_09.persona_doc.main:app
     envVars:
-      - key: OPENAI_API_KEY
+      - key: GROQ_API_KEY
         sync: false

@@ -20,8 +20,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Run Evaluation
-        # This assumes your eval script is in the production_agent folder
-        # Update the path if your structure differs
         run: python week_12/production_agent/eval.py
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
