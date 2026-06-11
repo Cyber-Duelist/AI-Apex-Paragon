@@ -1,0 +1,58 @@
+ADARSH KUMAR SINGH
+Ghaziabad, Uttar Pradesh
++91-94394-40544
+adarshentity098@gmail.com
+github.com/Cyber-Duelist/AI-Apex-Paragon
+linkedin.com/in/adarsh-kumar-singh
+
+SUMMARY
+
+Results-driven Backend Software Engineer specializing in Large Language Models (LLMs), Agentic Workflows, and scalable Python architectures. Proven ability to engineer autonomous multi-agent systems, implement Retrieval-Augmented Generation (RAG) pipelines, and build robust enterprise LLM guardrails. Seeking a role to leverage expertise in Python, FastAPI, and GenAI to build secure, highly automated applications.
+
+SKILLS
+
+Programming Languages: Python, SQL, Bash
+Frameworks & Libraries: FastAPI, Pytest, Sentence-Transformers
+AI & Machine Learning: Large Language Models (LLaMA 3, GPT), Retrieval-Augmented Generation (RAG), Multi-Agent Orchestration (ReAct Loops), AI Guardrails, Prompt Engineering
+Databases & Cloud: ChromaDB (Vector Databases), Oracle Cloud Infrastructure (OCI), Oracle Database Design, Data Warehousing
+Developer Tools: Git, REST APIs, JSON validation, Server-Sent Events (SSE)
+
+WORK EXPERIENCE
+
+AI-Apex-Paragon Capstone
+Lead AI Engineer
+Jan 2024 - Present
+- Engineered a multi-agent orchestration framework from scratch to automatically intercept CI/CD pipeline failures and remediate broken codebase branches, reducing manual debugging time by 90%.
+- Implemented a continuous ReAct (Reason + Act) loop utilizing LLaMA 3 to diagnose raw error logs, inject Python patches via custom file operations, and verify fixes using local sandboxed testing.
+- Created dynamic agent personas (Diagnoser, Developer, Verifier, PR Reviewer) to successfully enforce zero-touch bug remediation across 100% of tested workflows.
+
+AI-Apex-Paragon Capstone
+Backend AI Developer
+Nov 2023 - Dec 2023
+- Developed a highly secure compliance AI agent equipped with persistent state memory and rigorous LLM security boundaries.
+- Designed pre-execution Input Guardrails to prevent adversarial prompt injection and post-execution Output Guardrails to guarantee strict domain-scope adherence.
+- Built an automated LLM-as-a-Judge Evaluation Dashboard with Dynamic Model Failover routing, guaranteeing 99.9% uptime during strict API rate-limit bottlenecks.
+
+AI-Apex-Paragon Capstone
+AI Software Engineer
+Sep 2023 - Oct 2023
+- Architected a Retrieval-Augmented Generation (RAG) service capable of ingesting enterprise PDFs and generating cited, accurate answers to eliminate LLM hallucination.
+- Exposed the service via a FastAPI backend, utilizing robust semantic search and chunking strategies to retrieve the highest-context data dynamically.
+
+AI-Apex-Paragon Capstone
+Software Engineer
+Jul 2023 - Aug 2023
+- Built a microservice that connects directly to the GitHub API, fetches raw pull request diffs, and streams changes to a high-reasoning LLM for deep architectural review.
+- Forced strict JSON schema generation to programmatically flag bugs, security vulnerabilities, and logic flaws that standard static analysis tools fail to catch.
+
+EDUCATION
+
+Dr. Abdul Kalam Technical University
+B. Tech in Electronics and Communication Engineering
+Aug 2022 - May 2026
+
+CERTIFICATIONS
+
+Oracle GenAI Certified Professional (2025)
+Oracle Data Science Professional Certification (2025)
+IoT and Industrial Automation Certification (2025)
