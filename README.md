@@ -35,7 +35,17 @@ Upload any meeting transcript. Get structured intelligence — summary, per-pers
 - Two-stage LLM pipeline — analyze then draft
 - **Tech:** Python, FastAPI, Groq, LLaMA 3.3
 
-### 5. Document Risk Prediction — ML Project
+### 5. Autonomous Self-Healing DevOps Swarm
+A multi-agent orchestration system that automatically intercepts CI/CD pipeline failures, diagnoses the root cause, writes a patch, verifies the fix, and opens a GitHub Pull Request.
+- Continuous "ReAct" Loop routing between Diagnoser, Developer, Verifier, and PR LLM Agents.
+- **Tech:** Python, Groq, Pytest, Multi-Agent Orchestration
+
+### 6. LLMOps Evaluation Dashboard
+A real-time evaluation dashboard to test LLM agents against strict compliance and security datasets.
+- Implements automatic Model Failover (routing to 8B if 70B hits rate limits) ensuring 99.9% uptime.
+- **Tech:** Python, FastAPI (SSE Streaming), JavaScript, HTML/CSS
+
+### 7. Document Risk Prediction — ML Project
 Classify documents as high or low risk using machine learning.
 - Feature engineering, model comparison, hyperparameter tuning, saved prediction pipeline
 - **Tech:** Python, scikit-learn, pandas, Random Forest
