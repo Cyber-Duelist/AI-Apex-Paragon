@@ -1448,6 +1448,71 @@ code {
 }
 
 // ==========================================
+// PORTAL SKIP BUTTON
+// ==========================================
+.portal-skip {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    z-index: 10;
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.35);
+    font-family: $font-mono;
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    padding: 8px 20px;
+    border-radius: $radius-pill;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.05);
+    }
+}
+
+// ==========================================
+// HAMBURGER MENU
+// ==========================================
+.hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    z-index: 201;
+
+    span {
+        display: block;
+        width: 24px;
+        height: 2px;
+        background: var(--text-white);
+        border-radius: 2px;
+        transition: all 0.3s $ease-out;
+        transform-origin: center;
+    }
+
+    &.active {
+        span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        span:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+        span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -5px);
+        }
+    }
+}
+
+.desktop-only { display: inline-block; }
+
+// ==========================================
 // RESPONSIVE
 // ==========================================
 @media (max-width: 768px) {
@@ -1455,9 +1520,46 @@ code {
     a, button { cursor: auto; }
     .cursor { display: none; }
 
+    .hamburger { display: flex; }
+    .desktop-only { display: none; }
+
     #navbar {
         padding: 14px 24px;
-        .nav-links { display: none; }
+    }
+
+    .nav-links {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(3, 3, 8, 0.96);
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+        display: flex !important;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        z-index: 200;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.4s ease;
+
+        &.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        a {
+            font-size: 1.2rem;
+            letter-spacing: 4px;
+            color: var(--text-silver);
+            transition: color 0.3s ease;
+
+            &:hover { color: var(--accent-1); }
+            &::after { display: none; }
+        }
     }
 
     #hero { padding: 100px 24px 60px; }
@@ -1476,6 +1578,11 @@ code {
         bottom: 16px;
         right: 16px;
         padding: 8px 14px;
+    }
+
+    .portal-skip {
+        bottom: 20px;
+        right: 20px;
     }
 }
 

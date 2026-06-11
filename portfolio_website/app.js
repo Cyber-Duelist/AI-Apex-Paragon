@@ -22,6 +22,22 @@
         startWarpField();
     });
 
+    // Skip button — immediately dismiss the portal
+    const skipBtn = document.getElementById('portal-skip');
+    if (skipBtn) {
+        skipBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const loader = document.getElementById('portal-loader');
+            if (loader) {
+                loader.classList.add('fade-out');
+                setTimeout(() => {
+                    loader.remove();
+                    document.body.classList.remove('loading');
+                }, 400);
+            }
+        });
+    }
+
     function startPortalAudio() {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const DURATION = 9;
@@ -650,4 +666,26 @@ document.querySelectorAll('.project-card').forEach(card => {
 (function() {
     const el = document.getElementById('footer-year');
     if (el) el.textContent = new Date().getFullYear();
+})();
+
+/* ========================================
+   HAMBURGER MENU
+   ======================================== */
+(function() {
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('nav-links');
+    if (!hamburger || !navLinks) return;
+
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        navLinks.classList.toggle('open');
+    });
+
+    // Close menu when a link is clicked
+    navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            hamburger.classList.remove('active');
+            navLinks.classList.remove('open');
+        });
+    });
 })();

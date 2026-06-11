@@ -12,10 +12,20 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Adarsh Kumar Singh | AI Software Engineer">
     <meta name="twitter:description" content="Multi-Agent Swarms · Production RAG · Enterprise Guardrails — 14 weeks of relentless building.">
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%23030308'/><text x='50' y='72' font-size='60' font-family='Arial' font-weight='900' fill='%2300e5ff' text-anchor='middle'>A</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <!-- Google Analytics (replace G-XXXXXXXXXX with your Measurement ID) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXXXXX');
+    </script>
     <script>
         // Restore saved theme before first paint to avoid flash
         (function() {
@@ -43,6 +53,7 @@
             </div>
         </div>
         <div class="portal-flash" style="display:none;"></div>
+        <button id="portal-skip" class="portal-skip">SKIP →</button>
     </div>
 
     <!-- Surreal Layers -->
@@ -65,14 +76,19 @@
     <!-- Navigation -->
     <nav id="navbar">
         <div class="nav-logo glitch" data-text="AKS.">AKS<span class="accent">.</span></div>
-        <div class="nav-links">
+        <div class="nav-links" id="nav-links">
             <a href="#about">About</a>
             <a href="#grind">The Grind</a>
             <a href="#projects">Projects</a>
             <a href="#skills">Skills</a>
             <a href="#contact">Contact</a>
         </div>
-        <a href="#contact" class="nav-cta">Hire Me</a>
+        <a href="#contact" class="nav-cta desktop-only">Hire Me</a>
+        <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
     </nav>
 
     <!-- Hero Section -->
@@ -88,6 +104,7 @@
             <div class="hero-buttons">
                 <a href="#projects" class="btn btn-primary">View Projects</a>
                 <a href="https://github.com/Cyber-Duelist/AI-Apex-Paragon" target="_blank" class="btn btn-outline">GitHub Portfolio</a>
+                <a href="resume.html" download class="btn btn-outline">Download CV ↓</a>
             </div>
             <div class="hero-stats">
                 <div class="stat">
