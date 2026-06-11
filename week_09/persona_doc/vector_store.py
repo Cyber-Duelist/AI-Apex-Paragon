@@ -1,7 +1,10 @@
 import os
 import sys
 import chromadb
+import logging
 from sentence_transformers import SentenceTransformer
+
+logger = logging.getLogger(__name__)
 
 # Ensure Python can find our previous modules
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -15,12 +18,20 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 
 def get_collection():
     """
-    Creates or loads a persistent ChromaDB client saved to the local disk.
-    Returns the 'persona_doc' collection (think of a collection like a SQL table).
+    Creates or loads a ChromaDB client. Uses a scalable external server if CHROMA_HOST is set,
+    otherwise safely falls back to a persistent local directory.
     """
-    db_path = os.path.join(current_dir, "chroma_db")
-    # PersistentClient ensures data survives script restarts
-    client = chromadb.PersistentClient(path=db_path)
+    chroma_host = os.getenv("CHROMA_HOST")
+    chroma_port = os.getenv("CHROMA_PORT", "8000")
+    
+    if chroma_host:
+        logger.info(f"Connecting to external ChromaDB Server at {chroma_host}:{chroma_port}")
+        client = chromadb.HttpClient(host=chroma_host, port=chroma_port)
+    else:
+        db_path = os.path.join(current_dir, "chroma_db")
+        logger.info(f"Using local persistent ChromaDB at {db_path}")
+        client = chromadb.PersistentClient(path=db_path)
+        
     collection = client.get_or_create_collection(name="persona_doc")
     return collection
 
@@ -56,18 +67,21 @@ def add_chunks(chunks: list[dict], collection):
         metadatas=metadatas
     )
 
-def search(query: str, collection, top_k: int = 3) -> list[dict]:
+def search(query: str, collection, top_k: int = 3, source_filter: str = None) -> list[dict]:
     """
     Embeds a user query, searches the database using Cosine Similarity,
     and returns the top matches with their original text and metadata.
     """
     query_embedding = model.encode([query]).tolist()
     
-    # Chroma handles the Cosine Similarity math for us automatically!
-    results = collection.query(
-        query_embeddings=query_embedding,
-        n_results=top_k
-    )
+    query_kwargs = {
+        "query_embeddings": query_embedding,
+        "n_results": top_k
+    }
+    if source_filter:
+        query_kwargs["where"] = {"source": source_filter}
+        
+    results = collection.query(**query_kwargs)
     
     formatted_results = []
     # Chroma returns lists of lists, so we access index 0

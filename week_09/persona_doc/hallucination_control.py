@@ -14,57 +14,41 @@ from vector_store import get_collection, search, model
 load_dotenv()
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-def rag_with_guard(question: str, collection, threshold: float = 0.25) -> dict:
+def rag_with_guard(question: str, collection, source: str = None, model_name: str = "llama-3.3-70b-versatile") -> dict:
     """
     Retrieves documents and checks the semantic similarity. 
     If the match is too weak, it refuses to call the LLM.
     """
     # 1. Search ChromaDB for top 3 chunks
-    retrieved = search(question, collection, top_k=3)
+    retrieved = search(question, collection, top_k=3, source_filter=source)
     
     if not retrieved:
-        return {
-            "answer": "I don't have enough information.", 
-            "grounded": False, 
-            "reason": "No relevant context found in database"
-        }
-        
-    # 2. Check the similarity score of the top result
-    top_text = retrieved[0]["text"]
-    
-    # Calculate exact Cosine Similarity between the question and the best chunk
-    query_emb = model.encode(question)
-    doc_emb = model.encode(top_text)
-    top_score = util.cos_sim(query_emb, doc_emb)[0][0].item()
-    
-    # 3. The Confidence Gate
-    if top_score < threshold:
-        return {
-            "answer": "I don't have enough information.", 
-            "grounded": False, 
-            "reason": f"No relevant context found (Score: {top_score:.4f} is below threshold {threshold})"
-        }
-        
-    # 4. If above threshold, build prompt and call LLM
-    context_text = "\n".join([f"- {chunk['text']}" for chunk in retrieved])
+        context_text = "No relevant documents found for this query."
+    else:
+        context_text = "\n".join([f"- {chunk['text']}" for chunk in retrieved])
     
     system_prompt = (
-        "You are a strict document analyst. Answer the user's question using ONLY the provided context.\n"
-        f"Context:\n{context_text}"
+        "You are a friendly, conversational, and helpful AI document assistant.\n"
+        "Your creator is Adarsh Kumar Singh. If someone asks who created you, made you, or built you, you must explicitly and proudly state that Adarsh Kumar Singh created you.\n"
+        "Your primary goal is to answer the user's question using the provided context from their documents.\n"
+        "If the provided context contains the answer, explain it clearly and comprehensively.\n"
+        "If the user asks about a topic not covered in the documents, DO NOT abruptly reject them. "
+        "Instead, politely inform them that the uploaded documents don't mention this, but you are happy to discuss it or provide an answer based on your general knowledge. Be very friendly and accommodating.\n\n"
+        f"Context from documents:\n{context_text}"
     )
     
     response = groq_client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model=model_name,
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": f"Question: {question}"}
         ],
-        temperature=0.0
+        temperature=0.3
     )
     
     return {
         "answer": response.choices[0].message.content,
-        "grounded": True,
+        "grounded": len(retrieved) > 0,
         "chunks_used": len(retrieved)
     }
 

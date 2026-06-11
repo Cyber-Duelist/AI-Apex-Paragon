@@ -6,13 +6,11 @@ A production-grade RAG (Retrieval-Augmented Generation) system that ingests docu
 
 ## What PersonaDoc Does
 
-PersonaDoc takes any PDF or TXT document, chunks it into semantically meaningful pieces, stores those chunks in ChromaDB with full citation metadata, and retrieves the most relevant context to answer questions. A confidence gate prevents the LLM from hallucinating when the retrieved context is insufficient. An evaluation pipeline measures answer accuracy against a golden dataset.
+PersonaDoc takes any PDF or TXT document, chunks it into semantically meaningful pieces, stores those chunks in ChromaDB with full citation metadata, and retrieves the most relevant context to answer questions. It features a complete **"Shiny Black" Glassmorphism Web Interface** where users can chat with their documents, hot-swap between multiple LLMs (Llama 3, Qwen, Allam), target specific documents, and export their conversation history. A confidence gate prevents the LLM from hallucinating when the retrieved context is insufficient.
 
 ---
 
-## Tech Stack
-
-`Python` · `FastAPI` · `ChromaDB` · `sentence-transformers` · `Groq` · `LLaMA 3.3 70B` · `pypdf` · `python-dotenv`
+`Python` · `FastAPI` · `ChromaDB` · `sentence-transformers` · `Groq` · `Vanilla JS/CSS (Glassmorphism)` · `marked.js`
 
 ---
 
@@ -23,7 +21,10 @@ PersonaDoc takes any PDF or TXT document, chunks it into semantically meaningful
 | `ingest.py` | Extract text from PDF and TXT files with page-level metadata |
 | `chunker.py` | Split pages into overlapping chunks with citation metadata on every chunk |
 | `vector_store.py` | ChromaDB persistent vector store — add, search, and delete chunks |
-| `main.py` | FastAPI service — upload, search, and delete endpoints |
+| `main.py` | FastAPI service — upload, search, and delete endpoints + Static File Server |
+| `static/index.html` | The "Shiny Black" Chat Dashboard |
+| `static/style.css` | Glassmorphism styles and Premium UI definitions |
+| `static/app.js` | Frontend logic for API calls, markdown rendering, and local storage |
 | `reranker.py` | Cross-encoder reranking for improved retrieval precision |
 | `hallucination_control.py` | Confidence gate that refuses to answer when context is insufficient |
 | `eval.py` | Golden dataset evaluation measuring retrieval and answer accuracy |
@@ -40,10 +41,10 @@ pip install pypdf chromadb sentence-transformers groq python-dotenv python-multi
 GROQ_API_KEY=your_key_here
 
 # Start the API
-uvicorn week_09.persona_doc.main:app --reload
+uvicorn main:app --port 8081
 
-# Visit
-http://127.0.0.1:8000/docs
+# Visit the Dashboard
+http://127.0.0.1:8081/
 ```
 
 ---
@@ -52,10 +53,11 @@ http://127.0.0.1:8000/docs
 
 | Method | Route | Description |
 |--------|-------|-------------|
-| GET | `/` | Health check |
+| GET | `/` | Serves the frontend web dashboard |
+| GET | `/documents` | Lists all currently indexed documents |
 | POST | `/upload` | Upload a PDF or TXT file and index it |
-| POST | `/search` | Search indexed documents by natural language query |
-| DELETE | `/delete` | Clear the entire vector store |
+| POST | `/search` | Search indexed documents (supports Targeted Search & Model Switching) |
+| DELETE | `/documents/{filename}` | Permanently scrub a document from the local disk and ChromaDB |
 
 ---
 
@@ -98,6 +100,7 @@ Q3 failed because the Delaware chunk scored below the confidence threshold and t
 
 ## What I Learned
 
-- Persistent vector storage with ChromaDB means the system does not need to re-embed documents on every restart — indexing once and querying many times is how production RAG systems work.
-- Reranking adds a second pass of precision on top of vector similarity — the cross-encoder re-scores each retrieved chunk against the query and often changes the ranking, improving answer quality.
-- A confidence gate that refuses to answer is not a failure — it is a feature. An 80% accurate system that says "I don't know" for the other 20% is far more trustworthy than one that hallucinates confident wrong answers.
+- Persistent vector storage with ChromaDB means the system does not need to re-embed documents on every restart.
+- Building a full-stack dashboard over an API drastically improves usability, especially with features like Targeted Search which allows users to restrict vector retrieval to a single `source` file.
+- "Soft Deletes" are not enough for secure document systems. Deleting a file requires physically wiping the PDF and scrubbing its embeddings from the vector database.
+- Chat history persistence (via `localStorage`) and markdown rendering (via `marked.js`) are essential for a premium conversational UI.

@@ -1,48 +1,101 @@
 import os
-from pypdf import PdfReader
+import fitz  # PyMuPDF
+import charset_normalizer
+import csv
+import logging
+
+logger = logging.getLogger(__name__)
+
+try:
+    import docx
+except ImportError:
+    docx = None
 
 def ingest_document(filepath: str) -> list[dict]:
     """
-    Reads a document (.txt or .pdf) and returns a list of dictionaries.
-    Each dictionary represents one page with metadata and text.
+    Reads a document (.txt, .md, .csv, .docx, or .pdf) and returns a list of dictionaries.
+    Each dictionary represents one page (or entire file) with metadata and text.
     """
     if not os.path.exists(filepath):
-        print(f"Error: File '{filepath}' not found.")
+        logger.error(f"File '{filepath}' not found.")
         return []
 
     filename = os.path.basename(filepath)
-    # Extract the file extension to determine how to parse it
     ext = os.path.splitext(filename)[1].lower()
     pages_data = []
 
-    if ext == '.txt':
-        # Handle simple text files (considered as 1 page)
-        with open(filepath, 'r', encoding='utf-8') as f:
-            text = f.read().strip()
-            pages_data.append({
-                "source": filename,
-                "page": 1,
-                "text": text
-            })
-            
-    elif ext == '.pdf':
-        # Handle PDF files, iterating page by page
+    if ext in ['.txt', '.md']:
         try:
-            reader = PdfReader(filepath)
-            for i, page in enumerate(reader.pages):
-                text = page.extract_text()
+            with open(filepath, 'rb') as f:
+                raw_data = f.read()
+                result = charset_normalizer.detect(raw_data)
+                encoding = result['encoding'] or 'utf-8'
+                
+                text = raw_data.decode(encoding, errors='replace').strip()
                 if text:
                     pages_data.append({
                         "source": filename,
-                        "page": i + 1,  # Page numbers should be 1-indexed for humans
+                        "page": 1,
+                        "text": text
+                    })
+        except Exception as e:
+            logger.error(f"Error reading TXT/MD file: {e}")
+            
+    elif ext == '.csv':
+        try:
+            with open(filepath, 'rb') as f:
+                raw_data = f.read()
+                result = charset_normalizer.detect(raw_data)
+                encoding = result['encoding'] or 'utf-8'
+                
+                text_content = raw_data.decode(encoding, errors='replace')
+                reader = csv.reader(text_content.splitlines())
+                text = "\n".join([", ".join(row) for row in reader])
+                if text.strip():
+                    pages_data.append({
+                        "source": filename,
+                        "page": 1,
                         "text": text.strip()
                     })
         except Exception as e:
-            print(f"Error reading PDF: {e}")
+            logger.error(f"Error reading CSV file: {e}")
+
+    elif ext == '.docx':
+        if not docx:
+            logger.error(f"python-docx not installed. Cannot process '{filename}'")
+            return []
+        try:
+            doc = docx.Document(filepath)
+            text = "\n".join([para.text for para in doc.paragraphs])
+            if text.strip():
+                pages_data.append({
+                    "source": filename,
+                    "page": 1,
+                    "text": text.strip()
+                })
+        except Exception as e:
+            logger.error(f"Error reading DOCX file: {e}")
+
+    elif ext == '.pdf':
+        try:
+            doc = fitz.open(filepath)
+            if doc.needs_pass:
+                logger.error(f"PDF '{filename}' is password protected or encrypted.")
+                return []
+                
+            for i, page in enumerate(doc):
+                text = page.get_text()
+                if text and text.strip():
+                    pages_data.append({
+                        "source": filename,
+                        "page": i + 1,
+                        "text": text.strip()
+                    })
+        except Exception as e:
+            logger.error(f"Error reading PDF: {e}")
             
     else:
-        # Failsafe for unsupported formats
-        print(f"Error: Unsupported file type '{ext}'")
+        logger.error(f"Unsupported file type '{ext}'")
         return []
 
     return pages_data

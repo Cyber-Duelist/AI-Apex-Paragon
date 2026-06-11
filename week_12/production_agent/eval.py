@@ -45,16 +45,22 @@ Output ONLY valid JSON with two keys: "score" (int) and "reasoning" (string).
 """
     user_prompt = f"[Query]\n{query}\n\n[Agent Response]\n{agent_response}\n\n[Rubric]\n{rubric}"
 
-    response = judge_client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
-        ],
-        temperature=0.0,
-        response_format={"type": "json_object"}
-    )
-    return json.loads(response.choices[0].message.content)
+    MODELS = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+    for current_model in MODELS:
+        try:
+            response = judge_client.chat.completions.create(
+                model=current_model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=0.0,
+                response_format={"type": "json_object"}
+            )
+            return json.loads(response.choices[0].message.content)
+        except Exception:
+            continue
+    raise Exception("All judge models failed")
 
 if __name__ == "__main__":
     print("=== INITIATING END-TO-END AGENT EVALUATION ===\n")

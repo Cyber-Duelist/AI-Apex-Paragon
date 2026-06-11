@@ -51,15 +51,24 @@ def call_judge_api(question: str, answer: str, rubric: str):
     """
     user_prompt = f"[User Question]\n{question}\n\n[AI Answer]\n{answer}\n\n[Grading Rubric]\n{rubric}"
     
-    return client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
-        ],
-        temperature=0.0,
-        response_format={"type": "json_object"}
-    )
+    MODELS = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+    
+    for current_model in MODELS:
+        try:
+            return client.chat.completions.create(
+                model=current_model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=0.0,
+                response_format={"type": "json_object"}
+            )
+        except Exception as e:
+            print(f"Model {current_model} failed: {str(e)}. Falling back.")
+            continue
+            
+    raise Exception("All judge models failed.")
 
 def evaluate_and_trace(question: str, answer: str, rubric: str) -> dict:
     """Helper function to parse the JSON returned by the traced API call."""

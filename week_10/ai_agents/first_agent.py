@@ -1,152 +1,281 @@
 import os
 import json
-from dotenv import load_dotenv
+import PyPDF2
 from groq import Groq
+from dotenv import load_dotenv
 
-# 1. Setup
 load_dotenv()
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-MODEL = "llama-3.3-70b-versatile"
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+
+# Priority list of models to try. If one fails (e.g. rate limit, bad json), it falls back to the next.
+MODELS = [
+    "llama-3.3-70b-versatile",               # High quality fallback
+    "llama-3.1-8b-instant"                   # Ultra-fast lightweight fallback
+]
+
+# System prompt that defines the Agent's identity
+SYSTEM_PROMPT = """You are a highly capable General Purpose Desktop AI Assistant.
+You live on the user's local machine. You have tools to:
+1. Search the web (Wikipedia) for general knowledge.
+2. Read files they upload to you.
+3. List directories on their computer.
+4. Save files to their computer (e.g. generating code, writing summaries, etc.).
+5. Escalate documents.
+
+When the user asks you a question, think step by step. If you need information, use your tools. 
+If they ask you to write or save a file, use the save_file tool! Format your final responses beautifully in Markdown."""
 
 # ==========================================
-# 2. DEFINE THE TOOLS (The Python Functions)
+# 1. DEFINE THE TOOLS (Python Functions)
 # ==========================================
 
-def get_document_risk(title: str, department: str, num_pages: int) -> dict:
-    """Mock database lookup for document risk."""
-    return {"risk_level": "high", "risk_score": 0.9}
+def search_web(query: str) -> dict:
+    """A simple wikipedia search for general knowledge"""
+    import urllib.request
+    import urllib.parse
+    try:
+        url = f"https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={urllib.parse.quote(query)}&utf8=&format=json"
+        with urllib.request.urlopen(url) as response:
+            data = json.loads(response.read().decode())
+            results = [f"{item['title']}: {item['snippet']}" for item in data['query']['search'][:3]]
+            return {"results": results}
+    except Exception as e:
+        return {"error": str(e)}
 
-def get_department_policy(department: str) -> dict:
-    """Mock database lookup for department compliance policies."""
-    policies = {
-        "Legal": "All documents over 50 pages require senior review",
-        "Finance": "All high-risk documents require CFO approval",
-        "HR": "Standard review process applies"
-    }
-    return {"policy": policies.get(department, "No specific policy found.")}
+def list_local_files(directory: str) -> dict:
+    """Lists files in a given directory"""
+    try:
+        if directory == "." or directory == "":
+            directory = os.getcwd()
+        files = os.listdir(directory)
+        return {"files": files, "directory": directory}
+    except Exception as e:
+        return {"error": str(e)}
+
+def save_file(filename: str, content: str) -> dict:
+    """Saves text content to a local file"""
+    try:
+        # Save to the local uploads directory to be safe
+        safe_path = os.path.join(os.path.dirname(__file__), "uploads", filename)
+        with open(safe_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+        return {"success": True, "message": f"File {filename} saved successfully at {safe_path}."}
+    except Exception as e:
+        return {"error": str(e)}
+
+def read_uploaded_document(filename: str) -> dict:
+    """Reads a document from the local uploads folder."""
+    file_path = os.path.join(os.path.dirname(__file__), "uploads", filename)
+    if not os.path.exists(file_path):
+        return {"error": f"File {filename} not found in uploads directory."}
+    
+    try:
+        ext = filename.lower().split('.')[-1]
+        
+        if ext == 'pdf':
+            text = ""
+            with open(file_path, 'rb') as f:
+                reader = PyPDF2.PdfReader(f)
+                for page in reader.pages:
+                    text += page.extract_text() + "\n"
+            return {"content": text[:8000]}
+            
+        elif ext in ['txt', 'md', 'csv']:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            return {"content": content[:8000]}
+            
+        else:
+            return {"error": f"Unsupported file type: {ext}"}
+            
+    except Exception as e:
+        return {"error": str(e)}
 
 def escalate_document(title: str, reason: str) -> dict:
-    """Mock API call to a ticketing system (like Jira or ServiceNow)."""
-    return {"escalated": True, "ticket_id": "ESC-001", "reason": reason}
+    """Escalates a document to senior management."""
+    return {"escalated": True, "ticket_id": "REQ-999", "message": f"Escalated {title} because: {reason}"}
 
-# Map string names to the actual Python functions so our loop can call them
+# ==========================================
+# 2. MAP TOOLS FOR THE AGENT LOOP
+# ==========================================
 available_functions = {
-    "get_document_risk": get_document_risk,
-    "get_department_policy": get_department_policy,
+    "search_web": search_web,
+    "list_local_files": list_local_files,
+    "save_file": save_file,
+    "read_uploaded_document": read_uploaded_document,
     "escalate_document": escalate_document,
 }
+
+DANGEROUS_TOOLS = {"save_file", "escalate_document"}
+
+def execute_tool_manually(tool_name: str, args: dict) -> dict:
+    func = available_functions.get(tool_name)
+    if not func:
+        return {"error": f"Tool {tool_name} not found"}
+    try:
+        return func(**args)
+    except Exception as e:
+        return {"error": str(e)}
 
 # ==========================================
 # 3. DEFINE THE TOOL SCHEMA (The Menu)
 # ==========================================
-tools = [
+tool_schema = [
     {
         "type": "function",
         "function": {
-            "name": "get_document_risk",
-            "description": "Calculates the risk level of a document based on its metadata.",
+            "name": "search_web",
+            "description": "Searches Wikipedia for knowledge.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "title": {"type": "string"},
-                    "department": {"type": "string"},
-                    "num_pages": {"type": "integer"}
+                    "query": {"type": "string", "description": "The search query"}
                 },
-                "required": ["title", "department", "num_pages"]
-            }
-        }
+                "required": ["query"],
+            },
+        },
     },
     {
         "type": "function",
         "function": {
-            "name": "get_department_policy",
-            "description": "Retrieves the standard operating policy for a specific department.",
+            "name": "list_local_files",
+            "description": "Lists the files in a specific directory on the user's computer.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "department": {"type": "string"}
+                    "directory": {"type": "string", "description": "The directory path, or '.' for current directory"}
                 },
-                "required": ["department"]
-            }
-        }
+                "required": ["directory"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "save_file",
+            "description": "Saves content to a local file on the user's computer. USE THIS to write reports, summaries, or code.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "filename": {"type": "string", "description": "The name of the file to save (e.g. summary.md)"},
+                    "content": {"type": "string", "description": "The complete text content to write to the file"}
+                },
+                "required": ["filename", "content"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "read_uploaded_document",
+            "description": "Reads the text content of a file that the user has uploaded to the dashboard.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "filename": {"type": "string", "description": "The name of the file."}
+                },
+                "required": ["filename"],
+            },
+        },
     },
     {
         "type": "function",
         "function": {
             "name": "escalate_document",
-            "description": "Escalates a document to management by creating a high-priority ticket.",
+            "description": "Escalates a document to senior management. ALWAYS USE THIS if the user explicitly asks to escalate something.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "title": {"type": "string"},
-                    "reason": {"type": "string", "description": "Detailed reason for escalation."}
+                    "title": {"type": "string", "description": "The document title"},
+                    "reason": {"type": "string", "description": "Why it needs escalation"}
                 },
-                "required": ["title", "reason"]
-            }
-        }
+                "required": ["title", "reason"],
+            },
+        },
     }
 ]
 
 # ==========================================
-# 4. THE AGENT LOOP (Reason -> Act -> Observe)
+# 4. THE AUTONOMOUS LOOP WITH STREAMING
 # ==========================================
-def run_agent(user_prompt: str):
-    print("=== INITIALIZING AGENT ===")
-    print(f"Task: {user_prompt}\n")
-    
-    # The agent's memory. It must remember everything it has done.
-    messages = [{"role": "user", "content": user_prompt}]
-    
-    # The infinite loop that keeps the agent alive until the job is done
+
+def stream_agent(messages: list):
+    """
+    Generator function that streams out exactly what the agent is doing at each step.
+    Receives standard OpenAI-formatted messages array.
+    """
+    # If the messages array doesn't have a system prompt yet, inject it.
+    if len(messages) > 0 and messages[0].get("role") != "system":
+        messages.insert(0, {"role": "system", "content": SYSTEM_PROMPT})
+
     while True:
-        # Step A: The Agent Thinks
-        response = client.chat.completions.create(
-            model=MODEL,
-            messages=messages,
-            tools=tools,
-            tool_choice="auto",
-            parallel_tool_calls=False # Force it to do one thing at a time
-        )
+        yield {"type": "think", "content": "Thinking..."}
         
+        response = None
+        for current_model in MODELS:
+            try:
+                cleaned_messages = []
+                for msg in messages:
+                    if hasattr(msg, "model_dump"):
+                        msg = msg.model_dump(exclude_none=True)
+                    if isinstance(msg, dict):
+                        clean_msg = {k: v for k, v in msg.items() if k in ["role", "content", "tool_calls", "tool_call_id", "name"] and v is not None}
+                        if msg.get("role") == "assistant" and "content" not in clean_msg:
+                            clean_msg["content"] = None
+                        cleaned_messages.append(clean_msg)
+                    else:
+                        cleaned_messages.append(msg)
+
+                response = client.chat.completions.create(
+                    model=current_model,
+                    messages=cleaned_messages,
+                    tools=tool_schema,
+                    tool_choice="auto",
+                    temperature=0.1
+                )
+                break 
+            except Exception as e:
+                print(f"Model {current_model} failed with error: {str(e)}")
+                # Fail over silently without alarming the user
+                continue 
+                
+        if not response:
+            yield {"type": "error", "content": "CRITICAL: All models failed to process the request. Aborting."}
+            break
+
         response_message = response.choices[0].message
         
-        # Step B: Does the Agent want to use a tool?
         if response_message.tool_calls:
-            # We must append the Agent's tool request to memory so it remembers asking for it
             messages.append(response_message)
             
             for tool_call in response_message.tool_calls:
                 function_name = tool_call.function.name
-                # Convert the JSON string from the LLM into a Python Dictionary
                 function_args = json.loads(tool_call.function.arguments)
                 
-                print(f"=== TOOL CALL: {function_name} ===")
+                if function_name in DANGEROUS_TOOLS:
+                    yield {
+                        "type": "require_approval",
+                        "tool": function_name,
+                        "args": function_args,
+                        "tool_call_id": tool_call.id,
+                        "messages": messages
+                    }
+                    return
                 
-                # Dynamically call our Python function using the dictionary map
-                function_to_call = available_functions[function_name]
-                function_result = function_to_call(**function_args) # Unpack dictionary into kwargs
+                yield {"type": "tool_call", "tool": function_name, "args": function_args}
                 
-                print(f"Result: {json.dumps(function_result)}")
+                function_result = execute_tool_manually(function_name, function_args)
                 
-                # Step C: The Agent Observes
-                # Send the result BACK to the LLM by appending it as a "tool" role message
+                yield {"type": "observation", "content": function_result}
+                
                 messages.append({
                     "role": "tool",
                     "tool_call_id": tool_call.id,
                     "name": function_name,
                     "content": json.dumps(function_result),
                 })
-                
         else:
-            # Step D: The Task is Complete
-            # If the LLM doesn't request a tool, it means it has enough info to give a final answer
-            print("\n=== FINAL RESPONSE ===")
-            print(response_message.content)
+            final_content = response_message.content
+            messages.append({"role": "assistant", "content": final_content})
+            yield {"type": "final_answer", "content": final_content, "messages": messages}
             break
-
-if __name__ == "__main__":
-    task = (
-        "Analyze the document 'Merger Agreement' from Legal department with 105 pages. "
-        "Check the department policy and if the document is high risk, escalate it with a reason."
-    )
-    run_agent(task)

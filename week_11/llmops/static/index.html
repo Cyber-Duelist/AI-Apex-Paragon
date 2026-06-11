@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLMOps Telemetry Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="cyber-container">
+        <!-- Header -->
+        <header class="cyber-header">
+            <div class="header-left">
+                <div class="status-indicator">
+                    <div class="dot blinking"></div>
+                    <span>TELEMETRY ONLINE // EVALUATION SUITE</span>
+                </div>
+            </div>
+            <div class="header-content">
+                <h1>LLMOps Telemetry Dashboard</h1>
+            </div>
+            <div class="scanline"></div>
+        </header>
+
+        <!-- Global Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">PASS RATE</div>
+                <div class="metric-value" id="passRateMetric">--%</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">TOTAL COST (USD)</div>
+                <div class="metric-value" id="costMetric">$0.000000</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">AVG LATENCY</div>
+                <div class="metric-value" id="latencyMetric">--ms</div>
+            </div>
+        </div>
+
+        <!-- Dataset Configuration -->
+        <div class="cyber-card" style="margin-bottom: 20px; border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 4px; padding: 20px; background: var(--bg-panel);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h3 style="font-family: 'Fira Code', monospace; color: var(--neon-blue); margin: 0; font-size: 1.1rem;">EVALUATION DATASET (JSON)</h3>
+            </div>
+            <textarea id="datasetInput" class="dataset-textarea" spellcheck="false">[
+  {
+    "question": "What is the capital of France?",
+    "answer": "The capital is Paris.",
+    "rubric": "5 = mentions Paris. 1 = wrong or missing."
+  },
+  {
+    "question": "Explain quantum computing in one sentence.",
+    "answer": "Quantum computing uses qubits to perform calculations much faster than classical computers.",
+    "rubric": "5 = mentions qubits and faster calculations. 3 = mentions only one. 1 = completely wrong."
+  }
+]</textarea>
+        </div>
+
+        <div class="action-bar">
+            <button id="runEvalBtn" class="cyber-btn">
+                <span class="btn-text">RUN EVALUATION</span>
+            </button>
+            <div class="progress-text" id="progressText">Awaiting initiation...</div>
+        </div>
+
+        <!-- Evaluation Table -->
+        <div class="table-container cyber-card">
+            <table class="cyber-table">
+                <thead>
+                    <tr>
+                        <th width="5%">#</th>
+                        <th width="35%">Prompt / Question</th>
+                        <th width="10%">Score</th>
+                        <th width="10%">Verdict</th>
+                        <th width="10%">Latency</th>
+                        <th width="15%">Tokens</th>
+                        <th width="15%">Cost</th>
+                    </tr>
+                </thead>
+                <tbody id="evalTableBody">
+                    <!-- Rows will be injected here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="/static/app.js"></script>
+</body>
+</html>

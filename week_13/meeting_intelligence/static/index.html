@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Intelligence Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="logo-area">
+            <div class="logo-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+            </div>
+            <h1>Meeting Intelligence</h1>
+        </div>
+        <div class="nav-links" style="display: flex; align-items: center; gap: 16px;">
+            <button id="themeToggleBtn" class="icon-btn" title="Toggle Dark Mode" style="border: none; padding: 4px;">
+                <svg id="moonIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+                <svg id="sunIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+            </button>
+            <span class="badge">Enterprise Edition</span>
+        </div>
+    </header>
+
+    <main class="dashboard">
+        
+        <!-- Input Section -->
+        <section class="input-section card">
+            <div class="card-header">
+                <h2>Raw Transcript</h2>
+                <p class="subtitle">Paste your meeting transcript below to generate structured intelligence.</p>
+            </div>
+            <div class="card-body">
+                <textarea id="transcriptInput" placeholder="John: Let's start the sprint planning..."></textarea>
+            </div>
+            <div class="card-footer">
+                <div class="toggle-group">
+                    <input type="checkbox" id="includeEmail" checked>
+                    <label for="includeEmail">Generate Follow-up Email</label>
+                </div>
+                <button id="analyzeBtn" class="primary-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    Analyze Meeting
+                </button>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section class="results-section hidden" id="resultsSection">
+            <div class="grid-container">
+                
+                <!-- Summary Card -->
+                <div class="card summary-card span-2">
+                    <div class="card-header">
+                        <h2>Executive Summary</h2>
+                        <div class="tags" id="tagsContainer">
+                            <!-- Tags injected here -->
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p id="summaryText" class="skeleton-text"></p>
+                    </div>
+                </div>
+
+                <!-- Action Items -->
+                <div class="card span-2">
+                    <div class="card-header">
+                        <h2>Action Items</h2>
+                    </div>
+                    <div class="card-body p-0" style="overflow-x: auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Assignee</th>
+                                    <th>Task</th>
+                                    <th>Deadline</th>
+                                </tr>
+                            </thead>
+                            <tbody id="actionItemsBody">
+                                <!-- Action items injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Key Decisions -->
+                <div class="card span-2">
+                    <div class="card-header">
+                        <h2>Key Decisions</h2>
+                    </div>
+                    <div class="card-body">
+                        <ul id="decisionsList" class="styled-list">
+                            <!-- Decisions injected here -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Email Draft Card -->
+                <div class="card email-card span-2" id="emailCard">
+                    <div class="card-header">
+                        <h2>Drafted Follow-up Email</h2>
+                        <button class="icon-btn" id="copyEmailBtn" title="Copy to clipboard">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                            Copy
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="email-field">
+                            <label>Subject:</label>
+                            <input type="text" id="emailSubject" readonly>
+                        </div>
+                        <div class="email-field">
+                            <label>Message:</label>
+                            <textarea id="emailBody"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <h3>Analyzing Transcript...</h3>
+        <p>Extracting decisions and action items</p>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

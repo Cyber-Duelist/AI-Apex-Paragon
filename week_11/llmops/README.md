@@ -23,7 +23,9 @@ This module transitions from building AI features to operating AI systems in pro
 | `prompt_versioning.py` | Version and diff prompts across iterations using a central registry. |
 | `llm_judge.py` | Score LLM responses using a second high-capability LLM as an impartial judge. |
 | `tracer.py` | A custom decorator to track latency, tokens, and cost per LLM call. |
-| `eval_dashboard.py` | Golden dataset eval pipeline outputting pass/fail metrics and telemetry. |
+| `eval_dashboard.py` | Golden dataset eval pipeline and logic for the LLM Judge. |
+| `main.py` | FastAPI backend that serves the LLMOps Web Dashboard and streams live telemetry. |
+| `static/` | Frontend Vanilla JS/CSS for the Telemetry Command Center. |
 | `llm_router.py` | Triage agent to route queries to a fast or smart model based on complexity. |
 | `traces.json` | Persisted trace logs from tracer runs (observability data). |
 

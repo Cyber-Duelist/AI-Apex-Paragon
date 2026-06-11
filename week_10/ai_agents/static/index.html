@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autonomous Agent Visualizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="cyber-container">
+        <!-- Header -->
+        <header class="cyber-header">
+            <div class="header-left">
+                <div class="status-indicator">
+                    <div class="dot blinking"></div>
+                    <span>SYSTEM ONLINE // REASONING CORE ACTIVE</span>
+                </div>
+            </div>
+            <button id="helpBtn" class="icon-btn" title="User Manual">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </button>
+            <div class="header-content">
+                <h1>Autonomous Agent Visualizer</h1>
+            </div>
+            <div class="scanline"></div>
+        </header>
+
+        <!-- Main Feed Area -->
+        <main class="feed-container" id="feedContainer">
+            <div class="welcome-message">
+                <h2>AGENT_READY // AWAITING COMMAND</h2>
+                <p>Enter a multi-step task below to visualize the agent's internal ReAct loop (Reason -> Act -> Observe).</p>
+                <div class="example-commands">
+                    <button class="example-btn" onclick="document.getElementById('promptInput').value=this.innerText">Analyze the document 'Merger Agreement' from Legal department with 105 pages. Check the department policy and if the document is high risk, escalate it with a reason.</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Input Area -->
+        <footer class="cyber-footer">
+            <div id="uploadStatus" class="upload-status" style="display: none;"></div>
+            <form id="agentForm" class="input-form">
+                <div class="input-wrapper">
+                    <span class="prompt-prefix">root@agent:~#</span>
+                    <input type="text" id="promptInput" placeholder="Enter objective..." required autocomplete="off">
+                    
+                    <input type="file" id="fileInput" style="display: none;" accept=".txt,.md,.csv,.pdf">
+                    <button type="button" id="uploadBtn" class="upload-btn" title="Upload Document">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    </button>
+                </div>
+                <button type="submit" id="submitBtn" class="cyber-btn">
+                    <span class="btn-text">EXECUTE</span>
+                </button>
+            </form>
+        </footer>
+
+        <!-- User Manual Modal -->
+        <div id="manualModal" class="modal-overlay" style="display: none;">
+            <div class="modal-content cyber-card">
+                <div class="modal-header">
+                    <h2>USER MANUAL</h2>
+                    <button id="closeModalBtn" class="icon-btn">&times;</button>
+                </div>
+                <div class="modal-body markdown-body">
+                    <h3>1. Basic Prompting</h3>
+                    <p>Type commands in the bottom input bar. Try: <em>"Search the web for the latest updates on Python 3.12 and give me a summary."</em></p>
+                    
+                    <h3>2. Uploading Documents</h3>
+                    <p>Click the <strong>Upload Button</strong> (up arrow) in the input bar to upload <code>.pdf</code>, <code>.txt</code>, <code>.csv</code>, or <code>.md</code> files. The agent will autonomously read and summarize them.</p>
+
+                    <h3>3. Local Desktop Integration</h3>
+                    <p>The agent can see files on your computer and generate files for you! Try: <em>"List the files in my current directory"</em> or <em>"Write a python script that calculates the Fibonacci sequence and save it to 'fibonacci.py'."</em></p>
+
+                    <h3>4. Human-in-the-Loop (HITL)</h3>
+                    <p>We have designated <code>save_file</code> as a Dangerous Action. When the agent attempts to save a file, the dashboard will pause and flash red, asking for your explicit APPROVAL or REJECTION before executing it.</p>
+
+                    <h3>5. Continuous Memory</h3>
+                    <p>The agent remembers previous steps! Try asking a follow-up question like <em>"What was the third point mentioned in that article again?"</em></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/app.js"></script>
+</body>
+</html>

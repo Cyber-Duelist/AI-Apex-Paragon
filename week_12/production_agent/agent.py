@@ -11,9 +11,9 @@ load_dotenv()
 def get_available_model():
     client = Groq(api_key=os.getenv("GROQ_API_KEY"))
     preferred_models = [
+        "llama-3.1-8b-instant",
         "llama-3.3-70b-versatile",
         "llama-3.1-70b-versatile",
-        "llama-3.1-8b-instant",
         "gemma2-9b-it"
     ]
     for model in preferred_models:

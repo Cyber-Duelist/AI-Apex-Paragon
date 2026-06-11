@@ -1,6 +1,8 @@
 import os
 import sys
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
@@ -13,6 +15,11 @@ from analyzer import analyze_transcript, _model
 from email_drafter import draft_followup_email
 
 app = FastAPI(title="Meeting Intelligence API")
+
+# Mount Static Files
+static_dir = os.path.join(current_dir, "static")
+os.makedirs(static_dir, exist_ok=True)
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # Pydantic Models
 class TranscriptRequest(BaseModel):
@@ -32,7 +39,7 @@ class MeetingResponse(BaseModel):
 # Endpoints
 @app.get("/")
 def root():
-    return {"status": "Meeting Intelligence API is running"}
+    return FileResponse(os.path.join(static_dir, "index.html"))
 
 @app.get("/health")
 def health():
