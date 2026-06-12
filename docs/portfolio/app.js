@@ -1676,6 +1676,8 @@ RULES:
 (function() {
     const ufo = document.getElementById('ufo-cursor');
     const particleContainer = document.getElementById('ufo-particles');
+    const alien = document.getElementById('alien-companion');
+    const alienBubble = alien ? alien.querySelector('.alien-bubble') : null;
     if (!ufo) return;
 
     let mouseX = window.innerWidth / 2;
@@ -1685,6 +1687,10 @@ RULES:
     let velX = 0;
     let velY = 0;
     
+    let alienX = mouseX + 100;
+    let alienY = mouseY - 100;
+    let alienVelX = 0;
+    let alienVelY = 0;
     document.addEventListener('mousemove', (e) => {
         mouseX = e.clientX;
         mouseY = e.clientY;
@@ -1736,32 +1742,52 @@ RULES:
     }
 
     function animateUFO() {
-        // Spring Physics parameters
+        // --- UFO Physics ---
         const stiffness = 0.12;
         const damping = 0.70;
         
-        // Calculate spring force
         const forceX = (mouseX - ufoX) * stiffness;
         const forceY = (mouseY - ufoY) * stiffness;
         
-        // Update velocity
         velX = (velX + forceX) * damping;
         velY = (velY + forceY) * damping;
         
-        // Update position
         ufoX += velX;
         ufoY += velY;
         
-        // Banking tilt based on horizontal velocity
         const tilt = Math.max(-35, Math.min(35, velX * 1.5));
-        
         ufo.style.transform = `translate(calc(-50% + ${ufoX}px), calc(-50% + ${ufoY}px)) rotate(${tilt}deg)`;
         
-        // Generate exhaust particles if moving fast enough
         if (Math.abs(velX) > 1.5 || Math.abs(velY) > 1.5) {
             createParticle(ufoX, ufoY);
         }
         updateParticles();
+
+        // --- Alien Companion Physics ---
+        if (alien) {
+            const aStiffness = 0.03; // Very loose spring (follows slowly)
+            const aDamping = 0.85;   // Lots of gliding
+            
+            // Target is offset slightly from the UFO
+            const targetX = ufoX + 60;
+            const targetY = ufoY - 60;
+
+            const aForceX = (targetX - alienX) * aStiffness;
+            const aForceY = (targetY - alienY) * aStiffness;
+
+            alienVelX = (alienVelX + aForceX) * aDamping;
+            alienVelY = (alienVelY + aForceY) * aDamping;
+
+            alienX += alienVelX;
+            alienY += alienVelY;
+
+            // Flip the alien to face the direction it's moving
+            const isFlipped = alienVelX < 0 ? 'scaleX(-1)' : 'scaleX(1)';
+            const tiltA = Math.max(-15, Math.min(15, alienVelX * 2));
+
+            alien.style.transform = `translate(calc(-50% + ${alienX}px), calc(-50% + ${alienY}px)) rotate(${tiltA}deg)`;
+            alienBubble.style.transform = isFlipped;
+        }
         
         requestAnimationFrame(animateUFO);
     }
@@ -1769,6 +1795,10 @@ RULES:
     // Reset initial CSS transform
     ufo.style.left = '0px';
     ufo.style.top = '0px';
+    if(alien) {
+        alien.style.left = '0px';
+        alien.style.top = '0px';
+    }
     
     animateUFO();
 })();
