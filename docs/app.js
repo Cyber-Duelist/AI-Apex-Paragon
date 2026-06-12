@@ -1460,16 +1460,15 @@ RULES:
         if (!synth) return;
         const voices = synth.getVoices();
 
-        // ── English female voices (ordered by naturalness and melodious tone) ──
+        // ── English female voices (ordered by naturalness and premium AI tone) ──
         const preferredEn = [
-            'Microsoft Neerja Online (Natural)', // Best Indian English natural voice
-            'Microsoft Neerja',                  // Windows Indian English
-            'Veena',                             // macOS Indian English
-            'Microsoft Aria Online (Natural)',   // High-quality natural fallback
-            'Google UK English Female',          // Smooth, soothing fallback
-            'Microsoft Zira',
-            'Samantha',
-            'Google US English'
+            'Microsoft Aria Online (Natural)',   // Ultra-premium, expressive neural voice
+            'Microsoft Jenny Online (Natural)',  // High-fidelity conversational AI voice
+            'Google US English',                 // Crisp, confident US voice
+            'Google UK English Female',          // Smooth, soothing British voice
+            'Samantha',                          // macOS premium voice
+            'Microsoft Zira',                    // Windows fallback
+            'Veena'                              // macOS fallback
         ];
         for (const name of preferredEn) {
             const found = voices.find(v => v.name.includes(name));
@@ -1558,9 +1557,9 @@ RULES:
                     utter.pitch = 1.0;
                     utter.volume = 1.0;
                 } else {
-                    // Faster, clear English settings
+                    // Crisp, highly engaging, and soft-spoken English settings
                     utter.rate = 1.05;   
-                    utter.pitch = 1.05;  
+                    utter.pitch = 1.1;  
                     utter.volume = 1.0; 
                 }
 
