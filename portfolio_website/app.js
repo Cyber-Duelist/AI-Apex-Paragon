@@ -2061,8 +2061,8 @@ RULES:
 
         card.addEventListener('mouseenter', () => {
             currentHoveredProject = title;
-            if (!isDocked && !isDocking) {
-                speak("Would you like to know what's inside? (Click me to hear!)", 5000, false);
+            if (!isDocked && !isDocking && projectExplanations[title]) {
+                speak(projectExplanations[title], 8000, true);
             }
         });
         
