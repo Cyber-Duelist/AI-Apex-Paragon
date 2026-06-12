@@ -1943,9 +1943,11 @@ RULES:
                         selectedVoice = voices.find(v => v.lang.startsWith('en'));
                     }
                     
-                    // Force the pitch extremely high and fast for a hyperactive alien voice
-                    utterance.pitch = 2.0; // Max high pitch (chipmunk/alien effect)
-                    utterance.rate = 1.3; // Fast, energetic chatter
+                    // Since browsers block us from adding synth/vocoder effects to native TTS,
+                    // the best approach for a professional portfolio is a calm, slightly deep, 
+                    // intelligent AI voice (like JARVIS or HAL 9000).
+                    utterance.pitch = 0.8; // Slightly deep, calm
+                    utterance.rate = 0.9; // Professional, calculated speed
                 }
                 
                 if (selectedVoice) {
