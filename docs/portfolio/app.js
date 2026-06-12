@@ -1882,8 +1882,15 @@ RULES:
             // Cancel any ongoing speech
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.pitch = 1.6; // High pitched robotic alien
-            utterance.rate = 1.1;
+            
+            // Wait for voices to load if they haven't
+            let voices = window.speechSynthesis.getVoices();
+            // Try to pick a non-default, distinct voice (like Zira or Google UK)
+            let alienVoice = voices.find(v => v.name.includes('Zira') || v.name.includes('Microsoft Hazel') || v.name.includes('Google UK English Female'));
+            if(alienVoice) utterance.voice = alienVoice;
+            
+            utterance.pitch = 2.0; // Max high pitch for squeaky alien
+            utterance.rate = 1.4; // Fast talking
             window.speechSynthesis.speak(utterance);
         }
         
@@ -1994,19 +2001,24 @@ RULES:
                 const dist = Math.sqrt(Math.pow(window.currentUfoX - currentAlienX, 2) + Math.pow(window.currentUfoY - currentAlienY, 2));
                 
                 // If UFO hovers directly over the alien
-                if (dist < 60) {
+                if (dist < 90) { // Increased trigger radius for easier abduction
                     isDocking = true;
                     gsap.killTweensOf(alien); // Stop current roam
                     speak("Whoa! Abduction sequence initiated!", 3000);
                     
-                    // Fly to UFO rapidly and shrink
-                    gsap.to(alienBubbleUI, { scale: 0.25, duration: 0.5, ease: "power2.in" });
+                    // Fly to UFO rapidly, spin, and shrink
+                    gsap.to(alienBubbleUI, { 
+                        scale: 0, // shrink completely into UFO core
+                        rotationZ: 720, // Spin violently
+                        duration: 0.4, 
+                        ease: "power3.in" 
+                    });
                     gsap.to(alien, {
                         x: window.currentUfoX,
                         y: window.currentUfoY,
                         rotationZ: 0,
-                        duration: 0.5,
-                        ease: "power2.in",
+                        duration: 0.4,
+                        ease: "power3.in",
                         onComplete: () => {
                             isDocking = false;
                             isDocked = true;
@@ -2024,11 +2036,13 @@ RULES:
             }
         });
 
-        // Double click to release
-        ufo.addEventListener('dblclick', () => {
+        // Double click ANYWHERE to release (UFO has pointer-events: none, so clicks pass through)
+        window.addEventListener('dblclick', () => {
             if (isDocked || isDocking) {
                 isDocked = false;
-                gsap.to(alienBubbleUI, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out" });
+                
+                // Pop back out and unspin
+                gsap.to(alienBubbleUI, { scale: 1, rotationZ: 0, opacity: 1, duration: 0.6, ease: "elastic.out(1, 0.5)" });
                 speak("Released from mothership. Resuming exploration.");
                 roam();
             }
