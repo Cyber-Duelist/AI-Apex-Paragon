@@ -1928,10 +1928,10 @@ RULES:
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 
-                // Revert to English but extremely low pitch.
+                // Restore Synth Voice
                 utterance.lang = 'en-US'; 
-                utterance.pitch = 0.1; 
-                utterance.rate = 0.8; 
+                utterance.pitch = 1.5; // High pitch synth
+                utterance.rate = 1.2;  // Faster speaking
                 
                 window.speechSynthesis.speak(utterance);
             }
@@ -2228,5 +2228,200 @@ RULES:
                 releaseAlien();
             }
         });
+    }
+})();
+
+/* ========================================
+   PHYSICS SKILL GRAPH
+   ======================================== */
+(function() {
+    const canvas = document.getElementById('skills-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('skills-canvas-container');
+
+    let width, height;
+    function resize() {
+        width = container.clientWidth;
+        height = container.clientHeight;
+        canvas.width = width;
+        canvas.height = height;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const skills = [
+        "LLaMA 3", "GPT-4", "RAG", "Multi-Agent", "Python", "FastAPI",
+        "Docker", "CI/CD", "Pytest", "ChromaDB", "ReAct", "Guardrails",
+        "React", "Node.js", "TensorFlow", "PyTorch"
+    ];
+
+    const nodes = skills.map(skill => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 2,
+        vy: (Math.random() - 0.5) * 2,
+        label: skill,
+        radius: 30 + Math.random() * 20
+    }));
+
+    let mouseX = width / 2;
+    let mouseY = height / 2;
+    let isHovering = false;
+
+    container.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        mouseX = e.clientX - rect.left;
+        mouseY = e.clientY - rect.top;
+        isHovering = true;
+    });
+
+    container.addEventListener('mouseleave', () => {
+        isHovering = false;
+    });
+
+    function loop() {
+        ctx.clearRect(0, 0, width, height);
+        
+        // Draw edges
+        ctx.lineWidth = 1;
+        for (let i = 0; i < nodes.length; i++) {
+            for (let j = i + 1; j < nodes.length; j++) {
+                const dx = nodes[i].x - nodes[j].x;
+                const dy = nodes[i].y - nodes[j].y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 150) {
+                    ctx.beginPath();
+                    ctx.moveTo(nodes[i].x, nodes[i].y);
+                    ctx.lineTo(nodes[j].x, nodes[j].y);
+                    ctx.strokeStyle = `rgba(57, 255, 20, ${1 - dist / 150})`;
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // Draw nodes
+        nodes.forEach(node => {
+            node.x += node.vx;
+            node.y += node.vy;
+
+            if (node.x < node.radius || node.x > width - node.radius) node.vx *= -1;
+            if (node.y < node.radius || node.y > height - node.radius) node.vy *= -1;
+
+            if (isHovering) {
+                const dx = mouseX - node.x;
+                const dy = mouseY - node.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 100) {
+                    node.vx -= (dx / dist) * 0.5;
+                    node.vy -= (dy / dist) * 0.5;
+                }
+            }
+
+            const speed = Math.sqrt(node.vx * node.vx + node.vy * node.vy);
+            if (speed > 2) {
+                node.vx *= 0.95;
+                node.vy *= 0.95;
+            } else if (speed < 0.5) {
+                node.vx *= 1.05;
+                node.vy *= 1.05;
+            }
+
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(10, 20, 15, 0.8)";
+            ctx.fill();
+            ctx.strokeStyle = "#39ff14";
+            ctx.stroke();
+
+            ctx.fillStyle = "#39ff14";
+            ctx.font = "12px monospace";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(node.label, node.x, node.y);
+        });
+
+        requestAnimationFrame(loop);
+    }
+    loop();
+})();
+
+/* ========================================
+   AMBIENT AUDIO & KONAMI CODE
+   ======================================== */
+(function() {
+    // 1. Ambient Audio
+    const audioToggleBtn = document.getElementById('ambient-audio-toggle');
+    const audioIcon = document.getElementById('audio-icon');
+    let ambientAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/02/10/audio_5b34f7831f.mp3?filename=dark-ambient-drone-24076.mp3'); 
+    ambientAudio.loop = true;
+    ambientAudio.volume = 0.2;
+    let isAudioPlaying = false;
+
+    if (audioToggleBtn) {
+        audioToggleBtn.addEventListener('click', () => {
+            if (isAudioPlaying) {
+                ambientAudio.pause();
+                audioIcon.innerText = '🔇';
+                isAudioPlaying = false;
+            } else {
+                ambientAudio.play();
+                audioIcon.innerText = '🔊';
+                isAudioPlaying = true;
+            }
+        });
+    }
+
+    // 2. Konami Code Lockdown
+    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    let konamiIndex = 0;
+    
+    window.addEventListener('keydown', (e) => {
+        if (e.key === konamiCode[konamiIndex]) {
+            konamiIndex++;
+            if (konamiIndex === konamiCode.length) {
+                konamiIndex = 0;
+                triggerLockdown();
+            }
+        } else {
+            konamiIndex = 0;
+        }
+    });
+
+    function triggerLockdown() {
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0'; overlay.style.left = '0';
+        overlay.style.width = '100vw'; overlay.style.height = '100vh';
+        overlay.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+        overlay.style.boxShadow = 'inset 0 0 150px red';
+        overlay.style.zIndex = '9999999';
+        overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.style.fontFamily = 'monospace';
+        overlay.innerHTML = '<h1 style="color:red; font-size:4vw; text-align:center; text-shadow: 0 0 20px red;">CLASSIFIED PROTOCOL UNLOCKED:<br>APEX-PARAGON CORE</h1>';
+        document.body.appendChild(overlay);
+
+        gsap.fromTo(overlay, {opacity: 0}, {opacity: 1, duration: 0.5, yoyo: true, repeat: 5});
+        
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime + 0.5);
+            osc.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 3);
+        } catch(e) {}
+
+        setTimeout(() => overlay.remove(), 4000);
+        
+        if(window.speechSynthesis) {
+            const u = new SpeechSynthesisUtterance("Warning. Classified clearance granted.");
+            u.pitch = 0.5; u.rate = 0.8;
+            window.speechSynthesis.speak(u);
+        }
     }
 })();
