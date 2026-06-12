@@ -2039,8 +2039,8 @@ RULES:
                 
                 const dist = Math.sqrt(Math.pow(window.currentUfoX - currentAlienX, 2) + Math.pow(window.currentUfoY - currentAlienY, 2));
                 
-                // Perfect Tractor Beam Distance: Matches the visual height of the CSS .ufo-beam (160px)
-                if (dist < 160 && window.currentUfoY < currentAlienY) {
+                // Perfect Tractor Beam Distance requested by user: 260px
+                if (dist < 260 && window.currentUfoY < currentAlienY) {
                     isDocking = true;
                     gsap.killTweensOf(alien); // Stop current roam
                     speak("Abduction sequence engaged.", 3000);
