@@ -1951,23 +1951,34 @@ RULES:
                 // Restore Synth Voice and Handle Hindi
                 const isHindi = /[\u0900-\u097F]/.test(text);
                 
+                let voices = window.speechSynthesis.getVoices();
+                if (voices.length === 0 && synthVoices.length > 0) {
+                    voices = synthVoices;
+                }
+                
                 let selectedVoice = null;
                 
                 if (isHindi) {
-                    selectedVoice = synthVoices.find(v => v.lang.includes('hi'));
+                    selectedVoice = voices.find(v => v.lang.includes('hi'));
                     utterance.pitch = 0.6;
                     utterance.rate = 1.0;
                 } else {
-                    // Try to find the most robotic/computerized voice available
-                    selectedVoice = synthVoices.find(v => 
-                        v.name.includes('Zira') || 
-                        v.name.includes('Mark') || 
-                        v.name.includes('David') ||
-                        v.name.includes('Google')
-                    ) || synthVoices[0]; // fallback
+                    // Bruteforce the most robotic voices available on Windows/Chrome
+                    selectedVoice = voices.find(v => 
+                        v.name === 'Microsoft Mark - English (United States)' ||
+                        v.name === 'Google US English' ||
+                        v.name.includes('Mark') ||
+                        v.name.includes('David')
+                    );
                     
-                    utterance.pitch = 0.0; // Flat 0 pitch forces monotonic tone
-                    utterance.rate = 0.8; // Slow, mechanical
+                    // If we still can't find a specific voice, just grab any English voice
+                    if (!selectedVoice) {
+                        selectedVoice = voices.find(v => v.lang.startsWith('en'));
+                    }
+                    
+                    // Force the pitch to absolute minimum for maximum robotic effect
+                    utterance.pitch = 0.01; 
+                    utterance.rate = 0.75; // Very slow and calculated
                 }
                 
                 if (selectedVoice) {
