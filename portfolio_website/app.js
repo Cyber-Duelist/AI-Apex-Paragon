@@ -1393,17 +1393,21 @@ RULES:
 
         // ── Hindi female voices ──
         const preferredHi = [
-            'Microsoft Swara',       // Windows Hindi female — best quality
-            'Google हिन्दी',          // Google Hindi
-            'Lekha',                 // macOS Hindi
+            'Google हिन्दी',          // Google Cloud Hindi (most natural, Chrome default)
+            'Microsoft Swara',       // Windows native Hindi
+            'Lekha',                 // macOS native Hindi
+            'Microsoft Neerja',      // Windows Indian English (excellent fallback for Hindi)
+            'Veena'                  // macOS Indian English
         ];
         for (const name of preferredHi) {
             const found = voices.find(v => v.name.includes(name));
             if (found) { selectedVoiceHi = found; break; }
         }
         if (!selectedVoiceHi) {
-            // Fallback: any Hindi voice
-            selectedVoiceHi = voices.find(v => v.lang.startsWith('hi')) || null;
+            // Fallback: any Hindi voice, or at least an Indian English voice so it doesn't sound foreign
+            selectedVoiceHi = voices.find(v => v.lang.startsWith('hi')) || 
+                              voices.find(v => v.lang === 'en-IN') || 
+                              null;
         }
     }
 
@@ -1446,10 +1450,17 @@ RULES:
                 if (voice) utter.voice = voice;
                 utter.lang = hindi ? 'hi-IN' : 'en-US';
 
-                // Crisp, clear Siri-like enhanced AI parameters
-                utter.rate = 1.0 + (Math.random() * 0.02 - 0.01);   // ~1.0 (precise, normal pace)
-                utter.pitch = 1.05 + (Math.random() * 0.02 - 0.01); // ~1.05 (clean, normalized AI pitch)
-                utter.volume = 1.0;
+                if (hindi) {
+                    // Hindi TTS engines sound rushed at 1.0. Slower rate + normal pitch = natural Indian tone
+                    utter.rate = 0.88 + Math.random() * 0.04;   // 0.88–0.92 (calm, native pace)
+                    utter.pitch = 1.0;                          // Native pitch
+                    utter.volume = 1.0;
+                } else {
+                    // Crisp, clear Siri-like enhanced AI parameters for English
+                    utter.rate = 1.0 + (Math.random() * 0.02 - 0.01);   // ~1.0 (precise, normal pace)
+                    utter.pitch = 1.05 + (Math.random() * 0.02 - 0.01); // ~1.05 (clean, normalized AI pitch)
+                    utter.volume = 1.0;
+                }
 
                 synth.speak(utter);
             }, delay);
