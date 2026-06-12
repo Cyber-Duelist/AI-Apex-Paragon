@@ -2038,26 +2038,44 @@ RULES:
         });
 
         // Double click ANYWHERE to release (UFO has pointer-events: none, so clicks pass through)
-        window.addEventListener('dblclick', () => {
+        // Foolproof Release Mechanism
+        function releaseAlien() {
             if (isDocked || isDocking) {
                 isDocked = false;
+                isDocking = false; // Crucial: clear docking state to prevent onComplete overrides
                 abductionCooldown = true; // Prevent immediate re-abduction
+                
+                // Crucial: kill any running abduction animations that might conflict
+                gsap.killTweensOf(alien);
+                gsap.killTweensOf(alienBubbleUI);
                 
                 // Drop the alien slightly down from the UFO
                 gsap.to(alien, {
-                    y: window.currentUfoY + 100, // Drop it 100px below the UFO
-                    duration: 0.5,
+                    x: window.currentUfoX,
+                    y: window.currentUfoY + 150, // Drop it 150px below the UFO
+                    duration: 0.6,
                     ease: "power2.out"
                 });
                 
                 // Pop back out and unspin
                 gsap.to(alienBubbleUI, { scale: 1, rotationZ: 0, opacity: 1, duration: 0.6, ease: "elastic.out(1, 0.5)" });
-                speak("Released from mothership.");
+                speak("Ejected from mothership.");
                 
                 setTimeout(() => {
                     abductionCooldown = false;
                     roam(); // Resume roaming after dropped
                 }, 2000); // 2 seconds of immunity
+            }
+        }
+
+        // Release on double-click
+        window.addEventListener('dblclick', releaseAlien);
+        
+        // Release on Right-Click (foolproof alternative)
+        window.addEventListener('contextmenu', (e) => {
+            if (isDocked || isDocking) {
+                e.preventDefault(); // Block the normal browser context menu if we are releasing the alien
+                releaseAlien();
             }
         });
     }
