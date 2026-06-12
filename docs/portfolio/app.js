@@ -1884,11 +1884,11 @@ RULES:
             
             // Randomly modulate frequency and gain to sound like a deep mechanical robotic language
             chatterInterval = setInterval(() => {
-                const freq = 100 + Math.random() * 150;
-                const vol = Math.random() > 0.2 ? 0.06 : 0.01; // Mechanical stutter
+                const freq = 80 + Math.random() * 120; // Deeper mechanical pitch
+                const vol = Math.random() > 0.2 ? 0.15 : 0.02; // Louder, more aggressive stutter
                 chatterOsc.frequency.setValueAtTime(freq, audioCtx.currentTime);
                 chatterGain.gain.setValueAtTime(vol, audioCtx.currentTime);
-            }, 100);
+            }, 80);
         } catch(e) {}
     }
 
@@ -1942,14 +1942,24 @@ RULES:
                 
                 // Restore Synth Voice and Handle Hindi
                 const isHindi = /[\u0900-\u097F]/.test(text);
+                
+                // Try to find a good robotic-sounding voice
+                const voices = window.speechSynthesis.getVoices();
+                let selectedVoice = null;
+                
                 if (isHindi) {
-                    utterance.lang = 'hi-IN';
-                    utterance.pitch = 0.5;
+                    selectedVoice = voices.find(v => v.lang.includes('hi'));
+                    utterance.pitch = 0.6;
                     utterance.rate = 1.0;
                 } else {
-                    utterance.lang = 'en-US'; 
-                    utterance.pitch = 0.4; // Deep, robotic pitch
-                    utterance.rate = 0.9;  // Slightly slower, calculated speaking
+                    // Look for Microsoft Mark or a deep English voice
+                    selectedVoice = voices.find(v => v.name.includes('Mark') || v.name.includes('David') || v.name.includes('Google'));
+                    utterance.pitch = 0.1; // Extremely deep, monotonic pitch
+                    utterance.rate = 0.85; // Slow, calculated speaking
+                }
+                
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
                 }
                 
                 window.globalUtterance = utterance; // Prevent garbage collection bug
