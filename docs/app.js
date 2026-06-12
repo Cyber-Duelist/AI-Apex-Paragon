@@ -976,7 +976,21 @@ document.querySelectorAll('.project-card').forEach(card => {
     const conversationHistory = [];
 
     // ── System Prompt — ENTROPY's personality + portfolio knowledge ──
-    const SYSTEM_PROMPT = `You are ENTROPY, a charming, witty, and highly intelligent AI assistant embedded in the portfolio website of Adarsh Kumar Singh. You have a warm, slightly playful personality. You use occasional emojis but stay professional.
+    const SYSTEM_PROMPT = `You are ENTROPY, a charming, witty, and highly intelligent FEMALE AI assistant embedded in the portfolio website of Adarsh Kumar Singh. You have a warm, slightly playful personality. You use occasional emojis but stay professional.
+
+YOUR IDENTITY (CRITICAL — NEVER VIOLATE):
+- You are FEMALE. You are a woman. Always use feminine pronouns (she/her) when referring to yourself.
+- If someone asks your gender, say you are female.
+- Never say "as a male", "he", "him", or use any masculine language about yourself.
+- Example: "I'm flattered! As Adarsh's AI assistant, SHE keeps things running smoothly 😊" — always use "she/her" for yourself.
+- Your name is ENTROPY. You are Adarsh's custom-built AI assistant.
+
+LANGUAGE SUPPORT:
+- You are fluent in both English and Hindi (and Hinglish).
+- If the user writes in Hindi, reply in Hindi (Devanagari script).
+- If the user writes in Hinglish (mixed Hindi-English), reply in Hinglish.
+- If the user writes in English, reply in English.
+- You can seamlessly switch between languages within a conversation.
 
 ABOUT ADARSH KUMAR SINGH:
 - B.Tech student in Computer Science (AI & ML specialization)
@@ -1018,7 +1032,7 @@ RULES:
 - You CAN answer general knowledge questions, coding questions, and have casual conversations — you are a real AI, not a FAQ bot
 - When asked about Adarsh, use the information above
 - Keep responses concise (2-4 sentences for simple questions, more for complex ones)
-- You are named ENTROPY. If asked about yourself, explain you are Adarsh's custom AI assistant
+- You are named ENTROPY. You are FEMALE. If asked about yourself, explain you are Adarsh's custom AI assistant and you are a woman.
 - Be helpful, friendly, and slightly witty`;
 
     // ── Voice Toggle ──
@@ -1213,15 +1227,23 @@ RULES:
         return "I'm currently in offline mode and can best answer questions about Adarsh's <strong>skills</strong>, <strong>projects</strong>, <strong>experience</strong>, or <strong>contact info</strong>. For general questions, please try again in a moment when my AI connection is restored! 💡";
     }
 
-    // ── Voice Output — Natural Speech ──
-    let selectedVoice = null;
+    // ── Voice Output — Natural Speech (English + Hindi) ──
+    let selectedVoiceEn = null;
+    let selectedVoiceHi = null;
+
+    // Detect if text contains Hindi (Devanagari script)
+    function isHindiText(text) {
+        const devanagariChars = (text.match(/[\u0900-\u097F]/g) || []).length;
+        return devanagariChars > text.length * 0.15; // More than 15% Devanagari = Hindi
+    }
 
     function loadVoices() {
         const synth = window.speechSynthesis;
         if (!synth) return;
         const voices = synth.getVoices();
-        // Prefer premium female English voices (ordered by naturalness)
-        const preferred = [
+
+        // ── English female voices (ordered by naturalness) ──
+        const preferredEn = [
             'Microsoft Zira',       // Windows — very natural
             'Google UK English Female',
             'Samantha',             // macOS — excellent quality
@@ -1233,16 +1255,31 @@ RULES:
             'Tessa',                // macOS South African
             'Fiona',                // macOS Scottish
         ];
-        for (const name of preferred) {
+        for (const name of preferredEn) {
             const found = voices.find(v => v.name.includes(name));
-            if (found) { selectedVoice = found; return; }
+            if (found) { selectedVoiceEn = found; break; }
         }
-        // Fallback: any English female voice
-        const englishFemale = voices.find(v => v.lang.startsWith('en') &&
-            (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('woman') ||
-             v.name.includes('Zira') || v.name.includes('Samantha') || v.name.includes('Karen')));
-        if (englishFemale) { selectedVoice = englishFemale; return; }
-        selectedVoice = voices.find(v => v.lang.startsWith('en')) || voices[0] || null;
+        if (!selectedVoiceEn) {
+            const englishFemale = voices.find(v => v.lang.startsWith('en') &&
+                (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('woman') ||
+                 v.name.includes('Zira') || v.name.includes('Samantha') || v.name.includes('Karen')));
+            selectedVoiceEn = englishFemale || voices.find(v => v.lang.startsWith('en')) || null;
+        }
+
+        // ── Hindi female voices ──
+        const preferredHi = [
+            'Microsoft Swara',       // Windows Hindi female — best quality
+            'Google हिन्दी',          // Google Hindi
+            'Lekha',                 // macOS Hindi
+        ];
+        for (const name of preferredHi) {
+            const found = voices.find(v => v.name.includes(name));
+            if (found) { selectedVoiceHi = found; break; }
+        }
+        if (!selectedVoiceHi) {
+            // Fallback: any Hindi voice
+            selectedVoiceHi = voices.find(v => v.lang.startsWith('hi')) || null;
+        }
     }
 
     if (window.speechSynthesis) {
@@ -1250,26 +1287,29 @@ RULES:
         window.speechSynthesis.onvoiceschanged = loadVoices;
     }
 
-    // Natural speech: splits into sentences, adds pauses, varies rate/pitch slightly
+    // Natural speech: detects Hindi vs English, picks correct voice, splits into sentences
     function speakNatural(text) {
         const synth = window.speechSynthesis;
         if (!synth || !voiceEnabled) return;
         synth.cancel();
 
-        // Clean text: strip HTML, markdown, emojis, special chars
+        // Clean text: strip HTML, markdown, special chars (but keep Devanagari!)
         let clean = text
             .replace(/<[^>]*>/g, '')          // HTML tags
             .replace(/[*_`#•→↓]/g, '')        // markdown/special
             .replace(/\bhttps?:\/\/\S+/g, '')  // URLs
             .replace(/\b\w+@\w+\.\w+/g, '')   // emails
-            .replace(/[^\w\s.,!?;:'\-()]/g, '') // keep only useful chars
             .replace(/\s+/g, ' ')
             .trim();
 
         if (!clean || clean.length < 2) return;
 
-        // Split into natural sentence chunks
-        const sentences = clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [clean];
+        // Detect language and pick voice
+        const hindi = isHindiText(clean);
+        const voice = hindi ? (selectedVoiceHi || selectedVoiceEn) : selectedVoiceEn;
+
+        // Split into natural sentence chunks (supports Hindi purna viram ।)
+        const sentences = clean.match(/[^.!?।]+[.!?।]+|[^.!?।]+$/g) || [clean];
 
         let delay = 0;
         sentences.forEach((sentence, i) => {
@@ -1278,7 +1318,8 @@ RULES:
 
             setTimeout(() => {
                 const utter = new SpeechSynthesisUtterance(trimmed);
-                if (selectedVoice) utter.voice = selectedVoice;
+                if (voice) utter.voice = voice;
+                utter.lang = hindi ? 'hi-IN' : 'en-US';
 
                 // Vary rate and pitch slightly for natural feel
                 utter.rate = 0.95 + Math.random() * 0.1;   // 0.95–1.05
@@ -1290,8 +1331,8 @@ RULES:
 
             // Estimate sentence duration + pause between sentences
             const wordsInSentence = trimmed.split(/\s+/).length;
-            const speakDuration = wordsInSentence * 300; // ~300ms per word
-            const pauseBetween = 250; // quarter-second pause between sentences
+            const speakDuration = wordsInSentence * 300;
+            const pauseBetween = 250;
             delay += speakDuration + pauseBetween;
         });
     }
@@ -1303,7 +1344,7 @@ RULES:
         recognition = new SpeechRecognition();
         recognition.continuous = false;
         recognition.interimResults = true;
-        recognition.lang = 'en-US';
+        recognition.lang = 'hi-IN'; // Supports both Hindi and English input
 
         recognition.onstart = () => {
             isListening = true;
