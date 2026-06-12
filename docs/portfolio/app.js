@@ -1940,11 +1940,19 @@ RULES:
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 
-                // Restore Synth Voice
-                utterance.lang = 'en-US'; 
-                utterance.pitch = 0.4; // Deep, robotic pitch
-                utterance.rate = 0.9;  // Slightly slower, calculated speaking
+                // Restore Synth Voice and Handle Hindi
+                const isHindi = /[\u0900-\u097F]/.test(text);
+                if (isHindi) {
+                    utterance.lang = 'hi-IN';
+                    utterance.pitch = 0.5;
+                    utterance.rate = 1.0;
+                } else {
+                    utterance.lang = 'en-US'; 
+                    utterance.pitch = 0.4; // Deep, robotic pitch
+                    utterance.rate = 0.9;  // Slightly slower, calculated speaking
+                }
                 
+                window.globalUtterance = utterance; // Prevent garbage collection bug
                 window.speechSynthesis.speak(utterance);
             }
             
@@ -2074,7 +2082,7 @@ RULES:
 
         card.addEventListener('mouseenter', () => {
             currentHoveredProject = title;
-            if (!isDocked && !isDocking && projectExplanations[title]) {
+            if (projectExplanations[title]) {
                 speak(projectExplanations[title], 8000, true);
             }
         });
