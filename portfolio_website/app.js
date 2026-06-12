@@ -814,7 +814,10 @@ document.querySelectorAll('.project-card').forEach(card => {
                 // Count ALL commits pushed in the recent 100 events
                 events.forEach(evt => {
                     if (evt.type === 'PushEvent') {
-                        totalCommits += evt.payload.commits ? evt.payload.commits.length : 0;
+                        let count = 1;
+                        if (evt.payload.size !== undefined) count = evt.payload.size;
+                        else if (evt.payload.commits) count = evt.payload.commits.length;
+                        totalCommits += count;
                     }
                 });
 
@@ -825,9 +828,12 @@ document.querySelectorAll('.project-card').forEach(card => {
                     const timeAgo = getTimeAgo(new Date(evt.created_at));
 
                     if (evt.type === 'PushEvent') {
-                        const commits = evt.payload.commits ? evt.payload.commits.length : 0;
+                        let count = 1;
+                        if (evt.payload.size !== undefined) count = evt.payload.size;
+                        else if (evt.payload.commits) count = evt.payload.commits.length;
+
                         icon = '⚡';
-                        text = `Pushed <strong>${commits} commit${commits !== 1 ? 's' : ''}</strong> to ${repo}`;
+                        text = `Pushed <strong>${count} commit${count !== 1 ? 's' : ''}</strong> to ${repo}`;
                     } else if (evt.type === 'CreateEvent') {
                         icon = '🌱';
                         text = `Created ${evt.payload.ref_type} <strong>${evt.payload.ref || repo}</strong>`;
@@ -1357,14 +1363,14 @@ RULES:
         if (!synth) return;
         const voices = synth.getVoices();
 
-        // ── English female voices (ordered by Siri-like/Enhanced AI tone) ──
+        // ── English female voices (ordered by naturalness and melodious tone) ──
         const preferredEn = [
-            'Samantha',             // macOS — classic Siri-like voice
-            'Google US English',    // Very clean, crisp AI voice
-            'Microsoft Zira',       // Windows — precise AI
-            'Google UK English Female', 
+            'Google UK English Female', // Most natural, soothing, and human-like
+            'Microsoft Zira',       // Natural Windows voice
+            'Samantha',             // macOS smooth voice
             'Karen',                
             'Moira',                
+            'Google US English',    
             'Microsoft Hazel',      
             'Microsoft Susan',      
             'Tessa',                
@@ -1455,10 +1461,10 @@ RULES:
                     utter.pitch = 1.0;                          // Native pitch
                     utter.volume = 1.0;
                 } else {
-                    // Crisp, clear Siri-like enhanced AI parameters for English
-                    utter.rate = 1.0 + (Math.random() * 0.02 - 0.01);   // ~1.0 (precise, normal pace)
-                    utter.pitch = 1.05 + (Math.random() * 0.02 - 0.01); // ~1.05 (clean, normalized AI pitch)
-                    utter.volume = 1.0;
+                    // Soft, natural, human-like melodious parameters for English
+                    utter.rate = 0.88 + Math.random() * 0.04;   // 0.88–0.92 (calm, slow, deeply soothing)
+                    utter.pitch = 1.15 + Math.random() * 0.05;  // 1.15–1.20 (soft, high, elegant)
+                    utter.volume = 0.95; 
                 }
 
                 synth.speak(utter);
