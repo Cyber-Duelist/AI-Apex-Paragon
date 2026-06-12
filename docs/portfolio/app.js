@@ -1902,66 +1902,58 @@ RULES:
         }
     });
 
+    // Synthetic Alien Voice (Retro RPG Style)
+    function playAlienBlip() {
+        if (!audioCtx || audioCtx.state !== 'running' || isMuted) return;
+        try {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            // Square wave for that classic mechanical/robotic synth feel
+            osc.type = 'square'; 
+            
+            // Randomize pitch slightly for each character to sound like alien chatter
+            const baseFreq = 200; 
+            osc.frequency.setValueAtTime(baseFreq + Math.random() * 150, audioCtx.currentTime); 
+            
+            gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.04);
+        } catch(e) {}
+    }
+
     // Speak Function (Text-To-Speech)
     function speak(text, duration = 4000, playAudio = false) {
         if (isMuted || isSpeaking) return;
         isSpeaking = true;
-        textEl.textContent = text;
         bubble.classList.remove('hidden');
+        textEl.textContent = "";
         
-        if (playAudio) {
-            // Native Browser TTS
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
+        if (window.typingInterval) clearInterval(window.typingInterval);
+        
+        let i = 0;
+        window.typingInterval = setInterval(() => {
+            if (i < text.length) {
+                textEl.textContent += text.charAt(i);
                 
-                // Restore Synth Voice and Handle Hindi
-                const isHindi = /[\u0900-\u097F]/.test(text);
-                
-                let voices = window.speechSynthesis.getVoices();
-                if (voices.length === 0 && synthVoices.length > 0) {
-                    voices = synthVoices;
+                // Only play blips for actual letters, not spaces, to create pacing
+                if (playAudio && text.charAt(i) !== ' ') {
+                    playAlienBlip();
                 }
-                
-                let selectedVoice = null;
-                
-                if (isHindi) {
-                    selectedVoice = voices.find(v => v.lang.includes('hi'));
-                    utterance.pitch = 0.6;
-                    utterance.rate = 1.0;
-                } else {
-                    // Bruteforce the most robotic voices available on Windows/Chrome
-                    selectedVoice = voices.find(v => 
-                        v.name === 'Microsoft Mark - English (United States)' ||
-                        v.name === 'Google US English' ||
-                        v.name.includes('Mark') ||
-                        v.name.includes('David')
-                    );
-                    
-                    // If we still can't find a specific voice, just grab any English voice
-                    if (!selectedVoice) {
-                        selectedVoice = voices.find(v => v.lang.startsWith('en'));
-                    }
-                    
-                    // Since browsers block us from adding synth/vocoder effects to native TTS,
-                    // the best approach for a professional portfolio is a calm, slightly deep, 
-                    // intelligent AI voice (like JARVIS or HAL 9000).
-                    utterance.pitch = 0.8; // Slightly deep, calm
-                    utterance.rate = 0.9; // Professional, calculated speed
-                }
-                
-                if (selectedVoice) {
-                    utterance.voice = selectedVoice;
-                }
-                
-                window.globalUtterance = utterance; // Prevent garbage collection bug
-                window.speechSynthesis.speak(utterance);
+                i++;
+            } else {
+                // Finished typing
+                clearInterval(window.typingInterval);
+                setTimeout(() => {
+                    hideDialogue();
+                }, duration);
             }
-        }
-        
-        setTimeout(() => {
-            hideDialogue();
-        }, duration);
+        }, 35); // 35ms per character for a fast, robotic typing speed
     }
 
     function hideDialogue() {
