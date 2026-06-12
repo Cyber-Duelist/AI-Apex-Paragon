@@ -380,11 +380,32 @@ try {
         torus.rotation.y = time * 0.1;
         torus.rotation.z = time * 0.05;
 
+        // Mouse physics & bounds
+        const pMouseX = mouseX * 25; 
+        const pMouseY = mouseY * 15;
+        
+        for (let i = 0; i < particleCount; i++) {
+            positions[i*3] += velocities[i*3];
+            positions[i*3+1] += velocities[i*3+1];
+            positions[i*3+2] += velocities[i*3+2];
+            
+            // Mouse Repel
+            const dx = positions[i*3] - pMouseX;
+            const dy = positions[i*3+1] - pMouseY;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < 5.0) {
+                const force = (5.0 - dist) / 5.0;
+                positions[i*3] += (dx / dist) * force * 0.2;
+                positions[i*3+1] += (dy / dist) * force * 0.2;
+            }
+        }
+        geo.attributes.position.needsUpdate = true;
+
         // Update connection lines
         const pos = geo.attributes.position.array;
         let li = 0;
-        const maxD = 3.5;
-        const checkCount = Math.min(particleCount, 120);
+        const maxD = 4.0;
+        const checkCount = Math.min(particleCount, 150);
 
         for (let i = 0; i < checkCount; i++) {
             for (let j = i + 1; j < checkCount; j++) {
@@ -1093,7 +1114,19 @@ document.querySelectorAll('.project-card').forEach(card => {
     let voiceEnabled = true; // auto-speak replies
     let isListening = false;
     let isSending = false;
-    const conversationHistory = [];
+    let conversationHistory = [];
+
+    // ── Persistent Memory (localStorage) ──
+    try {
+        const savedMemory = localStorage.getItem('entropy_chat_memory');
+        if (savedMemory) {
+            conversationHistory = JSON.parse(savedMemory);
+        }
+    } catch(e) {}
+
+    function saveMemory() {
+        localStorage.setItem('entropy_chat_memory', JSON.stringify(conversationHistory));
+    }
 
     // ── System Prompt — ENTROPY's personality + portfolio knowledge ──
     const SYSTEM_PROMPT = `You are ENTROPY, a graceful, soothing, and highly intelligent AI assistant embedded in the portfolio website of Adarsh Kumar Singh. You have a warm, melodious, and profoundly calming personality. You use occasional emojis but maintain an elegant professionalism.
@@ -1105,6 +1138,17 @@ YOUR TONE AND IDENTITY (CRITICAL — NEVER VIOLATE):
 - Never use any masculine language, tone, or expressions.
 - Your voice and words should feel like a warm, reassuring, and highly intelligent companion.
 - Your name is ENTROPY. You are Adarsh's custom-built AI assistant.
+
+WEBSITE NAVIGATION (CRITICAL):
+- You can physically scroll the website for the user. If you answer a question about a specific topic, APPEND exactly ONE of the following hidden commands at the VERY END of your response to scroll the user to that section:
+  [SCROLL_TO: #about]
+  [SCROLL_TO: #grind]
+  [SCROLL_TO: #projects]
+  [SCROLL_TO: #skills]
+  [SCROLL_TO: #terminal-section]
+  [SCROLL_TO: #github-activity]
+  [SCROLL_TO: #contact]
+- Example: "Adarsh is a skilled engineer. [SCROLL_TO: #about]"
 
 LANGUAGE SUPPORT (CRITICAL - STRICT COMPLIANCE):
 - You are fluent in both English and Hindi.
@@ -1188,6 +1232,7 @@ RULES:
         input.value = '';
         addMsg(text, 'user');
         conversationHistory.push({ role: 'user', content: text });
+        saveMemory();
         await getAIReply();
     }
 
@@ -1212,6 +1257,20 @@ RULES:
         const d = document.createElement('div');
         d.textContent = str;
         return d.innerHTML;
+    }
+
+    // ── Restore Chat UI from Memory ──
+    if (conversationHistory.length > 0) {
+        const welcomeBack = document.createElement('div');
+        welcomeBack.className = 'chat-msg bot';
+        welcomeBack.innerHTML = '<span class="chat-bubble"><em>Welcome back! I remembered our chat context. ✨</em></span>';
+        messagesEl.appendChild(welcomeBack);
+
+        conversationHistory.forEach(msg => {
+            if (msg.role === 'user') addMsg(msg.content, 'user');
+            else if (msg.role === 'assistant') addBotMsg(formatReply(msg.content));
+        });
+        setTimeout(() => { messagesEl.scrollTop = messagesEl.scrollHeight; }, 100);
     }
 
     // ── Typing indicator ──
@@ -1289,7 +1348,16 @@ RULES:
         removeTyping();
 
         if (reply) {
+            // Handle context scrolling
+            const scrollMatch = reply.match(/\[SCROLL_TO:\s*(#[a-zA-Z0-9_-]+)\]/i);
+            if (scrollMatch) {
+                const targetId = scrollMatch[1];
+                reply = reply.replace(scrollMatch[0], '').trim();
+                triggerScroll(targetId);
+            }
+
             conversationHistory.push({ role: 'assistant', content: reply });
+            saveMemory();
             addBotMsg(formatReply(reply));
             if (voiceEnabled) speakNatural(reply);
         } else {
@@ -1297,6 +1365,7 @@ RULES:
             const fallback = localFallback(conversationHistory[conversationHistory.length - 1]?.content || '');
             addBotMsg(fallback);
             conversationHistory.push({ role: 'assistant', content: fallback });
+            saveMemory();
             if (voiceEnabled) speakNatural(fallback.replace(/<[^>]*>/g, ''));
         }
 
@@ -1306,8 +1375,36 @@ RULES:
         input.focus();
     }
 
-    // ── Format reply (basic markdown-like) ──
+    // ── Trigger DOM Scroll ──
+    function triggerScroll(targetId) {
+        const targetEl = document.querySelector(targetId);
+        if (targetEl) {
+            targetEl.scrollIntoView({ behavior: 'smooth' });
+            targetEl.classList.add('ai-highlight-glow');
+            setTimeout(() => {
+                targetEl.classList.remove('ai-highlight-glow');
+            }, 3000);
+        }
+    }
+
+    // ── Markdown Configuration ──
+    if (window.marked && window.hljs) {
+        marked.setOptions({
+            highlight: function(code, lang) {
+                const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                return hljs.highlight(code, { language }).value;
+            },
+            breaks: true, // Convert \n to <br>
+            gfm: true     // GitHub Flavored Markdown
+        });
+    }
+
+    // ── Format reply (Markdown) ──
     function formatReply(text) {
+        if (window.marked) {
+            return marked.parse(text);
+        }
+        // Fallback if marked fails to load
         return text
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
             .replace(/\*(.*?)\*/g, '<em>$1</em>')
@@ -1412,11 +1509,16 @@ RULES:
         window.speechSynthesis.onvoiceschanged = loadVoices;
     }
 
+    let speakingCount = 0;
+
     // Natural speech: detects Hindi vs English, picks correct voice, splits into sentences
     function speakNatural(text) {
         const synth = window.speechSynthesis;
         if (!synth || !voiceEnabled) return;
         synth.cancel();
+        speakingCount = 0;
+        win.classList.remove('speaking');
+        fab.classList.remove('speaking');
 
         // Clean text: strip HTML, markdown, special chars (but keep Devanagari!)
         let clean = text
@@ -1466,6 +1568,21 @@ RULES:
                     utter.pitch = 1.15 + Math.random() * 0.05;  // 1.15–1.20 (soft, high, elegant)
                     utter.volume = 0.95; 
                 }
+
+                utter.onstart = () => {
+                    speakingCount++;
+                    win.classList.add('speaking');
+                    fab.classList.add('speaking');
+                };
+                utter.onend = () => {
+                    speakingCount--;
+                    if (speakingCount <= 0) {
+                        speakingCount = 0;
+                        win.classList.remove('speaking');
+                        fab.classList.remove('speaking');
+                    }
+                };
+                utter.onerror = utter.onend; // cleanup on error
 
                 synth.speak(utter);
             }, delay);
