@@ -1910,27 +1910,29 @@ RULES:
     });
 
     // Speak Function (Text-To-Speech)
-    function speak(text, duration = 4000) {
+    function speak(text, duration = 4000, playAudio = false) {
         if (isMuted || isSpeaking) return;
         isSpeaking = true;
         textEl.textContent = text;
         bubble.classList.remove('hidden');
         
-        // Native Browser TTS
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
+        if (playAudio) {
+            // Native Browser TTS
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                // Revert to English but extremely low pitch.
+                utterance.lang = 'en-US'; 
+                utterance.pitch = 0.1; 
+                utterance.rate = 0.8; 
+                
+                window.speechSynthesis.speak(utterance);
+            }
             
-            // Revert to English but extremely low pitch. Foreign langs are ignored on some OS.
-            utterance.lang = 'en-US'; 
-            utterance.pitch = 0.1; 
-            utterance.rate = 0.8; 
-            
-            window.speechSynthesis.speak(utterance);
+            // Start guaranteed Web Audio alien chatter
+            startAlienChatter();
         }
-        
-        // Start guaranteed Web Audio alien chatter
-        startAlienChatter();
         
         setTimeout(() => {
             hideDialogue();
@@ -1958,10 +1960,17 @@ RULES:
         }
     }, 15000); // 50% chance every 15 seconds
 
-    // Click to speak
+    // Click to speak out loud
     alienBubbleUI.addEventListener('click', () => {
+        // If already showing a message, hide it first
+        if (isSpeaking) {
+            bubble.classList.add('hidden');
+            stopAlienChatter();
+            isSpeaking = false;
+        }
         const randomMsg = dialogues[Math.floor(Math.random() * dialogues.length)];
-        speak(randomMsg, 3000);
+        // Pass playAudio = true since the user explicitly clicked
+        speak(randomMsg, 4000, true);
     });
 
     // GSAP Roaming Engine
@@ -2043,7 +2052,7 @@ RULES:
                 if (dist < 260 && window.currentUfoY < currentAlienY) {
                     isDocking = true;
                     gsap.killTweensOf(alien); // Stop current roam
-                    speak("Abduction sequence engaged.", 3000);
+                    speak("Abduction sequence engaged.", 3000, true);
                     
                     // Fly to UFO rapidly, spin, and shrink
                     gsap.to(alienBubbleUI, { 
@@ -2100,7 +2109,7 @@ RULES:
                 
                 // Pop back out and unspin
                 gsap.to(alienBubbleUI, { scale: 1, rotationZ: 0, opacity: 1, duration: 0.6, ease: "elastic.out(1, 0.5)" });
-                speak("Ejected from mothership. Changing sectors.");
+                speak("Ejected from mothership. Changing sectors.", 3000, true);
                 
                 setTimeout(() => {
                     abductionCooldown = false;
