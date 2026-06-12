@@ -465,30 +465,84 @@
         </div>
     </section>
 
-    <!-- ====== AI CHATBOT ====== -->
+    <!-- ====== ENTROPY AI CHATBOT ====== -->
     <div class="chatbot-fab" id="chatbot-fab">
-        <span class="fab-icon">🤖</span>
+        <svg class="fab-icon-svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="entropy-grad" x1="0" y1="0" x2="48" y2="48">
+                    <stop offset="0%" stop-color="#00e5ff"/>
+                    <stop offset="50%" stop-color="#a855f7"/>
+                    <stop offset="100%" stop-color="#ff006e"/>
+                </linearGradient>
+            </defs>
+            <circle cx="24" cy="24" r="22" stroke="url(#entropy-grad)" stroke-width="2" fill="none" opacity="0.6"/>
+            <path d="M24 8 C18 14, 12 18, 12 24 C12 30, 18 36, 24 40 C30 36, 36 30, 36 24 C36 18, 30 14, 24 8Z" fill="url(#entropy-grad)" opacity="0.15"/>
+            <circle cx="24" cy="22" r="6" fill="url(#entropy-grad)" opacity="0.9"/>
+            <path d="M16 32 Q20 28, 24 28 Q28 28, 32 32" stroke="url(#entropy-grad)" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <circle cx="21" cy="21" r="1.2" fill="#fff"/>
+            <circle cx="27" cy="21" r="1.2" fill="#fff"/>
+        </svg>
         <span class="fab-pulse"></span>
+        <span class="fab-label">ENTROPY</span>
     </div>
     <div class="chatbot-window" id="chatbot-window">
         <div class="chatbot-header">
             <div class="chatbot-header-info">
-                <span class="chatbot-avatar">🤖</span>
+                <div class="chatbot-avatar-container">
+                    <svg class="chatbot-avatar-svg" viewBox="0 0 40 40" fill="none">
+                        <defs>
+                            <linearGradient id="avatar-grad" x1="0" y1="0" x2="40" y2="40">
+                                <stop offset="0%" stop-color="#00e5ff"/>
+                                <stop offset="100%" stop-color="#a855f7"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="20" cy="20" r="19" stroke="url(#avatar-grad)" stroke-width="1.5" fill="rgba(0,229,255,0.08)"/>
+                        <circle cx="20" cy="17" r="5" fill="url(#avatar-grad)" opacity="0.85"/>
+                        <circle cx="18" cy="16.5" r="1" fill="#fff"/>
+                        <circle cx="22" cy="16.5" r="1" fill="#fff"/>
+                        <path d="M14 28 Q17 24, 20 24 Q23 24, 26 28" stroke="url(#avatar-grad)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                    </svg>
+                    <span class="avatar-online-dot"></span>
+                </div>
                 <div>
-                    <span class="chatbot-name">APEX AI</span>
-                    <span class="chatbot-status">Online</span>
+                    <span class="chatbot-name">ENTROPY</span>
+                    <span class="chatbot-status"><span class="status-dot"></span> Online — AI Assistant</span>
                 </div>
             </div>
-            <button class="chatbot-close" id="chatbot-close">✕</button>
+            <div class="chatbot-header-actions">
+                <button class="chatbot-voice-toggle" id="chatbot-voice-toggle" title="Toggle voice responses">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                    </svg>
+                </button>
+                <button class="chatbot-close" id="chatbot-close">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
         </div>
         <div class="chatbot-messages" id="chatbot-messages">
             <div class="chat-msg bot">
-                <span class="chat-bubble">Hey! 👋 I'm Adarsh's AI assistant. Ask me anything about his skills, projects, or experience!</span>
+                <span class="chat-bubble">Hey! ✨ I'm <strong>ENTROPY</strong> — Adarsh's AI assistant. I can answer questions about his projects, skills, and experience, or chat about anything you'd like. Try asking me something, or tap the 🎤 to talk!</span>
             </div>
         </div>
         <div class="chatbot-input-area">
-            <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Ask me anything..." autocomplete="off">
-            <button class="chatbot-send" id="chatbot-send">→</button>
+            <button class="chatbot-mic" id="chatbot-mic" title="Hold to speak">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="23"/>
+                    <line x1="8" y1="23" x2="16" y2="23"/>
+                </svg>
+            </button>
+            <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Ask ENTROPY anything..." autocomplete="off">
+            <button class="chatbot-send" id="chatbot-send">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+            </button>
         </div>
     </div>
 
