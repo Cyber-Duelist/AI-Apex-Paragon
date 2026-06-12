@@ -1855,8 +1855,8 @@ RULES:
             filter.connect(ufoGain);
             ufoGain.connect(audioCtx.destination);
             
-            // Start humming
-            ufoGain.gain.value = isMuted ? 0 : 0.05;
+            // Start humming at base volume
+            ufoGain.gain.value = isMuted ? 0 : 0.03;
             ufoOsc.start();
         } catch(e) {
             console.log("Web Audio API failed to initialize.", e);
@@ -1907,12 +1907,20 @@ RULES:
             iconUnmuted.classList.add('hidden');
             iconMuted.classList.remove('hidden');
             hideDialogue();
-            if (isAudioInitialized && ufoGain) ufoGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.5);
+            if (isAudioInitialized && ufoGain) {
+                ufoGain.gain.cancelScheduledValues(audioCtx.currentTime);
+                ufoGain.gain.setValueAtTime(ufoGain.gain.value, audioCtx.currentTime);
+                ufoGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+            }
         } else {
             iconMuted.classList.add('hidden');
             iconUnmuted.classList.remove('hidden');
             speak("Audio and notifications unmuted.");
-            if (isAudioInitialized && ufoGain) ufoGain.gain.setTargetAtTime(0.05, audioCtx.currentTime, 0.5);
+            if (isAudioInitialized && ufoGain) {
+                ufoGain.gain.cancelScheduledValues(audioCtx.currentTime);
+                ufoGain.gain.setValueAtTime(ufoGain.gain.value, audioCtx.currentTime);
+                ufoGain.gain.linearRampToValueAtTime(0.03, audioCtx.currentTime + 0.5);
+            }
         }
     });
 
@@ -2131,6 +2139,18 @@ RULES:
         gsap.ticker.add(() => {
             if (window.currentUfoX === undefined) return;
             
+            // Update Procedural Audio based on UFO velocity (combines constant drone with engine revs)
+            if (isAudioInitialized && audioCtx && audioCtx.state === 'running' && window.currentUfoVelX !== undefined) {
+                const speed = Math.sqrt(window.currentUfoVelX**2 + window.currentUfoVelY**2);
+                const targetFreq = 50 + (speed * 1.5);
+                // Base hum is 0.03, plus speed-based gain up to 0.08
+                const targetGain = isMuted ? 0 : (0.03 + Math.min(0.08, speed * 0.01));
+                
+                // Smoothly adjust audio
+                ufoOsc.frequency.setTargetAtTime(targetFreq, audioCtx.currentTime, 0.1);
+                ufoGain.gain.setTargetAtTime(targetGain, audioCtx.currentTime, 0.1);
+            }
+
             // Check distance for abduction
             if (!isDocked && !isDocking && !abductionCooldown) {
                 const currentAlienX = gsap.getProperty(alien, "x") || 0;
