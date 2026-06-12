@@ -719,7 +719,7 @@ document.querySelectorAll('.project-card').forEach(card => {
 (function() {
     const GH_USER = 'Cyber-Duelist';
     const CACHE_KEY = 'gh_activity_cache';
-    const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+    const CACHE_TTL = 60 * 1000; // 60 seconds for real-time updates while respecting limits
 
     // ── Animated counter ──
     function animateCounter(el, target, duration = 1200) {
@@ -764,7 +764,8 @@ document.querySelectorAll('.project-card').forEach(card => {
 
         // Languages
         const langContainer = document.getElementById('github-languages');
-        if (langContainer && data.languages && langContainer.children.length === 0) {
+        if (langContainer && data.languages) {
+            langContainer.innerHTML = ''; // Clear for live updates
             data.languages.forEach(lang => {
                 const tag = document.createElement('span');
                 tag.className = 'lang-tag';
@@ -775,7 +776,8 @@ document.querySelectorAll('.project-card').forEach(card => {
 
         // Events
         const container = document.getElementById('github-events');
-        if (container && data.events && container.children.length === 0) {
+        if (container && data.events) {
+            container.innerHTML = ''; // Clear for live updates
             data.events.forEach(evt => {
                 const div = document.createElement('div');
                 div.className = 'github-event';
@@ -923,6 +925,7 @@ document.querySelectorAll('.project-card').forEach(card => {
     }
 
     fetchGitHub();
+    setInterval(fetchGitHub, 60000); // Auto-update every 60 seconds
 })();
 
 /* ========================================
