@@ -1464,12 +1464,31 @@ RULES:
 
     // ── Voice Input (Web Speech API) ──
     let recognition = null;
+    let micLang = 'en-US'; // Default to English for input
+
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         recognition = new SpeechRecognition();
         recognition.continuous = false;
         recognition.interimResults = true;
-        recognition.lang = 'hi-IN'; // Supports both Hindi and English input
+        recognition.lang = micLang;
+
+        // Language Toggle Logic
+        const langToggle = document.getElementById('chatbot-lang-toggle');
+        if (langToggle) {
+            langToggle.addEventListener('click', () => {
+                if (micLang === 'en-US') {
+                    micLang = 'hi-IN';
+                    langToggle.textContent = 'HI';
+                    langToggle.title = "Speech Language: Hindi (Click to switch to English)";
+                } else {
+                    micLang = 'en-US';
+                    langToggle.textContent = 'EN';
+                    langToggle.title = "Speech Language: English (Click to switch to Hindi)";
+                }
+                recognition.lang = micLang;
+            });
+        }
 
         recognition.onstart = () => {
             isListening = true;
