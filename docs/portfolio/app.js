@@ -1823,6 +1823,11 @@ RULES:
     let ufoGain;
     let isAudioInitialized = false;
 
+    // Alien Chatter Synth
+    let chatterOsc;
+    let chatterGain;
+    let chatterInterval;
+
     function initAudio() {
         if (isAudioInitialized) return;
         isAudioInitialized = true;
@@ -1853,6 +1858,39 @@ RULES:
         }
     }
 
+    function startAlienChatter() {
+        if (!audioCtx || audioCtx.state !== 'running') return;
+        try {
+            chatterOsc = audioCtx.createOscillator();
+            chatterGain = audioCtx.createGain();
+            chatterOsc.type = 'square';
+            
+            const bqFilter = audioCtx.createBiquadFilter();
+            bqFilter.type = 'bandpass';
+            bqFilter.frequency.value = 1000;
+
+            chatterOsc.connect(bqFilter);
+            bqFilter.connect(chatterGain);
+            chatterGain.connect(audioCtx.destination);
+            chatterOsc.start();
+            
+            // Randomly modulate frequency and gain to sound like alien robotic language
+            chatterInterval = setInterval(() => {
+                const freq = 400 + Math.random() * 800;
+                const vol = Math.random() > 0.3 ? 0.05 : 0; // Stutter effect
+                chatterOsc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                chatterGain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            }, 80);
+        } catch(e) {}
+    }
+
+    function stopAlienChatter() {
+        try {
+            if (chatterOsc) chatterOsc.stop();
+            if (chatterInterval) clearInterval(chatterInterval);
+        } catch(e) {}
+    }
+
     // Initialize audio on first click anywhere
     document.addEventListener('click', initAudio, { once: true });
 
@@ -1880,35 +1918,19 @@ RULES:
         
         // Native Browser TTS
         if ('speechSynthesis' in window) {
-            // Cancel any ongoing speech
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             
-            // To make it sound TRULY alien, we force a foreign phonetic engine (Finnish) to read English text
-            // This bypasses the OS's native English voice limitations and sounds extremely robotic/bizarre.
-            utterance.lang = 'fi-FI'; 
-            utterance.pitch = 0.1; // Deepest possible pitch
-            utterance.rate = 0.8; // Slow down the phonetic distortion
+            // Revert to English but extremely low pitch. Foreign langs are ignored on some OS.
+            utterance.lang = 'en-US'; 
+            utterance.pitch = 0.1; 
+            utterance.rate = 0.8; 
             
-            // Add a sci-fi 'transmission beep' before speaking using Web Audio API
-            if (audioCtx && audioCtx.state === 'running') {
-                try {
-                    const beepOsc = audioCtx.createOscillator();
-                    const beepGain = audioCtx.createGain();
-                    beepOsc.type = 'square';
-                    beepOsc.frequency.setValueAtTime(1500, audioCtx.currentTime);
-                    beepOsc.frequency.exponentialRampToValueAtTime(3000, audioCtx.currentTime + 0.1);
-                    beepGain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                    beepGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
-                    beepOsc.connect(beepGain);
-                    beepGain.connect(audioCtx.destination);
-                    beepOsc.start();
-                    beepOsc.stop(audioCtx.currentTime + 0.15);
-                } catch(e) {}
-            }
-
             window.speechSynthesis.speak(utterance);
         }
+        
+        // Start guaranteed Web Audio alien chatter
+        startAlienChatter();
         
         setTimeout(() => {
             hideDialogue();
@@ -1917,6 +1939,7 @@ RULES:
 
     function hideDialogue() {
         bubble.classList.add('hidden');
+        stopAlienChatter();
         setTimeout(() => { isSpeaking = false; }, 300);
     }
 
