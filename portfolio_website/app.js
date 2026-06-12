@@ -1095,7 +1095,7 @@ RULES:
 
     // ── Call Free LLM API — Groq via Cloudflare Worker Proxy ──
     // IMPORTANT: Replace this URL with your actual Cloudflare Worker URL
-    const GROQ_WORKER_URL = "https://your-worker-name.your-username.workers.dev";
+    const GROQ_WORKER_URL = "https://entropy-groq-proxy.ultraman5115.workers.dev";
 
     async function getAIReply() {
         isSending = true;
