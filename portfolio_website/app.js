@@ -1093,10 +1093,9 @@ RULES:
         if (el) el.remove();
     }
 
-    // ── Call Free LLM API — Gemini Free Tier ──
-    // IMPORTANT: Replace this placeholder with your actual Gemini API Key from Google AI Studio.
-    // For security, ensure you restrict this API key to your GitHub Pages domain (https://cyber-duelist.github.io) in the Google Cloud Console.
-    const GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
+    // ── Call Free LLM API — Groq via Cloudflare Worker Proxy ──
+    // IMPORTANT: Replace this URL with your actual Cloudflare Worker URL
+    const GROQ_WORKER_URL = "https://your-worker-name.your-username.workers.dev";
 
     async function getAIReply() {
         isSending = true;
@@ -1120,45 +1119,36 @@ RULES:
             } catch(e) { console.log('Chrome AI unavailable:', e.message); }
         }
 
-        // Strategy 2: Google Gemini Free Tier API
-        if (!reply && GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY_HERE") {
+        // Strategy 2: Groq API via Cloudflare Worker
+        if (!reply && GROQ_WORKER_URL !== "https://your-worker-name.your-username.workers.dev") {
             try {
-                // Convert message history to Gemini format
-                const contents = conversationHistory.slice(-10).map(msg => ({
-                    role: msg.role === 'assistant' ? 'model' : 'user',
-                    parts: [{ text: msg.content }]
-                }));
+                const msgs = [
+                    { role: 'system', content: SYSTEM_PROMPT },
+                    ...conversationHistory.slice(-10)
+                ];
 
                 const controller = new AbortController();
                 const timeout = setTimeout(() => controller.abort(), 15000);
                 
-                const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                const resp = await fetch(GROQ_WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     signal: controller.signal,
                     body: JSON.stringify({
-                        systemInstruction: {
-                            role: 'system',
-                            parts: [{ text: SYSTEM_PROMPT }]
-                        },
-                        contents: contents,
-                        generationConfig: {
-                            temperature: 0.7,
-                            maxOutputTokens: 500
-                        }
+                        messages: msgs
                     })
                 });
                 clearTimeout(timeout);
                 
                 if (resp.ok) {
                     const data = await resp.json();
-                    if (data.candidates && data.candidates.length > 0) {
-                        reply = data.candidates[0].content.parts[0].text.trim();
+                    if (data.choices && data.choices.length > 0) {
+                        reply = data.choices[0].message.content.trim();
                     }
                 } else {
-                    console.log('Gemini API Error:', await resp.text());
+                    console.log('Worker API Error:', await resp.text());
                 }
-            } catch(e) { console.log('Gemini fetch failed:', e.message); }
+            } catch(e) { console.log('Worker fetch failed:', e.message); }
         }
 
         removeTyping();
