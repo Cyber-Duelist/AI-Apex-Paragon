@@ -1093,17 +1093,16 @@ RULES:
         if (el) el.remove();
     }
 
-    // ── Call Free LLM API — Multi-provider waterfall ──
+    // ── Call Free LLM API — Gemini Free Tier ──
+    // IMPORTANT: Replace this placeholder with your actual Gemini API Key from Google AI Studio.
+    // For security, ensure you restrict this API key to your GitHub Pages domain (https://cyber-duelist.github.io) in the Google Cloud Console.
+    const GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
+
     async function getAIReply() {
         isSending = true;
         showTyping();
         input.disabled = true;
         sendBtn.disabled = true;
-
-        const msgs = [
-            { role: 'system', content: SYSTEM_PROMPT },
-            ...conversationHistory.slice(-10)
-        ];
 
         let reply = null;
 
@@ -1121,48 +1120,45 @@ RULES:
             } catch(e) { console.log('Chrome AI unavailable:', e.message); }
         }
 
-        // Strategy 2: Pollinations.ai simple GET text endpoint
-        if (!reply) {
+        // Strategy 2: Google Gemini Free Tier API
+        if (!reply && GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY_HERE") {
             try {
-                const userMsg = conversationHistory[conversationHistory.length - 1]?.content || '';
-                const sysContext = `You are ENTROPY, a witty AI assistant on Adarsh Kumar Singh's portfolio site. He is a B.Tech CS student who built 14 AI systems in 14 weeks. Skills: Python, LangChain, FastAPI, RAG, Multi-Agent Systems. Contact: adarshentity098@gmail.com. Answer concisely.`;
-                const fullPrompt = encodeURIComponent(`${sysContext}\n\nUser: ${userMsg}\nENTROPY:`);
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 15000);
-                const resp = await fetch(`https://text.pollinations.ai/${fullPrompt}?model=mistral&noCache=true`, {
-                    signal: controller.signal
-                });
-                clearTimeout(timeout);
-                if (resp.ok) {
-                    const text = await resp.text();
-                    if (text && text.length > 5 && !text.includes('"error"')) reply = text.trim();
-                }
-            } catch(e) { console.log('Pollinations GET failed:', e.message); }
-        }
+                // Convert message history to Gemini format
+                const contents = conversationHistory.slice(-10).map(msg => ({
+                    role: msg.role === 'assistant' ? 'model' : 'user',
+                    parts: [{ text: msg.content }]
+                }));
 
-        // Strategy 3: Pollinations OpenAI-compatible POST
-        if (!reply) {
-            try {
                 const controller = new AbortController();
                 const timeout = setTimeout(() => controller.abort(), 15000);
-                const resp = await fetch('https://text.pollinations.ai/openai', {
+                
+                const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     signal: controller.signal,
                     body: JSON.stringify({
-                        model: 'mistral',
-                        messages: msgs,
-                        temperature: 0.7,
-                        max_tokens: 400
+                        systemInstruction: {
+                            role: 'system',
+                            parts: [{ text: SYSTEM_PROMPT }]
+                        },
+                        contents: contents,
+                        generationConfig: {
+                            temperature: 0.7,
+                            maxOutputTokens: 500
+                        }
                     })
                 });
                 clearTimeout(timeout);
+                
                 if (resp.ok) {
                     const data = await resp.json();
-                    const text = data.choices?.[0]?.message?.content?.trim();
-                    if (text && text.length > 3) reply = text;
+                    if (data.candidates && data.candidates.length > 0) {
+                        reply = data.candidates[0].content.parts[0].text.trim();
+                    }
+                } else {
+                    console.log('Gemini API Error:', await resp.text());
                 }
-            } catch(e) { console.log('Pollinations POST failed:', e.message); }
+            } catch(e) { console.log('Gemini fetch failed:', e.message); }
         }
 
         removeTyping();
