@@ -1868,24 +1868,24 @@ RULES:
         try {
             chatterOsc = audioCtx.createOscillator();
             chatterGain = audioCtx.createGain();
-            chatterOsc.type = 'square';
+            chatterOsc.type = 'sawtooth';
             
             const bqFilter = audioCtx.createBiquadFilter();
-            bqFilter.type = 'bandpass';
-            bqFilter.frequency.value = 1000;
+            bqFilter.type = 'lowpass';
+            bqFilter.frequency.value = 600;
 
             chatterOsc.connect(bqFilter);
             bqFilter.connect(chatterGain);
             chatterGain.connect(audioCtx.destination);
             chatterOsc.start();
             
-            // Randomly modulate frequency and gain to sound like alien robotic language
+            // Randomly modulate frequency and gain to sound like a deep mechanical robotic language
             chatterInterval = setInterval(() => {
-                const freq = 400 + Math.random() * 800;
-                const vol = Math.random() > 0.3 ? 0.05 : 0; // Stutter effect
+                const freq = 100 + Math.random() * 150;
+                const vol = Math.random() > 0.2 ? 0.06 : 0.01; // Mechanical stutter
                 chatterOsc.frequency.setValueAtTime(freq, audioCtx.currentTime);
                 chatterGain.gain.setValueAtTime(vol, audioCtx.currentTime);
-            }, 80);
+            }, 100);
         } catch(e) {}
     }
 
@@ -1929,8 +1929,8 @@ RULES:
                 
                 // Restore Synth Voice
                 utterance.lang = 'en-US'; 
-                utterance.pitch = 1.5; // High pitch synth
-                utterance.rate = 1.2;  // Faster speaking
+                utterance.pitch = 0.4; // Deep, robotic pitch
+                utterance.rate = 0.9;  // Slightly slower, calculated speaking
                 
                 window.speechSynthesis.speak(utterance);
             }
