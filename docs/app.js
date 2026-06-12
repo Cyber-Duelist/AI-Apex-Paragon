@@ -1559,13 +1559,13 @@ RULES:
 
                 if (hindi) {
                     // Hindi TTS engines sound rushed at 1.0. Slower rate + normal pitch = natural Indian tone
-                    utter.rate = 0.88 + Math.random() * 0.04;   // 0.88–0.92 (calm, native pace)
-                    utter.pitch = 1.0;                          // Native pitch
+                    utter.rate = 0.9;
+                    utter.pitch = 1.0;
                     utter.volume = 1.0;
                 } else {
                     // Soft, natural, human-like melodious parameters for English
-                    utter.rate = 0.88 + Math.random() * 0.04;   // 0.88–0.92 (calm, slow, deeply soothing)
-                    utter.pitch = 1.15 + Math.random() * 0.05;  // 1.15–1.20 (soft, high, elegant)
+                    utter.rate = 0.95;   
+                    utter.pitch = 1.1;  
                     utter.volume = 0.95; 
                 }
 
