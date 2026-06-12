@@ -1093,58 +1093,96 @@ RULES:
         if (el) el.remove();
     }
 
-    // ── Call Free LLM API (Pollinations.ai — no API key required) ──
+    // ── Call Free LLM API — Multi-provider waterfall ──
     async function getAIReply() {
         isSending = true;
         showTyping();
         input.disabled = true;
         sendBtn.disabled = true;
 
-        const messages = [
+        const msgs = [
             { role: 'system', content: SYSTEM_PROMPT },
-            ...conversationHistory.slice(-10) // Keep last 10 messages for context
+            ...conversationHistory.slice(-10)
         ];
 
-        try {
-            const response = await fetch('https://text.pollinations.ai/openai', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: 'openai',
-                    messages: messages,
-                    temperature: 0.7,
-                    max_tokens: 512
-                })
-            });
+        let reply = null;
 
-            if (!response.ok) throw new Error(`API error: ${response.status}`);
+        // Strategy 1: Chrome Built-in AI (Prompt API — free, local, no key)
+        if (!reply) {
+            try {
+                if (window.ai && window.ai.languageModel) {
+                    const session = await window.ai.languageModel.create({
+                        systemPrompt: SYSTEM_PROMPT
+                    });
+                    const userMsg = conversationHistory[conversationHistory.length - 1]?.content || '';
+                    reply = await session.prompt(userMsg);
+                    session.destroy();
+                }
+            } catch(e) { console.log('Chrome AI unavailable:', e.message); }
+        }
 
-            const data = await response.json();
-            const reply = data.choices?.[0]?.message?.content?.trim();
+        // Strategy 2: Pollinations.ai simple GET text endpoint
+        if (!reply) {
+            try {
+                const userMsg = conversationHistory[conversationHistory.length - 1]?.content || '';
+                const sysContext = `You are ENTROPY, a witty AI assistant on Adarsh Kumar Singh's portfolio site. He is a B.Tech CS student who built 14 AI systems in 14 weeks. Skills: Python, LangChain, FastAPI, RAG, Multi-Agent Systems. Contact: adarshentity098@gmail.com. Answer concisely.`;
+                const fullPrompt = encodeURIComponent(`${sysContext}\n\nUser: ${userMsg}\nENTROPY:`);
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 15000);
+                const resp = await fetch(`https://text.pollinations.ai/${fullPrompt}?model=mistral&noCache=true`, {
+                    signal: controller.signal
+                });
+                clearTimeout(timeout);
+                if (resp.ok) {
+                    const text = await resp.text();
+                    if (text && text.length > 5 && !text.includes('"error"')) reply = text.trim();
+                }
+            } catch(e) { console.log('Pollinations GET failed:', e.message); }
+        }
 
-            removeTyping();
+        // Strategy 3: Pollinations OpenAI-compatible POST
+        if (!reply) {
+            try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 15000);
+                const resp = await fetch('https://text.pollinations.ai/openai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    signal: controller.signal,
+                    body: JSON.stringify({
+                        model: 'mistral',
+                        messages: msgs,
+                        temperature: 0.7,
+                        max_tokens: 400
+                    })
+                });
+                clearTimeout(timeout);
+                if (resp.ok) {
+                    const data = await resp.json();
+                    const text = data.choices?.[0]?.message?.content?.trim();
+                    if (text && text.length > 3) reply = text;
+                }
+            } catch(e) { console.log('Pollinations POST failed:', e.message); }
+        }
 
-            if (reply) {
-                conversationHistory.push({ role: 'assistant', content: reply });
-                addBotMsg(formatReply(reply));
-                if (voiceEnabled) speak(reply);
-            } else {
-                addBotMsg("Hmm, I didn't get a response. Could you try again? 🔄");
-            }
-        } catch (err) {
-            console.warn('ENTROPY API error:', err);
-            removeTyping();
+        removeTyping();
+
+        if (reply) {
+            conversationHistory.push({ role: 'assistant', content: reply });
+            addBotMsg(formatReply(reply));
+            if (voiceEnabled) speakNatural(reply);
+        } else {
             // Fallback to local knowledge base
             const fallback = localFallback(conversationHistory[conversationHistory.length - 1]?.content || '');
             addBotMsg(fallback);
             conversationHistory.push({ role: 'assistant', content: fallback });
-            if (voiceEnabled) speak(fallback.replace(/<[^>]*>/g, ''));
-        } finally {
-            isSending = false;
-            input.disabled = false;
-            sendBtn.disabled = false;
-            input.focus();
+            if (voiceEnabled) speakNatural(fallback.replace(/<[^>]*>/g, ''));
         }
+
+        isSending = false;
+        input.disabled = false;
+        sendBtn.disabled = false;
+        input.focus();
     }
 
     // ── Format reply (basic markdown-like) ──
@@ -1156,32 +1194,58 @@ RULES:
             .replace(/\n/g, '<br>');
     }
 
-    // ── Local fallback (when API fails) ──
+    // ── Local fallback (when all APIs fail) ──
     function localFallback(query) {
         const q = query.toLowerCase();
         if (/^(hi|hello|hey|sup|yo)/i.test(q))
-            return "Hey there! ✨ I'm <strong>ENTROPY</strong> — Adarsh's AI assistant. I'm having a bit of trouble connecting right now, but ask me about his skills, projects, or experience!";
-        if (q.includes('skill') || q.includes('tech') || q.includes('stack'))
-            return "🛠️ <strong>Core:</strong> Python, JavaScript, SQL, Bash<br><strong>AI/ML:</strong> LangChain, LlamaIndex, HuggingFace, OpenAI API<br><strong>Frameworks:</strong> FastAPI, Flask, Streamlit<br><strong>Databases:</strong> PostgreSQL, ChromaDB, Pinecone, FAISS";
-        if (q.includes('project') || q.includes('built') || q.includes('build'))
-            return "🚀 Adarsh built 14 production AI systems including:<br>• <strong>Enterprise AI Agent</strong> with guardrails<br>• <strong>DevOps Swarm</strong> — autonomous CI/CD repair<br>• <strong>Production RAG</strong> with hallucination control<br>• <strong>AI Code Reviewer</strong> for GitHub PRs";
-        if (q.includes('contact') || q.includes('email') || q.includes('hire'))
-            return "📬 Reach Adarsh at: adarshentity098@gmail.com | <a href='https://linkedin.com/in/i-am-entity' target='_blank' style='color:#00e5ff'>LinkedIn</a> | <a href='https://github.com/Cyber-Duelist' target='_blank' style='color:#00e5ff'>GitHub</a>";
-        return "I'm having trouble connecting right now 😅 Try asking about Adarsh's <strong>skills</strong>, <strong>projects</strong>, or <strong>experience</strong>, or try again in a moment!";
+            return "Hey there! ✨ I'm <strong>ENTROPY</strong> — Adarsh's AI assistant. I'm running in offline mode right now, but I can still tell you about his skills, projects, or experience!";
+        if (q.includes('skill') || q.includes('tech') || q.includes('stack') || q.includes('language'))
+            return "🛠️ <strong>Core:</strong> Python, JavaScript, SQL, Bash<br><strong>AI/ML:</strong> LangChain, LlamaIndex, HuggingFace, OpenAI API, Groq<br><strong>Frameworks:</strong> FastAPI, Flask, Streamlit<br><strong>Databases:</strong> PostgreSQL, ChromaDB, Pinecone, FAISS<br><strong>DevOps:</strong> Docker, CI/CD, GitHub Actions";
+        if (q.includes('project') || q.includes('built') || q.includes('build') || q.includes('portfolio'))
+            return "🚀 Adarsh built 14 production AI systems including:<br>• <strong>Enterprise AI Agent</strong> with multi-layer guardrails<br>• <strong>DevOps Swarm</strong> — autonomous CI/CD repair with LLaMA 3<br>• <strong>Production RAG</strong> (PersonaDoc) with hallucination control<br>• <strong>AI Code Reviewer</strong> for GitHub PRs";
+        if (q.includes('contact') || q.includes('email') || q.includes('hire') || q.includes('reach'))
+            return "📬 Reach Adarsh at: adarshentity098@gmail.com | <a href='https://linkedin.com/in/i-am-entity' target='_blank' style='color:#00e5ff'>LinkedIn</a> | <a href='https://github.com/Cyber-Duelist' target='_blank' style='color:#00e5ff'>GitHub</a> | 📱 +91-94394-40544";
+        if (q.includes('experience') || q.includes('education') || q.includes('grind') || q.includes('journey') || q.includes('background'))
+            return "🎓 B.Tech in Computer Science (AI & ML specialization)<br>📜 Oracle GenAI Professional + Oracle Data Science certified<br>🔥 Completed a 14-week intensive AI engineering grind — from Python basics to production multi-agent systems in 98 days.";
+        if (q.includes('resume') || q.includes('cv'))
+            return "📄 You can download Adarsh's resume by clicking the 'Download CV' button in the hero section!";
+        if (q.includes('who') && (q.includes('you') || q.includes('entropy')))
+            return "✨ I'm <strong>ENTROPY</strong>, Adarsh's personal AI assistant! I'm currently running in offline mode, but normally I'm powered by a real AI model and can answer any question. Try asking about Adarsh's projects or skills!";
+        if (q.includes('agent') || q.includes('swarm') || q.includes('multi-agent'))
+            return "🤖 Multi-agent systems are Adarsh's specialty!<br>• <strong>DevOps Swarm:</strong> Autonomous agents that detect CI/CD failures, diagnose root causes, and apply fixes using LLaMA 3<br>• <strong>Enterprise Agent:</strong> Multi-layer guardrails blocking prompt injection, PII leaks, and off-topic queries";
+        if (q.includes('rag') || q.includes('retrieval'))
+            return "📚 Adarsh built a production RAG pipeline with semantic chunking, FAISS + ChromaDB vector stores, hallucination detection & citation verification, and query rewriting. It processes 1000+ pages with sub-second retrieval.";
+        if (q.includes('guardrail') || q.includes('security'))
+            return "🛡️ Adarsh built enterprise-grade AI guardrails: prompt injection detection, PII masking with regex + NER, topic boundary enforcement, output validation with confidence scoring, and rate limiting.";
+        if (q.includes('website') || q.includes('this site'))
+            return "🌐 This portfolio was built with Three.js (GLSL shaders), CSS glassmorphism, Web Audio API, and CSS Custom Properties for dual themes. Hosted on GitHub Pages.";
+        if (q.includes('available') || q.includes('job') || q.includes('looking') || q.includes('open'))
+            return "✅ Yes! Adarsh is actively looking for <strong>AI Engineer</strong> and <strong>Backend Software Engineer</strong> roles. Open to remote and on-site. Reach out!";
+        if (q.includes('thank') || q.includes('awesome') || q.includes('cool') || q.includes('great') || q.includes('nice'))
+            return "Thank you! 🙏 Adarsh appreciates the kind words. If you'd like to work with him, don't hesitate to reach out!";
+        // General fallback for any other question
+        return "I'm currently in offline mode and can best answer questions about Adarsh's <strong>skills</strong>, <strong>projects</strong>, <strong>experience</strong>, or <strong>contact info</strong>. For general questions, please try again in a moment when my AI connection is restored! 💡";
     }
 
-    // ── Voice Output (Web Speech API) ──
+    // ── Voice Output — Natural Speech ──
     let selectedVoice = null;
 
     function loadVoices() {
         const synth = window.speechSynthesis;
         if (!synth) return;
         const voices = synth.getVoices();
-        // Prefer a nice female English voice
+        // Prefer premium female English voices (ordered by naturalness)
         const preferred = [
-            'Microsoft Zira', 'Google UK English Female', 'Google US English',
-            'Samantha', 'Karen', 'Moira', 'Tessa', 'Fiona',
-            'Microsoft Hazel', 'Microsoft Susan'
+            'Microsoft Zira',       // Windows — very natural
+            'Google UK English Female',
+            'Samantha',             // macOS — excellent quality
+            'Karen',                // macOS Australian
+            'Moira',                // macOS Irish
+            'Google US English',
+            'Microsoft Hazel',      // Windows UK
+            'Microsoft Susan',      // Windows UK
+            'Tessa',                // macOS South African
+            'Fiona',                // macOS Scottish
         ];
         for (const name of preferred) {
             const found = voices.find(v => v.name.includes(name));
@@ -1192,7 +1256,6 @@ RULES:
             (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('woman') ||
              v.name.includes('Zira') || v.name.includes('Samantha') || v.name.includes('Karen')));
         if (englishFemale) { selectedVoice = englishFemale; return; }
-        // Fallback: any English voice
         selectedVoice = voices.find(v => v.lang.startsWith('en')) || voices[0] || null;
     }
 
@@ -1201,17 +1264,50 @@ RULES:
         window.speechSynthesis.onvoiceschanged = loadVoices;
     }
 
-    function speak(text) {
+    // Natural speech: splits into sentences, adds pauses, varies rate/pitch slightly
+    function speakNatural(text) {
         const synth = window.speechSynthesis;
         if (!synth || !voiceEnabled) return;
-        synth.cancel(); // stop any current speech
-        const clean = text.replace(/<[^>]*>/g, '').replace(/[*_`#]/g, '').substring(0, 500);
-        const utter = new SpeechSynthesisUtterance(clean);
-        if (selectedVoice) utter.voice = selectedVoice;
-        utter.rate = 1.0;
-        utter.pitch = 1.1; // slightly higher for feminine tone
-        utter.volume = 0.9;
-        synth.speak(utter);
+        synth.cancel();
+
+        // Clean text: strip HTML, markdown, emojis, special chars
+        let clean = text
+            .replace(/<[^>]*>/g, '')          // HTML tags
+            .replace(/[*_`#•→↓]/g, '')        // markdown/special
+            .replace(/\bhttps?:\/\/\S+/g, '')  // URLs
+            .replace(/\b\w+@\w+\.\w+/g, '')   // emails
+            .replace(/[^\w\s.,!?;:'\-()]/g, '') // keep only useful chars
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        if (!clean || clean.length < 2) return;
+
+        // Split into natural sentence chunks
+        const sentences = clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [clean];
+
+        let delay = 0;
+        sentences.forEach((sentence, i) => {
+            const trimmed = sentence.trim();
+            if (!trimmed || trimmed.length < 2) return;
+
+            setTimeout(() => {
+                const utter = new SpeechSynthesisUtterance(trimmed);
+                if (selectedVoice) utter.voice = selectedVoice;
+
+                // Vary rate and pitch slightly for natural feel
+                utter.rate = 0.95 + Math.random() * 0.1;   // 0.95–1.05
+                utter.pitch = 1.05 + Math.random() * 0.1;  // 1.05–1.15 (feminine)
+                utter.volume = 0.9;
+
+                synth.speak(utter);
+            }, delay);
+
+            // Estimate sentence duration + pause between sentences
+            const wordsInSentence = trimmed.split(/\s+/).length;
+            const speakDuration = wordsInSentence * 300; // ~300ms per word
+            const pauseBetween = 250; // quarter-second pause between sentences
+            delay += speakDuration + pauseBetween;
+        });
     }
 
     // ── Voice Input (Web Speech API) ──
