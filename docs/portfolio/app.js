@@ -1886,12 +1886,30 @@ RULES:
             
             // Wait for voices to load if they haven't
             let voices = window.speechSynthesis.getVoices();
-            // Try to pick a non-default, distinct voice (like Zira or Google UK)
-            let alienVoice = voices.find(v => v.name.includes('Zira') || v.name.includes('Microsoft Hazel') || v.name.includes('Google UK English Female'));
+            // Try to pick a non-default, distinct voice
+            let alienVoice = voices.find(v => v.name.includes('Zira') || v.name.includes('Hazel') || v.name.includes('Google UK English'));
             if(alienVoice) utterance.voice = alienVoice;
             
-            utterance.pitch = 2.0; // Max high pitch for squeaky alien
-            utterance.rate = 1.4; // Fast talking
+            utterance.pitch = 0.1; // Deep rumbling, distorted alien voice
+            utterance.rate = 0.85; // Slow and methodical
+            
+            // Add a sci-fi 'transmission beep' before speaking using Web Audio API
+            if (audioCtx && audioCtx.state === 'running') {
+                try {
+                    const beepOsc = audioCtx.createOscillator();
+                    const beepGain = audioCtx.createGain();
+                    beepOsc.type = 'square';
+                    beepOsc.frequency.setValueAtTime(1500, audioCtx.currentTime);
+                    beepOsc.frequency.exponentialRampToValueAtTime(3000, audioCtx.currentTime + 0.1);
+                    beepGain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    beepGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+                    beepOsc.connect(beepGain);
+                    beepGain.connect(audioCtx.destination);
+                    beepOsc.start();
+                    beepOsc.stop(audioCtx.currentTime + 0.15);
+                } catch(e) {}
+            }
+
             window.speechSynthesis.speak(utterance);
         }
         
@@ -2002,23 +2020,23 @@ RULES:
                 const dist = Math.sqrt(Math.pow(window.currentUfoX - currentAlienX, 2) + Math.pow(window.currentUfoY - currentAlienY, 2));
                 
                 // If UFO is in the vicinity of the alien (Wide Tractor Beam)
-                if (dist < 300) { // Massive trigger radius (300px) for long-distance abduction
+                if (dist < 600) { // Massive trigger radius (600px) for extreme long-distance abduction
                     isDocking = true;
                     gsap.killTweensOf(alien); // Stop current roam
-                    speak("Whoa! Abduction sequence initiated!", 3000);
+                    speak("Abduction sequence engaged.", 3000);
                     
                     // Fly to UFO rapidly, spin, and shrink
                     gsap.to(alienBubbleUI, { 
                         scale: 0, // shrink completely into UFO core
-                        rotationZ: 720, // Spin violently
-                        duration: 0.6, // Slightly longer duration to see the long-distance pull
+                        rotationZ: 1080, // Spin violently (3 full rotations)
+                        duration: 0.8, // Slightly longer duration to see the long-distance pull
                         ease: "power3.in" 
                     });
                     gsap.to(alien, {
                         x: window.currentUfoX,
                         y: window.currentUfoY,
                         rotationZ: 0,
-                        duration: 0.6,
+                        duration: 0.8,
                         ease: "power3.in",
                         onComplete: () => {
                             isDocking = false;
