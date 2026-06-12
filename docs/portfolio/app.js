@@ -2001,8 +2001,8 @@ RULES:
                 
                 const dist = Math.sqrt(Math.pow(window.currentUfoX - currentAlienX, 2) + Math.pow(window.currentUfoY - currentAlienY, 2));
                 
-                // If UFO hovers directly over the alien
-                if (dist < 90) { // Increased trigger radius for easier abduction
+                // If UFO is in the vicinity of the alien (Wide Tractor Beam)
+                if (dist < 300) { // Massive trigger radius (300px) for long-distance abduction
                     isDocking = true;
                     gsap.killTweensOf(alien); // Stop current roam
                     speak("Whoa! Abduction sequence initiated!", 3000);
@@ -2011,14 +2011,14 @@ RULES:
                     gsap.to(alienBubbleUI, { 
                         scale: 0, // shrink completely into UFO core
                         rotationZ: 720, // Spin violently
-                        duration: 0.4, 
+                        duration: 0.6, // Slightly longer duration to see the long-distance pull
                         ease: "power3.in" 
                     });
                     gsap.to(alien, {
                         x: window.currentUfoX,
                         y: window.currentUfoY,
                         rotationZ: 0,
-                        duration: 0.4,
+                        duration: 0.6,
                         ease: "power3.in",
                         onComplete: () => {
                             isDocking = false;
