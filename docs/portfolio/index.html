@@ -51,37 +51,70 @@
     <div id="alien-companion">
         <div class="alien-bubble">
             <div class="alien-body-svg">
-                <!-- Premium Custom Full-Body Alien SVG -->
+                <!-- Hyper-Realistic Grey Alien SVG -->
                 <svg viewBox="0 0 100 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Glow -->
-                    <filter id="alienGlow"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-                    
-                    <!-- Space Suit Body -->
-                    <path d="M30 80 Q 50 140 70 80 Q 80 50 50 40 Q 20 50 30 80 Z" fill="#112211" stroke="#39ff14" stroke-width="2"/>
-                    <!-- Shoulders & Arms -->
-                    <path d="M30 80 Q 15 100 25 120 M70 80 Q 85 100 75 120" stroke="#39ff14" stroke-width="3" stroke-linecap="round"/>
-                    <!-- Hands -->
-                    <circle cx="25" cy="120" r="4" fill="#39ff14" />
-                    <circle cx="75" cy="120" r="4" fill="#39ff14" />
-                    
-                    <!-- Alien Head -->
-                    <ellipse cx="50" cy="50" rx="20" ry="25" fill="#1a1a1a" stroke="#39ff14" stroke-width="2"/>
-                    
-                    <!-- Eyes -->
-                    <ellipse cx="40" cy="50" rx="6" ry="10" fill="#000" transform="rotate(15 40 50)"/>
-                    <ellipse cx="60" cy="50" rx="6" ry="10" fill="#000" transform="rotate(-15 60 50)"/>
-                    <!-- Eye Highlights -->
-                    <circle cx="38" cy="45" r="2" fill="#39ff14" filter="url(#alienGlow)"/>
-                    <circle cx="62" cy="45" r="2" fill="#39ff14" filter="url(#alienGlow)"/>
-                    
-                    <!-- Antenna -->
-                    <path d="M50 25 L 50 10" stroke="#39ff14" stroke-width="2"/>
-                    <circle cx="50" cy="8" r="3" fill="#39ff14" filter="url(#alienGlow)">
-                        <animate attributeName="opacity" values="1;0.2;1" dur="1s" repeatCount="indefinite"/>
+                    <defs>
+                        <!-- Realistic Skin Shading -->
+                        <radialGradient id="skinGrad" cx="50%" cy="30%" r="60%">
+                            <stop offset="0%" stop-color="#b0c4de" />
+                            <stop offset="70%" stop-color="#556b85" />
+                            <stop offset="100%" stop-color="#2c3e50" />
+                        </radialGradient>
+                        
+                        <!-- High-Gloss Eye Reflection -->
+                        <radialGradient id="eyeGrad" cx="30%" cy="30%" r="50%">
+                            <stop offset="0%" stop-color="#333" />
+                            <stop offset="40%" stop-color="#0a0a0a" />
+                            <stop offset="100%" stop-color="#000" />
+                        </radialGradient>
+
+                        <!-- Suit Shading -->
+                        <linearGradient id="suitGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#111" />
+                            <stop offset="100%" stop-color="#050505" />
+                        </linearGradient>
+
+                        <!-- Cyber Glow -->
+                        <filter id="neonGlow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    </defs>
+
+                    <!-- Advanced Space Suit Body -->
+                    <path d="M25 80 C 25 60, 75 60, 75 80 C 85 110, 70 140, 50 145 C 30 140, 15 110, 25 80 Z" fill="url(#suitGrad)" stroke="#39ff14" stroke-width="1.5" />
+                    <!-- Cybernetic Suit details -->
+                    <path d="M40 85 L 60 85 L 55 100 L 45 100 Z" fill="#39ff14" opacity="0.3" filter="url(#neonGlow)" />
+                    <circle cx="50" cy="115" r="8" fill="#39ff14" filter="url(#neonGlow)">
+                        <animate attributeName="opacity" values="1;0.4;1" dur="2s" repeatCount="indefinite"/>
                     </circle>
+
+                    <!-- Realistic Arms -->
+                    <path d="M25 85 Q 10 100 20 125" stroke="url(#skinGrad)" stroke-width="4" stroke-linecap="round"/>
+                    <path d="M75 85 Q 90 100 80 125" stroke="url(#skinGrad)" stroke-width="4" stroke-linecap="round"/>
                     
-                    <!-- Floating Legs (Suit Bottom) -->
-                    <path d="M40 115 Q 50 140 60 115" stroke="#39ff14" stroke-width="2" fill="none"/>
+                    <!-- Alien Hands -->
+                    <circle cx="20" cy="125" r="5" fill="url(#skinGrad)" />
+                    <circle cx="80" cy="125" r="5" fill="url(#skinGrad)" />
+
+                    <!-- Realistic Grey Alien Head -->
+                    <path d="M20 40 C 15 10, 85 10, 80 40 C 75 75, 55 80, 50 82 C 45 80, 25 75, 20 40 Z" fill="url(#skinGrad)" />
+                    
+                    <!-- Deep Black Glossy Eyes -->
+                    <!-- Left Eye -->
+                    <path d="M25 45 C 20 30, 45 25, 45 50 C 45 65, 30 65, 25 45 Z" fill="url(#eyeGrad)" transform="rotate(-15 35 45)" />
+                    <!-- Right Eye -->
+                    <path d="M75 45 C 80 30, 55 25, 55 50 C 55 65, 70 65, 75 45 Z" fill="url(#eyeGrad)" transform="rotate(15 65 45)" />
+                    
+                    <!-- High-Res Eye Reflections -->
+                    <ellipse cx="32" cy="40" rx="4" ry="8" fill="#fff" opacity="0.8" transform="rotate(-30 32 40)" />
+                    <ellipse cx="68" cy="40" rx="4" ry="8" fill="#fff" opacity="0.8" transform="rotate(30 68 40)" />
+                    <circle cx="38" cy="48" r="1.5" fill="#fff" opacity="0.5" />
+                    <circle cx="62" cy="48" r="1.5" fill="#fff" opacity="0.5" />
+
+                    <!-- Small nose slits -->
+                    <path d="M47 62 Q 48 60 49 62" stroke="#222" stroke-width="1" stroke-linecap="round"/>
+                    <path d="M51 62 Q 52 60 53 62" stroke="#222" stroke-width="1" stroke-linecap="round"/>
+                    
+                    <!-- Tiny mouth -->
+                    <path d="M45 72 Q 50 74 55 72" stroke="#222" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
             </div>
         </div>
@@ -664,6 +697,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-    <script src="app.js?v=20260612"></script>
+    <script src="app.js?v=20260612_2"></script>
 </body>
 </html>

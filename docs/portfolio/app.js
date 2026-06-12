@@ -1763,9 +1763,11 @@ RULES:
         }
         updateParticles();
 
-        // Export UFO coordinates for Alien Docking system
+        // Export UFO coordinates & velocity for Alien Docking and Audio systems
         window.currentUfoX = ufoX;
         window.currentUfoY = ufoY;
+        window.currentUfoVelX = velX;
+        window.currentUfoVelY = velY;
 
         requestAnimationFrame(animateUFO);
     }
@@ -1807,8 +1809,51 @@ RULES:
         "Did you know? This site uses Zero dependencies for the 3D physics.",
         "FAQ: Yes, the AI voice is fully synthesized in real-time.",
         "Hovering over elements is fun.",
-        "Be sure to check out the neural swarm visualization."
+        "Be sure to check out the neural swarm visualization.",
+        "Your Enterprise RAG pipeline architecture is highly efficient.",
+        "Multi-Agent Swarms detected. Scaling operations...",
+        "I sense 14 weeks of relentless building in this code.",
+        "React and Next.js ecosystems running at optimal capacity."
     ];
+
+    // --- PROCEDURAL AUDIO ENGINE ---
+    let audioCtx;
+    let ufoOsc;
+    let ufoGain;
+    let isAudioInitialized = false;
+
+    function initAudio() {
+        if (isAudioInitialized) return;
+        isAudioInitialized = true;
+        
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            ufoOsc = audioCtx.createOscillator();
+            ufoGain = audioCtx.createGain();
+            
+            // Low-frequency sci-fi drone
+            ufoOsc.type = 'sawtooth';
+            ufoOsc.frequency.value = 50; 
+            
+            // Lowpass filter for deep hum
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 200;
+            
+            ufoOsc.connect(filter);
+            filter.connect(ufoGain);
+            ufoGain.connect(audioCtx.destination);
+            
+            // Start silent
+            ufoGain.gain.value = 0;
+            ufoOsc.start();
+        } catch(e) {
+            console.log("Web Audio API failed to initialize.", e);
+        }
+    }
+
+    // Initialize audio on first click anywhere
+    document.addEventListener('click', initAudio, { once: true });
 
     // Mute Toggle
     muteBtn.addEventListener('click', (e) => {
@@ -1925,45 +1970,67 @@ RULES:
     // Start roaming
     setTimeout(roam, 2000); // Delay start
 
-    // --- UFO DOCKING MECHANICS ---
+    // --- PROXIMITY ABDUCTION MECHANICS ---
     if (ufo) {
-        ufo.addEventListener('dblclick', () => {
-            if (isDocked || isDocking) {
-                // Undock
-                isDocked = false;
-                gsap.to(alienBubbleUI, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out" });
-                speak("Undocking from mothership. Resuming autonomous exploration.");
-                roam();
-            } else {
-                // Dock
-                isDocking = true;
-                gsap.killTweensOf(alien); // Stop current roam
-                speak("Recall signal received. Docking sequence initiated.");
-                
-                // Fly to UFO rapidly and shrink
-                gsap.to(alienBubbleUI, { scale: 0.25, duration: 0.8, ease: "power2.inOut" });
-                gsap.to(alien, {
-                    x: window.currentUfoX || window.innerWidth / 2,
-                    y: window.currentUfoY || window.innerHeight / 2,
-                    rotationZ: 0,
-                    duration: 0.8,
-                    ease: "power2.in",
-                    onComplete: () => {
-                        isDocking = false;
-                        isDocked = true;
-                    }
-                });
-            }
-        });
-
-        // Continuous Docking Lock (runs every frame)
         gsap.ticker.add(() => {
-            if (isDocked && !isDocking && window.currentUfoX !== undefined) {
-                // Lock alien position directly to UFO coordinates
+            if (window.currentUfoX === undefined) return;
+            
+            // Update Procedural Audio based on UFO velocity
+            if (isAudioInitialized && audioCtx.state === 'running' && window.currentUfoVelX !== undefined) {
+                const speed = Math.sqrt(window.currentUfoVelX**2 + window.currentUfoVelY**2);
+                const targetFreq = 50 + (speed * 2);
+                const targetGain = Math.min(0.1, speed * 0.01);
+                
+                // Smoothly adjust audio
+                ufoOsc.frequency.setTargetAtTime(targetFreq, audioCtx.currentTime, 0.1);
+                ufoGain.gain.setTargetAtTime(targetGain, audioCtx.currentTime, 0.1);
+            }
+
+            // Check distance for abduction
+            if (!isDocked && !isDocking) {
+                const currentAlienX = gsap.getProperty(alien, "x") || 0;
+                const currentAlienY = gsap.getProperty(alien, "y") || 0;
+                
+                const dist = Math.sqrt(Math.pow(window.currentUfoX - currentAlienX, 2) + Math.pow(window.currentUfoY - currentAlienY, 2));
+                
+                // If UFO hovers directly over the alien
+                if (dist < 60) {
+                    isDocking = true;
+                    gsap.killTweensOf(alien); // Stop current roam
+                    speak("Whoa! Abduction sequence initiated!", 3000);
+                    
+                    // Fly to UFO rapidly and shrink
+                    gsap.to(alienBubbleUI, { scale: 0.25, duration: 0.5, ease: "power2.in" });
+                    gsap.to(alien, {
+                        x: window.currentUfoX,
+                        y: window.currentUfoY,
+                        rotationZ: 0,
+                        duration: 0.5,
+                        ease: "power2.in",
+                        onComplete: () => {
+                            isDocking = false;
+                            isDocked = true;
+                        }
+                    });
+                }
+            }
+            
+            // Continuous Docking Lock
+            if (isDocked && !isDocking) {
                 gsap.set(alien, {
                     x: window.currentUfoX,
                     y: window.currentUfoY
                 });
+            }
+        });
+
+        // Double click to release
+        ufo.addEventListener('dblclick', () => {
+            if (isDocked || isDocking) {
+                isDocked = false;
+                gsap.to(alienBubbleUI, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out" });
+                speak("Released from mothership. Resuming exploration.");
+                roam();
             }
         });
     }
