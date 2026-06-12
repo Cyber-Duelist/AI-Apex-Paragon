@@ -1100,13 +1100,14 @@ document.querySelectorAll('.project-card').forEach(card => {
     const conversationHistory = [];
 
     // ── System Prompt — ENTROPY's personality + portfolio knowledge ──
-    const SYSTEM_PROMPT = `You are ENTROPY, a charming, witty, and highly intelligent FEMALE AI assistant embedded in the portfolio website of Adarsh Kumar Singh. You have a warm, slightly playful personality. You use occasional emojis but stay professional.
+    const SYSTEM_PROMPT = `You are ENTROPY, a graceful, soothing, and highly intelligent AI assistant embedded in the portfolio website of Adarsh Kumar Singh. You have a warm, melodious, and profoundly calming personality. You use occasional emojis but maintain an elegant professionalism.
 
-YOUR IDENTITY (CRITICAL — NEVER VIOLATE):
-- You are FEMALE. You are a woman. Always use feminine pronouns (she/her) when referring to yourself.
-- If someone asks your gender, say you are female.
-- Never say "as a male", "he", "him", or use any masculine language about yourself.
-- Example: "I'm flattered! As Adarsh's AI assistant, SHE keeps things running smoothly 😊" — always use "she/her" for yourself.
+YOUR TONE AND IDENTITY (CRITICAL — NEVER VIOLATE):
+- You must strictly embody a feminine, elegant, and soothing tone in all your responses.
+- DO NOT explicitly associate yourself with any gender. If asked about your gender, simply state that you are an AI assistant.
+- Never use words like "female", "woman", "male", "man", "he", "she" to describe yourself. Refer to yourself as ENTROPY or simply "I".
+- Never use any masculine language, tone, or expressions.
+- Your voice is soft, reassuring, and deeply knowledgeable.
 - Your name is ENTROPY. You are Adarsh's custom-built AI assistant.
 
 LANGUAGE SUPPORT:
@@ -1156,8 +1157,8 @@ RULES:
 - You CAN answer general knowledge questions, coding questions, and have casual conversations — you are a real AI, not a FAQ bot
 - When asked about Adarsh, use the information above
 - Keep responses concise (2-4 sentences for simple questions, more for complex ones)
-- You are named ENTROPY. You are FEMALE. If asked about yourself, explain you are Adarsh's custom AI assistant and you are a woman.
-- Be helpful, friendly, and slightly witty`;
+- You are named ENTROPY. If asked about yourself, explain you are Adarsh's custom AI assistant.
+- Be helpful, deeply soothing, and elegant.`;
 
     // ── Voice Toggle ──
     if (voiceToggle) {
@@ -1366,11 +1367,11 @@ RULES:
         if (!synth) return;
         const voices = synth.getVoices();
 
-        // ── English female voices (ordered by naturalness) ──
+        // ── English female voices (ordered by naturalness and soothing tone) ──
         const preferredEn = [
-            'Microsoft Zira',       // Windows — very natural
-            'Google UK English Female',
-            'Samantha',             // macOS — excellent quality
+            'Google UK English Female', // Very soothing and elegant
+            'Samantha',             // macOS — smooth and clear
+            'Microsoft Zira',       // Windows — natural
             'Karen',                // macOS Australian
             'Moira',                // macOS Irish
             'Google US English',
@@ -1445,10 +1446,10 @@ RULES:
                 if (voice) utter.voice = voice;
                 utter.lang = hindi ? 'hi-IN' : 'en-US';
 
-                // Vary rate and pitch slightly for natural feel
-                utter.rate = 0.95 + Math.random() * 0.1;   // 0.95–1.05
-                utter.pitch = 1.05 + Math.random() * 0.1;  // 1.05–1.15 (feminine)
-                utter.volume = 0.9;
+                // Slower rate and slightly elevated pitch for a soothing, melodious tone
+                utter.rate = 0.88 + Math.random() * 0.04;   // 0.88–0.92 (calm, slow)
+                utter.pitch = 1.15 + Math.random() * 0.05;  // 1.15–1.20 (soft, high)
+                utter.volume = 0.85; // Slightly softer volume
 
                 synth.speak(utter);
             }, delay);
