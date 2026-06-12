@@ -1763,6 +1763,10 @@ RULES:
         }
         updateParticles();
 
+        // Export UFO coordinates for Alien Docking system
+        window.currentUfoX = ufoX;
+        window.currentUfoY = ufoY;
+
         requestAnimationFrame(animateUFO);
     }
     
@@ -1787,9 +1791,13 @@ RULES:
     const iconMuted = muteBtn.querySelector('.icon-muted');
     const alienBubbleUI = alien.querySelector('.alien-bubble');
 
+    const ufo = document.getElementById('ufo-cursor');
+
     let isMuted = false;
     let isSpeaking = false;
     let timeSpentSeconds = 0;
+    let isDocked = false;
+    let isDocking = false;
 
     const dialogues = [
         "Scanning sector...",
@@ -1817,12 +1825,22 @@ RULES:
         }
     });
 
-    // Speak Function
+    // Speak Function (Text-To-Speech)
     function speak(text, duration = 4000) {
         if (isMuted || isSpeaking) return;
         isSpeaking = true;
         textEl.textContent = text;
         bubble.classList.remove('hidden');
+        
+        // Native Browser TTS
+        if ('speechSynthesis' in window) {
+            // Cancel any ongoing speech
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.pitch = 1.6; // High pitched robotic alien
+            utterance.rate = 1.1;
+            window.speechSynthesis.speak(utterance);
+        }
         
         setTimeout(() => {
             hideDialogue();
@@ -1857,6 +1875,8 @@ RULES:
 
     // GSAP Roaming Engine
     function roam() {
+        if (isDocked || isDocking) return; // Halt roaming if docked
+        
         if (typeof gsap === 'undefined') {
             setTimeout(roam, 1000); // Wait for GSAP to load
             return;
@@ -1904,4 +1924,47 @@ RULES:
     
     // Start roaming
     setTimeout(roam, 2000); // Delay start
+
+    // --- UFO DOCKING MECHANICS ---
+    if (ufo) {
+        ufo.addEventListener('dblclick', () => {
+            if (isDocked || isDocking) {
+                // Undock
+                isDocked = false;
+                gsap.to(alienBubbleUI, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out" });
+                speak("Undocking from mothership. Resuming autonomous exploration.");
+                roam();
+            } else {
+                // Dock
+                isDocking = true;
+                gsap.killTweensOf(alien); // Stop current roam
+                speak("Recall signal received. Docking sequence initiated.");
+                
+                // Fly to UFO rapidly and shrink
+                gsap.to(alienBubbleUI, { scale: 0.25, duration: 0.8, ease: "power2.inOut" });
+                gsap.to(alien, {
+                    x: window.currentUfoX || window.innerWidth / 2,
+                    y: window.currentUfoY || window.innerHeight / 2,
+                    rotationZ: 0,
+                    duration: 0.8,
+                    ease: "power2.in",
+                    onComplete: () => {
+                        isDocking = false;
+                        isDocked = true;
+                    }
+                });
+            }
+        });
+
+        // Continuous Docking Lock (runs every frame)
+        gsap.ticker.add(() => {
+            if (isDocked && !isDocking && window.currentUfoX !== undefined) {
+                // Lock alien position directly to UFO coordinates
+                gsap.set(alien, {
+                    x: window.currentUfoX,
+                    y: window.currentUfoY
+                });
+            }
+        });
+    }
 })();

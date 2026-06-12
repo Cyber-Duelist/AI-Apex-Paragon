@@ -50,7 +50,40 @@
     <!-- Alien Companion -->
     <div id="alien-companion">
         <div class="alien-bubble">
-            <div class="alien-head">👽</div>
+            <div class="alien-body-svg">
+                <!-- Premium Custom Full-Body Alien SVG -->
+                <svg viewBox="0 0 100 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Glow -->
+                    <filter id="alienGlow"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    
+                    <!-- Space Suit Body -->
+                    <path d="M30 80 Q 50 140 70 80 Q 80 50 50 40 Q 20 50 30 80 Z" fill="#112211" stroke="#39ff14" stroke-width="2"/>
+                    <!-- Shoulders & Arms -->
+                    <path d="M30 80 Q 15 100 25 120 M70 80 Q 85 100 75 120" stroke="#39ff14" stroke-width="3" stroke-linecap="round"/>
+                    <!-- Hands -->
+                    <circle cx="25" cy="120" r="4" fill="#39ff14" />
+                    <circle cx="75" cy="120" r="4" fill="#39ff14" />
+                    
+                    <!-- Alien Head -->
+                    <ellipse cx="50" cy="50" rx="20" ry="25" fill="#1a1a1a" stroke="#39ff14" stroke-width="2"/>
+                    
+                    <!-- Eyes -->
+                    <ellipse cx="40" cy="50" rx="6" ry="10" fill="#000" transform="rotate(15 40 50)"/>
+                    <ellipse cx="60" cy="50" rx="6" ry="10" fill="#000" transform="rotate(-15 60 50)"/>
+                    <!-- Eye Highlights -->
+                    <circle cx="38" cy="45" r="2" fill="#39ff14" filter="url(#alienGlow)"/>
+                    <circle cx="62" cy="45" r="2" fill="#39ff14" filter="url(#alienGlow)"/>
+                    
+                    <!-- Antenna -->
+                    <path d="M50 25 L 50 10" stroke="#39ff14" stroke-width="2"/>
+                    <circle cx="50" cy="8" r="3" fill="#39ff14" filter="url(#alienGlow)">
+                        <animate attributeName="opacity" values="1;0.2;1" dur="1s" repeatCount="indefinite"/>
+                    </circle>
+                    
+                    <!-- Floating Legs (Suit Bottom) -->
+                    <path d="M40 115 Q 50 140 60 115" stroke="#39ff14" stroke-width="2" fill="none"/>
+                </svg>
+            </div>
         </div>
         <div class="alien-shadow"></div>
         

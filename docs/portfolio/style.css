@@ -239,9 +239,21 @@ body.loading {
   cursor: pointer;
 }
 
-.alien-head {
-  font-size: 24px;
+.alien-body-svg {
+  width: 45px;
+  height: 65px;
   filter: drop-shadow(0 0 5px #39ff14);
+  animation: alienFloat 4s ease-in-out infinite alternate;
+}
+
+.alien-body-svg svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes alienFloat {
+  0% { transform: translateY(-2px) rotate(-2deg); }
+  100% { transform: translateY(2px) rotate(2deg); }
 }
 
 .alien-shadow {
