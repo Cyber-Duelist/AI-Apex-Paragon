@@ -235,6 +235,8 @@ body.loading {
   animation: alienHover 3s ease-in-out infinite alternate;
   box-shadow: inset 0 0 10px rgba(57, 255, 20, 0.2), 0 0 15px rgba(57, 255, 20, 0.3);
   transition: transform 0.2s; /* for flipping horizontally */
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .alien-head {
@@ -262,6 +264,73 @@ body.loading {
 @keyframes shadowScale {
   0% { transform: scale(1); opacity: 0.8; }
   100% { transform: scale(0.6); opacity: 0.3; }
+}
+
+/* Alien Interactive Elements */
+.alien-speech-bubble {
+  position: absolute;
+  bottom: 80px;
+  right: -50px;
+  background: rgba(10, 10, 15, 0.8);
+  border: 1px solid rgba(57, 255, 20, 0.5);
+  box-shadow: 0 0 15px rgba(57, 255, 20, 0.2);
+  backdrop-filter: blur(8px);
+  color: var(--text-white);
+  padding: 10px 15px;
+  border-radius: 12px 12px 12px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  width: max-content;
+  max-width: 200px;
+  pointer-events: auto;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 10;
+}
+
+.alien-speech-bubble.hidden {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+.alien-text {
+  display: block;
+  line-height: 1.4;
+}
+
+.alien-mute {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(57, 255, 20, 0.5);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #39ff14;
+  cursor: pointer !important;
+  pointer-events: auto;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.alien-mute:hover {
+  background: rgba(57, 255, 20, 0.2);
+  transform: scale(1.1);
+}
+
+.alien-mute svg {
+  width: 12px;
+  height: 12px;
+}
+
+.alien-mute svg.hidden {
+  display: none;
 }
 
 #portal-gate {

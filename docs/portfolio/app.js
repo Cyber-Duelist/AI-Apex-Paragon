@@ -1763,42 +1763,145 @@ RULES:
         }
         updateParticles();
 
-        // --- Alien Companion Physics ---
-        if (alien) {
-            const aStiffness = 0.03; // Very loose spring (follows slowly)
-            const aDamping = 0.85;   // Lots of gliding
-            
-            // Target is offset slightly from the UFO
-            const targetX = ufoX + 60;
-            const targetY = ufoY - 60;
-
-            const aForceX = (targetX - alienX) * aStiffness;
-            const aForceY = (targetY - alienY) * aStiffness;
-
-            alienVelX = (alienVelX + aForceX) * aDamping;
-            alienVelY = (alienVelY + aForceY) * aDamping;
-
-            alienX += alienVelX;
-            alienY += alienVelY;
-
-            // Flip the alien to face the direction it's moving
-            const isFlipped = alienVelX < 0 ? 'scaleX(-1)' : 'scaleX(1)';
-            const tiltA = Math.max(-15, Math.min(15, alienVelX * 2));
-
-            alien.style.transform = `translate(calc(-50% + ${alienX}px), calc(-50% + ${alienY}px)) rotate(${tiltA}deg)`;
-            alienBubble.style.transform = isFlipped;
-        }
-        
         requestAnimationFrame(animateUFO);
     }
     
     // Reset initial CSS transform
     ufo.style.left = '0px';
     ufo.style.top = '0px';
-    if(alien) {
-        alien.style.left = '0px';
-        alien.style.top = '0px';
-    }
     
     animateUFO();
+})();
+
+/* ========================================
+   AUTONOMOUS ALIEN COMPANION (GSAP)
+   ======================================== */
+(function() {
+    const alien = document.getElementById('alien-companion');
+    if (!alien) return;
+    
+    const bubble = alien.querySelector('.alien-speech-bubble');
+    const textEl = alien.querySelector('.alien-text');
+    const muteBtn = document.getElementById('alien-mute-btn');
+    const iconUnmuted = muteBtn.querySelector('.icon-unmuted');
+    const iconMuted = muteBtn.querySelector('.icon-muted');
+    const alienBubbleUI = alien.querySelector('.alien-bubble');
+
+    let isMuted = false;
+    let isSpeaking = false;
+    let timeSpentSeconds = 0;
+
+    const dialogues = [
+        "Scanning sector...",
+        "These CSS 3D cards are quite impressive.",
+        "Tip: Click the mic icon to talk to ENTROPY.",
+        "Analyzing user interactions...",
+        "Did you know? This site uses Zero dependencies for the 3D physics.",
+        "FAQ: Yes, the AI voice is fully synthesized in real-time.",
+        "Hovering over elements is fun.",
+        "Be sure to check out the neural swarm visualization."
+    ];
+
+    // Mute Toggle
+    muteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        isMuted = !isMuted;
+        if (isMuted) {
+            iconUnmuted.classList.add('hidden');
+            iconMuted.classList.remove('hidden');
+            hideDialogue();
+        } else {
+            iconMuted.classList.add('hidden');
+            iconUnmuted.classList.remove('hidden');
+            speak("Audio and notifications unmuted.");
+        }
+    });
+
+    // Speak Function
+    function speak(text, duration = 4000) {
+        if (isMuted || isSpeaking) return;
+        isSpeaking = true;
+        textEl.textContent = text;
+        bubble.classList.remove('hidden');
+        
+        setTimeout(() => {
+            hideDialogue();
+        }, duration);
+    }
+
+    function hideDialogue() {
+        bubble.classList.add('hidden');
+        setTimeout(() => { isSpeaking = false; }, 300);
+    }
+
+    // Time Tracker
+    setInterval(() => {
+        timeSpentSeconds += 10; // Check every 10 seconds
+        if (timeSpentSeconds === 60) speak("You've been here for 1 minute. Fascinating.");
+        if (timeSpentSeconds === 300) speak("5 minutes of exploration logged.");
+    }, 10000);
+
+    // Random Dialogues
+    setInterval(() => {
+        if (Math.random() > 0.5) {
+            const randomMsg = dialogues[Math.floor(Math.random() * dialogues.length)];
+            speak(randomMsg);
+        }
+    }, 15000); // 50% chance every 15 seconds
+
+    // Click to speak
+    alienBubbleUI.addEventListener('click', () => {
+        const randomMsg = dialogues[Math.floor(Math.random() * dialogues.length)];
+        speak(randomMsg, 3000);
+    });
+
+    // GSAP Roaming Engine
+    function roam() {
+        if (typeof gsap === 'undefined') {
+            setTimeout(roam, 1000); // Wait for GSAP to load
+            return;
+        }
+
+        const maxX = window.innerWidth - 100;
+        const maxY = window.innerHeight - 100;
+        const targetX = Math.random() * maxX + 50;
+        const targetY = Math.random() * maxY + 50;
+
+        // Calculate distance and direction
+        const currentX = gsap.getProperty(alien, "x") || 0;
+        const deltaX = targetX - currentX;
+        
+        // Flip to face direction
+        gsap.to(alienBubbleUI, {
+            scaleX: deltaX < 0 ? -1 : 1,
+            duration: 0.3
+        });
+
+        // Add a slight banking tilt
+        const tilt = deltaX > 0 ? 15 : -15;
+
+        const distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(targetY - (gsap.getProperty(alien, "y") || 0), 2));
+        const duration = distance / 100; // Speed factor
+
+        gsap.to(alien, {
+            x: targetX,
+            y: targetY,
+            rotationZ: tilt,
+            duration: duration,
+            ease: "sine.inOut",
+            onComplete: () => {
+                // Return to upright when stopped
+                gsap.to(alien, { rotationZ: 0, duration: 0.5 });
+                
+                // Pause for a random time before moving again
+                setTimeout(roam, 1000 + Math.random() * 4000);
+            }
+        });
+    }
+
+    // Initial positioning
+    gsap.set(alien, { x: window.innerWidth - 100, y: window.innerHeight - 150 });
+    
+    // Start roaming
+    setTimeout(roam, 2000); // Delay start
 })();
