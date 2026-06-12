@@ -778,20 +778,20 @@ document.querySelectorAll('.project-card').forEach(card => {
         }
 
         try {
-            // Fetch user profile
+            // Fetch user profile (1 call)
             const userResp = await fetch(`https://api.github.com/users/${GH_USER}`);
             if (userResp.status === 403 || userResp.status === 429) {
                 throw new Error('Rate limited');
             }
             const user = await userResp.json();
 
-            // Fetch repos
+            // Fetch repos (1 call)
             const reposResp = await fetch(`https://api.github.com/users/${GH_USER}/repos?per_page=100&sort=updated`);
             const repos = await reposResp.json();
 
             if (!Array.isArray(repos)) throw new Error('Invalid repos response');
 
-            let totalStars = 0, totalForks = 0, totalCommits = 0;
+            let totalStars = 0, totalForks = 0;
             const langs = {};
 
             repos.forEach(r => {
@@ -800,35 +800,25 @@ document.querySelectorAll('.project-card').forEach(card => {
                 if (r.language) langs[r.language] = (langs[r.language] || 0) + 1;
             });
 
-            // Fetch commit counts for each repo (limited to top 5 by recent activity)
-            const topRepos = repos.filter(r => !r.fork).sort((a, b) => new Date(b.pushed_at) - new Date(a.pushed_at)).slice(0, 5);
-            const commitPromises = topRepos.map(async (repo) => {
-                try {
-                    const commitsResp = await fetch(`https://api.github.com/repos/${GH_USER}/${repo.name}/commits?per_page=1`);
-                    if (!commitsResp.ok) return 0;
-                    // GitHub returns the total count in the Link header's last page
-                    const linkHeader = commitsResp.headers.get('Link');
-                    if (linkHeader) {
-                        const lastMatch = linkHeader.match(/page=(\d+)>; rel="last"/);
-                        if (lastMatch) return parseInt(lastMatch[1], 10);
-                    }
-                    // If only 1 page, count the commits directly
-                    const commits = await commitsResp.json();
-                    return Array.isArray(commits) ? commits.length : 0;
-                } catch(e) { return 0; }
-            });
-            const commitCounts = await Promise.all(commitPromises);
-            totalCommits = commitCounts.reduce((sum, c) => sum + c, 0);
-
             // Languages sorted by frequency
             const sortedLangs = Object.keys(langs).sort((a, b) => langs[b] - langs[a]);
 
-            // Fetch recent events
-            const eventsResp = await fetch(`https://api.github.com/users/${GH_USER}/events?per_page=10`);
+            // Fetch recent events (1 call) - get 100 events to count recent commits accurately
+            const eventsResp = await fetch(`https://api.github.com/users/${GH_USER}/events?per_page=100`);
             const events = await eventsResp.json();
 
             const eventData = [];
+            let totalCommits = 0;
+
             if (Array.isArray(events)) {
+                // Count ALL commits pushed in the recent 100 events
+                events.forEach(evt => {
+                    if (evt.type === 'PushEvent') {
+                        totalCommits += evt.payload.commits ? evt.payload.commits.length : 0;
+                    }
+                });
+
+                // Render only the top 6 events for the activity feed
                 events.slice(0, 6).forEach(evt => {
                     let icon = '📌', text = '';
                     const repo = evt.repo ? evt.repo.name.split('/')[1] : '';
@@ -837,7 +827,7 @@ document.querySelectorAll('.project-card').forEach(card => {
                     if (evt.type === 'PushEvent') {
                         const commits = evt.payload.commits ? evt.payload.commits.length : 0;
                         icon = '⚡';
-                        text = `Pushed <strong>${commits} commit${commits > 1 ? 's' : ''}</strong> to ${repo}`;
+                        text = `Pushed <strong>${commits} commit${commits !== 1 ? 's' : ''}</strong> to ${repo}`;
                     } else if (evt.type === 'CreateEvent') {
                         icon = '🌱';
                         text = `Created ${evt.payload.ref_type} <strong>${evt.payload.ref || repo}</strong>`;
