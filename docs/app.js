@@ -1442,8 +1442,17 @@ RULES:
 
         let delay = 0;
         sentences.forEach((sentence, i) => {
-            const trimmed = sentence.trim();
+            let trimmed = sentence.trim();
             if (!trimmed || trimmed.length < 2) return;
+
+            // ── Phonetic Overrides for perfect TTS pronunciation ──
+            if (hindi) {
+                // Force pure Devanagari pronunciation for Adarsh
+                trimmed = trimmed.replace(/\b(?:A|a)darsh\b/g, 'आदर्श');
+            } else {
+                // Force English TTS to use a short 'A' (Uh-darsh instead of Ah-daarsh)
+                trimmed = trimmed.replace(/\b(?:A|a)darsh\b/g, 'Uh-darsh');
+            }
 
             setTimeout(() => {
                 const utter = new SpeechSynthesisUtterance(trimmed);
