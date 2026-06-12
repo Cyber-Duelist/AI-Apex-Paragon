@@ -2039,8 +2039,8 @@ RULES:
                 
                 const dist = Math.sqrt(Math.pow(window.currentUfoX - currentAlienX, 2) + Math.pow(window.currentUfoY - currentAlienY, 2));
                 
-                // If UFO is in the vicinity (600px) AND the UFO is physically ABOVE the alien (currentUfoY < currentAlienY)
-                if (dist < 600 && window.currentUfoY < currentAlienY) {
+                // Perfect Tractor Beam Distance: Matches the visual height of the CSS .ufo-beam (160px)
+                if (dist < 160 && window.currentUfoY < currentAlienY) {
                     isDocking = true;
                     gsap.killTweensOf(alien); // Stop current roam
                     speak("Abduction sequence engaged.", 3000);
@@ -2087,17 +2087,20 @@ RULES:
                 gsap.killTweensOf(alien);
                 gsap.killTweensOf(alienBubbleUI);
                 
-                // Drop the alien slightly down from the UFO
+                // Eject to a random location on the screen, dropping out of the beam
+                const randomEjectX = Math.max(100, Math.min(window.innerWidth - 100, window.currentUfoX + (Math.random() > 0.5 ? 400 : -400)));
+                const randomEjectY = Math.max(100, Math.min(window.innerHeight - 100, window.currentUfoY + 250 + Math.random() * 200));
+
                 gsap.to(alien, {
-                    x: window.currentUfoX,
-                    y: window.currentUfoY + 150, // Drop it 150px below the UFO
-                    duration: 0.6,
+                    x: randomEjectX,
+                    y: randomEjectY, 
+                    duration: 1.2,
                     ease: "power2.out"
                 });
                 
                 // Pop back out and unspin
                 gsap.to(alienBubbleUI, { scale: 1, rotationZ: 0, opacity: 1, duration: 0.6, ease: "elastic.out(1, 0.5)" });
-                speak("Ejected from mothership.");
+                speak("Ejected from mothership. Changing sectors.");
                 
                 setTimeout(() => {
                     abductionCooldown = false;
