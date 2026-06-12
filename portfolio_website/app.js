@@ -226,6 +226,7 @@
 /* ========================================
    THREE.JS — SURREAL PARTICLE COSMOS
    ======================================== */
+try {
 (function() {
     const canvas = document.getElementById('hero-canvas');
     const scene = new THREE.Scene();
@@ -410,6 +411,7 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
 })();
+} catch(e) { console.warn('Three.js failed to load:', e); }
 
 /* ========================================
    CUSTOM CURSOR
