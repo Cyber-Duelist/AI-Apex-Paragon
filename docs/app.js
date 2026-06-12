@@ -1487,20 +1487,15 @@ RULES:
             'Microsoft Swara Online (Natural)', // Best natural Hindi voice
             'Google हिन्दी',                      // Google Cloud Hindi
             'Microsoft Swara',                  // Windows native Hindi
-            'Lekha',                            // macOS native Hindi
-            'Microsoft Neerja Online (Natural)',// Excellent fallback
-            'Microsoft Neerja',                 
-            'Veena'                             
+            'Lekha'                             // macOS native Hindi
         ];
         for (const name of preferredHi) {
             const found = voices.find(v => v.name.includes(name));
             if (found) { selectedVoiceHi = found; break; }
         }
         if (!selectedVoiceHi) {
-            // Fallback: any Hindi voice, or at least an Indian English voice so it doesn't sound foreign
-            selectedVoiceHi = voices.find(v => v.lang.startsWith('hi')) || 
-                              voices.find(v => v.lang === 'en-IN') || 
-                              null;
+            // Strictly fallback to ANY Hindi voice. Do not fall back to English voices for Hindi text.
+            selectedVoiceHi = voices.find(v => v.lang.startsWith('hi')) || null;
         }
     }
 
@@ -1558,13 +1553,13 @@ RULES:
                 utter.lang = hindi ? 'hi-IN' : 'en-US';
 
                 if (hindi) {
-                    // Slower rate for Hindi to sound more calm and authentically Indian, avoiding the "rushed" robotic tone
-                    utter.rate = 0.85;
+                    // Normal rate for Hindi
+                    utter.rate = 1.0;
                     utter.pitch = 1.0;
                     utter.volume = 1.0;
                 } else {
-                    // Smooth, elegant English settings
-                    utter.rate = 0.9;   
+                    // Faster, clear English settings
+                    utter.rate = 1.05;   
                     utter.pitch = 1.05;  
                     utter.volume = 1.0; 
                 }
