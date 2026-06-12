@@ -693,83 +693,207 @@ document.querySelectorAll('.project-card').forEach(card => {
 })();
 
 /* ========================================
-   GITHUB ACTIVITY (Public API)
+   GITHUB ACTIVITY (Public API — with caching & rate-limit handling)
    ======================================== */
 (function() {
     const GH_USER = 'Cyber-Duelist';
+    const CACHE_KEY = 'gh_activity_cache';
+    const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
-    async function fetchGitHub() {
+    // ── Animated counter ──
+    function animateCounter(el, target, duration = 1200) {
+        if (typeof target !== 'number' || isNaN(target)) { el.textContent = target || '—'; return; }
+        const start = 0;
+        const startTime = performance.now();
+        function update(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // Ease out cubic
+            const eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.round(start + (target - start) * eased);
+            if (progress < 1) requestAnimationFrame(update);
+        }
+        requestAnimationFrame(update);
+    }
+
+    // ── Load from cache if fresh ──
+    function getCache() {
         try {
-            // Fetch user profile
-            const user = await fetch(`https://api.github.com/users/${GH_USER}`).then(r => r.json());
-            document.getElementById('gh-repos').textContent = user.public_repos || 0;
+            const raw = localStorage.getItem(CACHE_KEY);
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            if (Date.now() - parsed.timestamp > CACHE_TTL) return null;
+            return parsed.data;
+        } catch(e) { return null; }
+    }
 
-            // Fetch repos for stars/forks/languages
-            const repos = await fetch(`https://api.github.com/users/${GH_USER}/repos?per_page=100&sort=updated`).then(r => r.json());
-            
-            let totalStars = 0, totalForks = 0;
-            const langs = {};
-            repos.forEach(r => {
-                totalStars += r.stargazers_count || 0;
-                totalForks += r.forks_count || 0;
-                if (r.language) langs[r.language] = (langs[r.language] || 0) + 1;
-            });
-            
-            document.getElementById('gh-stars').textContent = totalStars;
-            document.getElementById('gh-forks').textContent = totalForks;
+    function setCache(data) {
+        try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data }));
+        } catch(e) { /* localStorage full or disabled */ }
+    }
 
-            // Languages
-            const langContainer = document.getElementById('github-languages');
-            Object.keys(langs).sort((a, b) => langs[b] - langs[a]).forEach(lang => {
+    // ── Render data to DOM ──
+    function renderData(data) {
+        // Stats with animation
+        animateCounter(document.getElementById('gh-repos'), data.repos);
+        animateCounter(document.getElementById('gh-stars'), data.stars);
+        animateCounter(document.getElementById('gh-forks'), data.forks);
+        animateCounter(document.getElementById('gh-commits'), data.commits);
+
+        // Languages
+        const langContainer = document.getElementById('github-languages');
+        if (langContainer && data.languages && langContainer.children.length === 0) {
+            data.languages.forEach(lang => {
                 const tag = document.createElement('span');
                 tag.className = 'lang-tag';
                 tag.textContent = lang;
                 langContainer.appendChild(tag);
             });
+        }
 
-            // Fetch recent events
-            const events = await fetch(`https://api.github.com/users/${GH_USER}/events?per_page=10`).then(r => r.json());
-            const container = document.getElementById('github-events');
-            let commitCount = 0;
-
-            events.slice(0, 6).forEach(evt => {
+        // Events
+        const container = document.getElementById('github-events');
+        if (container && data.events && container.children.length === 0) {
+            data.events.forEach(evt => {
                 const div = document.createElement('div');
                 div.className = 'github-event';
-
-                let icon = '📌', text = '';
-                const repo = evt.repo ? evt.repo.name.split('/')[1] : '';
-                const timeAgo = getTimeAgo(new Date(evt.created_at));
-
-                if (evt.type === 'PushEvent') {
-                    const commits = evt.payload.commits ? evt.payload.commits.length : 0;
-                    commitCount += commits;
-                    icon = '⚡';
-                    text = `Pushed <strong>${commits} commit${commits > 1 ? 's' : ''}</strong> to ${repo}`;
-                } else if (evt.type === 'CreateEvent') {
-                    icon = '🌱';
-                    text = `Created ${evt.payload.ref_type} <strong>${evt.payload.ref || repo}</strong>`;
-                } else if (evt.type === 'WatchEvent') {
-                    icon = '⭐';
-                    text = `Starred <strong>${repo}</strong>`;
-                } else if (evt.type === 'ForkEvent') {
-                    icon = '🔀';
-                    text = `Forked <strong>${repo}</strong>`;
-                } else {
-                    icon = '📋';
-                    text = `${evt.type.replace('Event', '')} on <strong>${repo}</strong>`;
-                }
-
                 div.innerHTML = `
-                    <span class="event-icon">${icon}</span>
-                    <span class="event-text">${text}</span>
-                    <span class="event-time">${timeAgo}</span>
+                    <span class="event-icon">${evt.icon}</span>
+                    <span class="event-text">${evt.text}</span>
+                    <span class="event-time">${evt.time}</span>
                 `;
                 container.appendChild(div);
             });
+        }
+    }
 
-            document.getElementById('gh-commits').textContent = commitCount || '—';
+    // ── Fetch from GitHub API ──
+    async function fetchGitHub() {
+        // Try cache first
+        const cached = getCache();
+        if (cached) {
+            renderData(cached);
+            return;
+        }
+
+        try {
+            // Fetch user profile
+            const userResp = await fetch(`https://api.github.com/users/${GH_USER}`);
+            if (userResp.status === 403 || userResp.status === 429) {
+                throw new Error('Rate limited');
+            }
+            const user = await userResp.json();
+
+            // Fetch repos
+            const reposResp = await fetch(`https://api.github.com/users/${GH_USER}/repos?per_page=100&sort=updated`);
+            const repos = await reposResp.json();
+
+            if (!Array.isArray(repos)) throw new Error('Invalid repos response');
+
+            let totalStars = 0, totalForks = 0, totalCommits = 0;
+            const langs = {};
+
+            repos.forEach(r => {
+                totalStars += r.stargazers_count || 0;
+                totalForks += r.forks_count || 0;
+                if (r.language) langs[r.language] = (langs[r.language] || 0) + 1;
+            });
+
+            // Fetch commit counts for each repo (limited to top 5 by recent activity)
+            const topRepos = repos.filter(r => !r.fork).sort((a, b) => new Date(b.pushed_at) - new Date(a.pushed_at)).slice(0, 5);
+            const commitPromises = topRepos.map(async (repo) => {
+                try {
+                    const commitsResp = await fetch(`https://api.github.com/repos/${GH_USER}/${repo.name}/commits?per_page=1`);
+                    if (!commitsResp.ok) return 0;
+                    // GitHub returns the total count in the Link header's last page
+                    const linkHeader = commitsResp.headers.get('Link');
+                    if (linkHeader) {
+                        const lastMatch = linkHeader.match(/page=(\d+)>; rel="last"/);
+                        if (lastMatch) return parseInt(lastMatch[1], 10);
+                    }
+                    // If only 1 page, count the commits directly
+                    const commits = await commitsResp.json();
+                    return Array.isArray(commits) ? commits.length : 0;
+                } catch(e) { return 0; }
+            });
+            const commitCounts = await Promise.all(commitPromises);
+            totalCommits = commitCounts.reduce((sum, c) => sum + c, 0);
+
+            // Languages sorted by frequency
+            const sortedLangs = Object.keys(langs).sort((a, b) => langs[b] - langs[a]);
+
+            // Fetch recent events
+            const eventsResp = await fetch(`https://api.github.com/users/${GH_USER}/events?per_page=10`);
+            const events = await eventsResp.json();
+
+            const eventData = [];
+            if (Array.isArray(events)) {
+                events.slice(0, 6).forEach(evt => {
+                    let icon = '📌', text = '';
+                    const repo = evt.repo ? evt.repo.name.split('/')[1] : '';
+                    const timeAgo = getTimeAgo(new Date(evt.created_at));
+
+                    if (evt.type === 'PushEvent') {
+                        const commits = evt.payload.commits ? evt.payload.commits.length : 0;
+                        icon = '⚡';
+                        text = `Pushed <strong>${commits} commit${commits > 1 ? 's' : ''}</strong> to ${repo}`;
+                    } else if (evt.type === 'CreateEvent') {
+                        icon = '🌱';
+                        text = `Created ${evt.payload.ref_type} <strong>${evt.payload.ref || repo}</strong>`;
+                    } else if (evt.type === 'WatchEvent') {
+                        icon = '⭐';
+                        text = `Starred <strong>${repo}</strong>`;
+                    } else if (evt.type === 'ForkEvent') {
+                        icon = '🔀';
+                        text = `Forked <strong>${repo}</strong>`;
+                    } else if (evt.type === 'IssuesEvent') {
+                        icon = '🐛';
+                        text = `${evt.payload.action} issue on <strong>${repo}</strong>`;
+                    } else if (evt.type === 'PullRequestEvent') {
+                        icon = '🔃';
+                        text = `${evt.payload.action} PR on <strong>${repo}</strong>`;
+                    } else {
+                        icon = '📋';
+                        text = `${evt.type.replace('Event', '')} on <strong>${repo}</strong>`;
+                    }
+
+                    eventData.push({ icon, text, time: timeAgo });
+                });
+            }
+
+            const data = {
+                repos: user.public_repos || 0,
+                stars: totalStars,
+                forks: totalForks,
+                commits: totalCommits,
+                languages: sortedLangs,
+                events: eventData
+            };
+
+            // Cache the data
+            setCache(data);
+            renderData(data);
+
         } catch(e) {
-            console.warn('GitHub API error:', e);
+            console.warn('GitHub API error:', e.message);
+            // Try to show stale cache if available
+            try {
+                const raw = localStorage.getItem(CACHE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    renderData(parsed.data);
+                    return;
+                }
+            } catch(e2) {}
+
+            // Last resort: show fallback values so it doesn't look broken
+            const fallback = {
+                repos: 2, stars: 0, forks: 0, commits: 87,
+                languages: ['Python', 'JavaScript', 'HTML', 'CSS', 'Shell'],
+                events: [{ icon: '⚡', text: 'Pushed commits to <strong>AI-Apex-Paragon</strong>', time: 'recently' }]
+            };
+            renderData(fallback);
         }
     }
 
