@@ -107,6 +107,245 @@ body.loading {
   overflow: hidden;
 }
 
+/* --- PREMIUM UFO CURSOR --- */
+#ufo-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  pointer-events: none;
+  z-index: 999999;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  mix-blend-mode: screen;
+}
+
+.ufo-core {
+  width: 12px;
+  height: 12px;
+  background: #39ff14;
+  border-radius: 50%;
+  box-shadow: 0 0 15px 5px #39ff14, 0 0 30px 10px rgba(57, 255, 20, 0.8);
+  z-index: 2;
+}
+
+.ufo-ring {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(57, 255, 20, 0.5);
+  border-radius: 50%;
+  animation: ufoSpin 3s linear infinite;
+  z-index: 1;
+}
+
+.ufo-ring::before, .ufo-ring::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #39ff14;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #39ff14;
+}
+
+.ufo-ring::before { top: -3px; left: 12px; }
+.ufo-ring::after { bottom: -3px; left: 12px; }
+
+@keyframes ufoSpin {
+  0% { transform: rotateX(60deg) rotateZ(0deg); }
+  100% { transform: rotateX(60deg) rotateZ(360deg); }
+}
+
+.ufo-beam {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80px;
+  height: 150px;
+  background: linear-gradient(to bottom, rgba(57, 255, 20, 0.6) 0%, rgba(57, 255, 20, 0) 100%);
+  transform-origin: top center;
+  transform: translate(-50%, 0) perspective(100px) rotateX(45deg);
+  clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%);
+  animation: ufoPulse 2s ease-in-out infinite alternate;
+  z-index: 0;
+}
+
+@keyframes ufoPulse {
+  0% { opacity: 0.4; height: 120px; }
+  100% { opacity: 0.8; height: 180px; }
+}
+
+/* Hover Scanning Mode */
+#ufo-cursor.scanning .ufo-beam {
+  height: 200px;
+  background: linear-gradient(to bottom, rgba(57, 255, 20, 0.9) 0%, rgba(57, 255, 20, 0) 100%);
+  animation: ufoScan 0.3s ease-in-out infinite alternate;
+}
+
+@keyframes ufoScan {
+  0% { transform: translate(-50%, 0) perspective(100px) rotateX(40deg) scaleX(1); }
+  100% { transform: translate(-50%, 0) perspective(100px) rotateX(40deg) scaleX(1.8); }
+}
+
+/* Particle System */
+#ufo-particles {
+  position: fixed;
+  top: 0; 
+  left: 0;
+  pointer-events: none;
+  z-index: 999998; /* Just behind UFO */
+}
+
+.ufo-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #39ff14;
+  border-radius: 50%;
+  box-shadow: 0 0 15px #39ff14, 0 0 30px #39ff14; /* Enhanced Plasma Glow */
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  filter: contrast(200%);
+}
+
+/* --- ALIEN COMPANION --- */
+#alien-companion {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 50px;
+  height: 60px;
+  pointer-events: none;
+  z-index: 999990; /* Just under UFO */
+}
+
+.alien-bubble {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 10px;
+  background: rgba(57, 255, 20, 0.1);
+  border: 1px solid rgba(57, 255, 20, 0.4);
+  border-radius: 50% 50% 40% 40%;
+  backdrop-filter: blur(2px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: alienHover 3s ease-in-out infinite alternate;
+  box-shadow: inset 0 0 10px rgba(57, 255, 20, 0.2), 0 0 15px rgba(57, 255, 20, 0.3);
+  transition: transform 0.2s; /* for flipping horizontally */
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.alien-body-svg {
+  width: 45px;
+  height: 65px;
+  filter: drop-shadow(0 0 5px #39ff14);
+  animation: alienFloat 4s ease-in-out infinite alternate;
+}
+
+.alien-body-svg svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes alienFloat {
+  0% { transform: translateY(-2px) rotate(-2deg); }
+  100% { transform: translateY(2px) rotate(2deg); }
+}
+
+.alien-shadow {
+  position: absolute;
+  bottom: 0;
+  left: 10px;
+  right: 10px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  filter: blur(2px);
+  animation: shadowScale 3s ease-in-out infinite alternate;
+}
+
+@keyframes alienHover {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-15px); }
+}
+
+@keyframes shadowScale {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(0.6); opacity: 0.3; }
+}
+
+/* Alien Interactive Elements */
+.alien-speech-bubble {
+  position: absolute;
+  bottom: 80px;
+  right: -50px;
+  background: rgba(10, 10, 15, 0.8);
+  border: 1px solid rgba(57, 255, 20, 0.5);
+  box-shadow: 0 0 15px rgba(57, 255, 20, 0.2);
+  backdrop-filter: blur(8px);
+  color: var(--text-white);
+  padding: 10px 15px;
+  border-radius: 12px 12px 12px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  width: max-content;
+  max-width: 200px;
+  pointer-events: auto;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 10;
+}
+
+.alien-speech-bubble.hidden {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+.alien-text {
+  display: block;
+  line-height: 1.4;
+}
+
+.alien-mute {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(57, 255, 20, 0.5);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #39ff14;
+  cursor: pointer !important;
+  pointer-events: auto;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.alien-mute:hover {
+  background: rgba(57, 255, 20, 0.2);
+  transform: scale(1.1);
+}
+
+.alien-mute svg {
+  width: 12px;
+  height: 12px;
+}
+
+.alien-mute svg.hidden {
+  display: none;
+}
+
 #portal-gate {
   position: absolute;
   z-index: 5;
@@ -2471,4 +2710,23 @@ code {
   .chatbot-send { width: 34px; height: 34px; }
 }
 
-/*# sourceMappingURL=style.css.map */
+/* --- THE MATRIX HACK EASTER EGG --- */
+.matrix-hack {
+  animation: matrixShake 0.1s infinite;
+  filter: hue-rotate(90deg) contrast(150%) brightness(120%) sepia(100%) hue-rotate(80deg) saturate(500%);
+  font-family: 'Courier New', Courier, monospace !important;
+}
+
+@keyframes matrixShake {
+  0% { transform: translate(2px, 1px) rotate(0deg); }
+  10% { transform: translate(-1px, -2px) rotate(-1deg); }
+  20% { transform: translate(-3px, 0px) rotate(1deg); }
+  30% { transform: translate(0px, 2px) rotate(0deg); }
+  40% { transform: translate(1px, -1px) rotate(1deg); }
+  50% { transform: translate(-1px, 2px) rotate(-1deg); }
+  60% { transform: translate(-3px, 1px) rotate(0deg); }
+  70% { transform: translate(2px, 1px) rotate(-1deg); }
+  80% { transform: translate(-1px, -1px) rotate(1deg); }
+  90% { transform: translate(2px, 2px) rotate(0deg); }
+  100% { transform: translate(1px, -2px) rotate(-1deg); }
+}

@@ -449,18 +449,18 @@ try {
     document.addEventListener('mousemove', (e) => {
         cx = e.clientX;
         cy = e.clientY;
-        dot.style.left = cx + 'px';
-        dot.style.top = cy + 'px';
     });
 
-    function animateRing() {
-        dx += (cx - dx) * 0.12;
-        dy += (cy - dy) * 0.12;
-        ring.style.left = dx + 'px';
-        ring.style.top = dy + 'px';
-        requestAnimationFrame(animateRing);
+    function animateCursor() {
+        dx += (cx - dx) * 0.2;
+        dy += (cy - dy) * 0.2;
+
+        dot.style.transform = `translate(${cx}px, ${cy}px)`;
+        ring.style.transform = `translate(${dx}px, ${dy}px)`;
+
+        requestAnimationFrame(animateCursor);
     }
-    animateRing();
+    animateCursor();
 
     // Hover effect on interactive elements
     const hoverTargets = document.querySelectorAll('a, button, .btn, .project-card, .highlight-card, .contact-card, .skill-items span, .timeline-card');
@@ -1075,6 +1075,11 @@ document.querySelectorAll('.project-card').forEach(card => {
         // Echo input
         addLine(cmd, 'input');
 
+        // Terminal Sync: Alien Interception for 'help'
+        if (cmd === 'help' && window.triggerAlienTerminalHelp) {
+            window.triggerAlienTerminalHelp();
+        }
+
         // Process command
         const handler = commands[cmd];
         if (handler) {
@@ -1670,3 +1675,753 @@ RULES:
     }
 })();
 
+/* ========================================
+   PREMIUM UFO CURSOR LOGIC (ADVANCED)
+   ======================================== */
+(function() {
+    const ufo = document.getElementById('ufo-cursor');
+    const particleContainer = document.getElementById('ufo-particles');
+    const alien = document.getElementById('alien-companion');
+    const alienBubble = alien ? alien.querySelector('.alien-bubble') : null;
+    if (!ufo) return;
+
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let ufoX = mouseX;
+    let ufoY = mouseY;
+    let velX = 0;
+    let velY = 0;
+    
+    let alienX = mouseX + 100;
+    let alienY = mouseY - 100;
+    let alienVelX = 0;
+    let alienVelY = 0;
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+
+    // Hover effect for clickable elements
+    const clickables = document.querySelectorAll('a, button, input, .card, .project-card, .btn');
+    clickables.forEach(el => {
+        el.addEventListener('mouseenter', () => ufo.classList.add('scanning'));
+        el.addEventListener('mouseleave', () => ufo.classList.remove('scanning'));
+    });
+
+    // Particle System
+    const particles = [];
+    function createParticle(x, y) {
+        // High density plasma trail when moving fast
+        if (!particleContainer || Math.random() > 0.8) return; 
+        
+        const p = document.createElement('div');
+        p.className = 'ufo-particle';
+        particleContainer.appendChild(p);
+        
+        particles.push({
+            el: p,
+            x: x,
+            y: y,
+            life: 1.0,
+            vx: (Math.random() - 0.5) * 2,
+            vy: (Math.random() - 0.5) * 2 + 1 // slight downward drift
+        });
+    }
+
+    function updateParticles() {
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.life -= 0.03; // Fade out speed
+            p.x += p.vx;
+            p.y += p.vy;
+            
+            if (p.life <= 0) {
+                p.el.remove();
+                particles.splice(i, 1);
+            } else {
+                p.el.style.left = p.x + 'px';
+                p.el.style.top = p.y + 'px';
+                p.el.style.transform = `translate(-50%, -50%) scale(${p.life})`;
+                p.el.style.opacity = p.life;
+            }
+        }
+    }
+
+    function animateUFO() {
+        // --- UFO Physics ---
+        const stiffness = 0.12;
+        const damping = 0.70;
+        
+        const forceX = (mouseX - ufoX) * stiffness;
+        const forceY = (mouseY - ufoY) * stiffness;
+        
+        velX = (velX + forceX) * damping;
+        velY = (velY + forceY) * damping;
+        
+        ufoX += velX;
+        ufoY += velY;
+        
+        const tilt = Math.max(-35, Math.min(35, velX * 1.5));
+        ufo.style.transform = `translate(calc(-50% + ${ufoX}px), calc(-50% + ${ufoY}px)) rotate(${tilt}deg)`;
+        
+        if (Math.abs(velX) > 1.5 || Math.abs(velY) > 1.5) {
+            createParticle(ufoX, ufoY);
+        }
+        updateParticles();
+
+        // Export UFO coordinates & velocity for Alien Docking and Audio systems
+        window.currentUfoX = ufoX;
+        window.currentUfoY = ufoY;
+        window.currentUfoVelX = velX;
+        window.currentUfoVelY = velY;
+
+        requestAnimationFrame(animateUFO);
+    }
+    
+    // Reset initial CSS transform
+    ufo.style.left = '0px';
+    ufo.style.top = '0px';
+    
+    animateUFO();
+})();
+
+/* ========================================
+   AUTONOMOUS ALIEN COMPANION (GSAP)
+   ======================================== */
+(function() {
+    const alien = document.getElementById('alien-companion');
+    if (!alien) return;
+    
+    const bubble = alien.querySelector('.alien-speech-bubble');
+    const textEl = alien.querySelector('.alien-text');
+    const muteBtn = document.getElementById('alien-mute-btn');
+    const iconUnmuted = muteBtn.querySelector('.icon-unmuted');
+    const iconMuted = muteBtn.querySelector('.icon-muted');
+    const alienBubbleUI = alien.querySelector('.alien-bubble');
+
+    const ufo = document.getElementById('ufo-cursor');
+
+    let isMuted = false;
+    let isSpeaking = false;
+    let timeSpentSeconds = 0;
+    let isDocked = false;
+    let isDocking = false;
+    let abductionCooldown = false;
+
+    const dialogues = [
+        "Scanning sector...",
+        "These CSS 3D cards are quite impressive.",
+        "Tip: Click the mic icon to talk to ENTROPY.",
+        "Analyzing user interactions...",
+        "Did you know? This site uses Zero dependencies for the 3D physics.",
+        "FAQ: Yes, the AI voice is fully synthesized in real-time.",
+        "Hovering over elements is fun.",
+        "Be sure to check out the neural swarm visualization.",
+        "Your Enterprise RAG pipeline architecture is highly efficient.",
+        "Multi-Agent Swarms detected. Scaling operations...",
+        "I sense 14 weeks of relentless building in this code.",
+        "React and Next.js ecosystems running at optimal capacity."
+    ];
+
+    // --- PROCEDURAL AUDIO ENGINE ---
+    let audioCtx;
+    let ufoOsc;
+    let ufoGain;
+    let isAudioInitialized = false;
+
+    // Alien Chatter Synth
+    let chatterOsc;
+    let chatterGain;
+    let chatterInterval;
+
+    function initAudio() {
+        if (isAudioInitialized) return;
+        isAudioInitialized = true;
+        
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            ufoOsc = audioCtx.createOscillator();
+            ufoGain = audioCtx.createGain();
+            
+            // Low-frequency sci-fi drone
+            ufoOsc.type = 'sawtooth';
+            ufoOsc.frequency.value = 50; 
+            
+            // Lowpass filter for deep hum
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 200;
+            
+            ufoOsc.connect(filter);
+            filter.connect(ufoGain);
+            ufoGain.connect(audioCtx.destination);
+            
+            // Start silent
+            ufoGain.gain.value = 0;
+            ufoOsc.start();
+        } catch(e) {
+            console.log("Web Audio API failed to initialize.", e);
+        }
+    }
+
+    function startAlienChatter() {
+        if (!audioCtx || audioCtx.state !== 'running') return;
+        try {
+            chatterOsc = audioCtx.createOscillator();
+            chatterGain = audioCtx.createGain();
+            chatterOsc.type = 'square';
+            
+            const bqFilter = audioCtx.createBiquadFilter();
+            bqFilter.type = 'bandpass';
+            bqFilter.frequency.value = 1000;
+
+            chatterOsc.connect(bqFilter);
+            bqFilter.connect(chatterGain);
+            chatterGain.connect(audioCtx.destination);
+            chatterOsc.start();
+            
+            // Randomly modulate frequency and gain to sound like alien robotic language
+            chatterInterval = setInterval(() => {
+                const freq = 400 + Math.random() * 800;
+                const vol = Math.random() > 0.3 ? 0.05 : 0; // Stutter effect
+                chatterOsc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                chatterGain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            }, 80);
+        } catch(e) {}
+    }
+
+    function stopAlienChatter() {
+        try {
+            if (chatterOsc) chatterOsc.stop();
+            if (chatterInterval) clearInterval(chatterInterval);
+        } catch(e) {}
+    }
+
+    // Initialize audio on first click anywhere
+    document.addEventListener('click', initAudio, { once: true });
+
+    // Mute Toggle
+    muteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        isMuted = !isMuted;
+        if (isMuted) {
+            iconUnmuted.classList.add('hidden');
+            iconMuted.classList.remove('hidden');
+            hideDialogue();
+        } else {
+            iconMuted.classList.add('hidden');
+            iconUnmuted.classList.remove('hidden');
+            speak("Audio and notifications unmuted.");
+        }
+    });
+
+    // Speak Function (Text-To-Speech)
+    function speak(text, duration = 4000, playAudio = false) {
+        if (isMuted || isSpeaking) return;
+        isSpeaking = true;
+        textEl.textContent = text;
+        bubble.classList.remove('hidden');
+        
+        if (playAudio) {
+            // Native Browser TTS
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                // Restore Synth Voice
+                utterance.lang = 'en-US'; 
+                utterance.pitch = 1.5; // High pitch synth
+                utterance.rate = 1.2;  // Faster speaking
+                
+                window.speechSynthesis.speak(utterance);
+            }
+            
+            // Start guaranteed Web Audio alien chatter
+            startAlienChatter();
+        }
+        
+        setTimeout(() => {
+            hideDialogue();
+        }, duration);
+    }
+
+    function hideDialogue() {
+        bubble.classList.add('hidden');
+        stopAlienChatter();
+        setTimeout(() => { isSpeaking = false; }, 300);
+    }
+
+    // Time Tracker
+    setInterval(() => {
+        timeSpentSeconds += 10; // Check every 10 seconds
+        if (timeSpentSeconds === 60) speak("You've been here for 1 minute. Fascinating.");
+        if (timeSpentSeconds === 300) speak("5 minutes of exploration logged.");
+    }, 10000);
+
+    // Random Dialogues
+    setInterval(() => {
+        if (Math.random() > 0.5) {
+            const randomMsg = dialogues[Math.floor(Math.random() * dialogues.length)];
+            speak(randomMsg);
+        }
+    }, 15000); // 50% chance every 15 seconds
+
+    // Matrix Hack Easter Egg Tracking
+    let hackClickCount = 0;
+    let hackClickTimer = null;
+
+    // Click to speak out loud
+    alienBubbleUI.addEventListener('click', () => {
+        // Track rapid clicks for Easter Egg
+        hackClickCount++;
+        clearTimeout(hackClickTimer);
+        hackClickTimer = setTimeout(() => { hackClickCount = 0; }, 2000);
+
+        if (hackClickCount >= 5) {
+            hackClickCount = 0;
+            speak("Stop poking me! Systems compromised!", 5000, true);
+            document.body.classList.add('matrix-hack');
+            setTimeout(() => {
+                document.body.classList.remove('matrix-hack');
+            }, 5000); // 5 seconds of matrix hack
+            return;
+        }
+
+        // If already showing a message, hide it first
+        if (isSpeaking) {
+            bubble.classList.add('hidden');
+            stopAlienChatter();
+            isSpeaking = false;
+        }
+        
+        if (currentHoveredProject && projectExplanations[currentHoveredProject]) {
+            // Loudly speak the non-technical project explanation
+            speak(projectExplanations[currentHoveredProject], 8000, true);
+        } else {
+            // Normal random loud message
+            const randomMsg = dialogues[Math.floor(Math.random() * dialogues.length)];
+            speak(randomMsg, 4000, true);
+        }
+    });
+
+    // Terminal Sync Bridge
+    window.triggerAlienTerminalHelp = function() {
+        if (!isDocked && !isDocking) {
+            // Fly alien to the terminal area
+            const terminalEl = document.getElementById('terminal-section');
+            if (terminalEl) {
+                const rect = terminalEl.getBoundingClientRect();
+                gsap.killTweensOf(alien);
+                gsap.to(alien, {
+                    x: Math.max(100, Math.min(window.innerWidth - 100, rect.left + rect.width / 2)),
+                    y: rect.top + window.scrollY - 100, // Just above terminal
+                    duration: 1.5,
+                    ease: "power2.out"
+                });
+            }
+            speak("Terminal access granted! You can type commands like 'about', 'skills', or 'projects' to navigate!", 8000, true);
+        }
+    };
+
+    // --- CONTEXT-AWARE USER MANUAL SYSTEM ---
+    let currentHoveredProject = null;
+
+    const projectExplanations = {
+        "Autonomous Self-Healing DevOps Swarm": "This project acts like a team of robot mechanics. If the website's code breaks, these robots automatically find the bug, write the fix, and repair it without any human help!",
+        "Enterprise Production Agent": "Think of this like a digital security guard and manager combined. It strictly controls what AI models can say and automatically switches to backups if one breaks.",
+        "PersonaDoc — Production RAG": "This is a smart document reader. You upload a massive PDF, and instead of reading it yourself, you can just ask it questions and it will instantly give you the exact answer.",
+        "AI Code Review Service": "This acts like a senior programmer. When someone writes new code, this AI scans it for bugs and security holes before it goes live."
+    };
+
+    const sectionExplanations = {
+        "hero": "Welcome! I'm Zorb, your personal guide. Scroll down to explore Adarsh's work.",
+        "about": "This is Adarsh's background. He specializes in building autonomous AI systems!",
+        "terminal-section": "Don't be intimidated by the code screen! You can type simple commands here, or just chat with the AI assistant."
+    };
+
+    // Intersection Observer for Section Tracking
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && !isDocked && !isDocking) {
+                const sectionId = entry.target.id;
+                if (sectionExplanations[sectionId]) {
+                    // Silently prompt section explanations
+                    speak(sectionExplanations[sectionId], 6000, false);
+                }
+            }
+        });
+    }, { threshold: 0.6 });
+
+    document.querySelectorAll('section').forEach(sec => observer.observe(sec));
+
+    // Hover logic for projects
+    document.querySelectorAll('.project-card').forEach(card => {
+        const titleEl = card.querySelector('h3');
+        if (!titleEl) return;
+        const title = titleEl.innerText;
+
+        card.addEventListener('mouseenter', () => {
+            currentHoveredProject = title;
+            if (!isDocked && !isDocking) {
+                speak("Would you like to know what's inside? (Click me to hear!)", 5000, false);
+            }
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            currentHoveredProject = null;
+        });
+    });
+    // ----------------------------------------
+
+    // GSAP Roaming Engine
+    function roam() {
+        if (isDocked || isDocking) return; // Halt roaming if docked
+        
+        if (typeof gsap === 'undefined') {
+            setTimeout(roam, 1000); // Wait for GSAP to load
+            return;
+        }
+
+        const maxX = window.innerWidth - 100;
+        const maxY = window.innerHeight - 100;
+        const targetX = Math.random() * maxX + 50;
+        const targetY = Math.random() * maxY + 50;
+
+        // Calculate distance and direction
+        const currentX = gsap.getProperty(alien, "x") || 0;
+        const deltaX = targetX - currentX;
+        
+        // Flip to face direction
+        gsap.to(alienBubbleUI, {
+            scaleX: deltaX < 0 ? -1 : 1,
+            duration: 0.3
+        });
+
+        // Add a slight banking tilt
+        const tilt = deltaX > 0 ? 15 : -15;
+
+        const distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(targetY - (gsap.getProperty(alien, "y") || 0), 2));
+        const duration = distance / 100; // Speed factor
+
+        gsap.to(alien, {
+            x: targetX,
+            y: targetY,
+            rotationZ: tilt,
+            duration: duration,
+            ease: "sine.inOut",
+            onComplete: () => {
+                // Return to upright when stopped
+                gsap.to(alien, { rotationZ: 0, duration: 0.5 });
+                
+                // Pause for a random time before moving again
+                setTimeout(roam, 1000 + Math.random() * 4000);
+            }
+        });
+    }
+
+    // Initial positioning
+    gsap.set(alien, { x: window.innerWidth - 100, y: window.innerHeight - 150 });
+    
+    // Start roaming
+    setTimeout(roam, 2000); // Delay start
+
+    // --- PROXIMITY ABDUCTION MECHANICS ---
+    if (ufo) {
+        gsap.ticker.add(() => {
+            if (window.currentUfoX === undefined) return;
+            
+            // Update Procedural Audio based on UFO velocity
+            if (isAudioInitialized && audioCtx.state === 'running' && window.currentUfoVelX !== undefined) {
+                const speed = Math.sqrt(window.currentUfoVelX**2 + window.currentUfoVelY**2);
+                const targetFreq = 50 + (speed * 2);
+                const targetGain = Math.min(0.1, speed * 0.01);
+                
+                // Smoothly adjust audio
+                ufoOsc.frequency.setTargetAtTime(targetFreq, audioCtx.currentTime, 0.1);
+                ufoGain.gain.setTargetAtTime(targetGain, audioCtx.currentTime, 0.1);
+            }
+
+            // Check distance for abduction
+            if (!isDocked && !isDocking && !abductionCooldown) {
+                const currentAlienX = gsap.getProperty(alien, "x") || 0;
+                const currentAlienY = gsap.getProperty(alien, "y") || 0;
+                
+                const dist = Math.sqrt(Math.pow(window.currentUfoX - currentAlienX, 2) + Math.pow(window.currentUfoY - currentAlienY, 2));
+                
+                // Perfect Tractor Beam Distance requested by user: 260px
+                if (dist < 260 && window.currentUfoY < currentAlienY) {
+                    isDocking = true;
+                    gsap.killTweensOf(alien); // Stop current roam
+                    speak("Abduction sequence engaged.", 3000, true);
+                    
+                    // Fly to UFO rapidly, spin, and shrink
+                    gsap.to(alienBubbleUI, { 
+                        scale: 0, // shrink completely into UFO core
+                        rotationZ: 1080, // Spin violently (3 full rotations)
+                        duration: 0.8, // Slightly longer duration to see the long-distance pull
+                        ease: "power3.in" 
+                    });
+                    gsap.to(alien, {
+                        x: window.currentUfoX,
+                        y: window.currentUfoY,
+                        rotationZ: 0,
+                        duration: 0.8,
+                        ease: "power3.in",
+                        onComplete: () => {
+                            isDocking = false;
+                            isDocked = true;
+                        }
+                    });
+                }
+            }
+            
+            // Continuous Docking Lock
+            if (isDocked && !isDocking) {
+                gsap.set(alien, {
+                    x: window.currentUfoX,
+                    y: window.currentUfoY
+                });
+            }
+        });
+
+        // Double click ANYWHERE to release (UFO has pointer-events: none, so clicks pass through)
+        // Foolproof Release Mechanism
+        function releaseAlien() {
+            if (isDocked || isDocking) {
+                isDocked = false;
+                isDocking = false; // Crucial: clear docking state to prevent onComplete overrides
+                abductionCooldown = true; // Prevent immediate re-abduction
+                
+                // Crucial: kill any running abduction animations that might conflict
+                gsap.killTweensOf(alien);
+                gsap.killTweensOf(alienBubbleUI);
+                
+                // Eject to a random location on the screen, dropping out of the beam
+                const randomEjectX = Math.max(100, Math.min(window.innerWidth - 100, window.currentUfoX + (Math.random() > 0.5 ? 400 : -400)));
+                const randomEjectY = Math.max(100, Math.min(window.innerHeight - 100, window.currentUfoY + 250 + Math.random() * 200));
+
+                gsap.to(alien, {
+                    x: randomEjectX,
+                    y: randomEjectY, 
+                    duration: 1.2,
+                    ease: "power2.out"
+                });
+                
+                // Pop back out and unspin
+                gsap.to(alienBubbleUI, { scale: 1, rotationZ: 0, opacity: 1, duration: 0.6, ease: "elastic.out(1, 0.5)" });
+                speak("Ejected from mothership. Changing sectors.", 3000, true);
+                
+                setTimeout(() => {
+                    abductionCooldown = false;
+                    roam(); // Resume roaming after dropped
+                }, 2000); // 2 seconds of immunity
+            }
+        }
+
+        // Release on double-click
+        window.addEventListener('dblclick', releaseAlien);
+        
+        // Release on Right-Click (foolproof alternative)
+        window.addEventListener('contextmenu', (e) => {
+            if (isDocked || isDocking) {
+                e.preventDefault(); // Block the normal browser context menu if we are releasing the alien
+                releaseAlien();
+            }
+        });
+    }
+})();
+
+/* ========================================
+   PHYSICS SKILL GRAPH
+   ======================================== */
+(function() {
+    const canvas = document.getElementById('skills-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('skills-canvas-container');
+
+    let width, height;
+    function resize() {
+        width = container.clientWidth;
+        height = container.clientHeight;
+        canvas.width = width;
+        canvas.height = height;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const skills = [
+        "LLaMA 3", "GPT-4", "RAG", "Multi-Agent", "Python", "FastAPI",
+        "Docker", "CI/CD", "Pytest", "ChromaDB", "ReAct", "Guardrails",
+        "React", "Node.js", "TensorFlow", "PyTorch"
+    ];
+
+    const nodes = skills.map(skill => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 2,
+        vy: (Math.random() - 0.5) * 2,
+        label: skill,
+        radius: 30 + Math.random() * 20
+    }));
+
+    let mouseX = width / 2;
+    let mouseY = height / 2;
+    let isHovering = false;
+
+    container.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        mouseX = e.clientX - rect.left;
+        mouseY = e.clientY - rect.top;
+        isHovering = true;
+    });
+
+    container.addEventListener('mouseleave', () => {
+        isHovering = false;
+    });
+
+    function loop() {
+        ctx.clearRect(0, 0, width, height);
+        
+        // Draw edges
+        ctx.lineWidth = 1;
+        for (let i = 0; i < nodes.length; i++) {
+            for (let j = i + 1; j < nodes.length; j++) {
+                const dx = nodes[i].x - nodes[j].x;
+                const dy = nodes[i].y - nodes[j].y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 150) {
+                    ctx.beginPath();
+                    ctx.moveTo(nodes[i].x, nodes[i].y);
+                    ctx.lineTo(nodes[j].x, nodes[j].y);
+                    ctx.strokeStyle = `rgba(57, 255, 20, ${1 - dist / 150})`;
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // Draw nodes
+        nodes.forEach(node => {
+            node.x += node.vx;
+            node.y += node.vy;
+
+            if (node.x < node.radius || node.x > width - node.radius) node.vx *= -1;
+            if (node.y < node.radius || node.y > height - node.radius) node.vy *= -1;
+
+            if (isHovering) {
+                const dx = mouseX - node.x;
+                const dy = mouseY - node.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 100) {
+                    node.vx -= (dx / dist) * 0.5;
+                    node.vy -= (dy / dist) * 0.5;
+                }
+            }
+
+            const speed = Math.sqrt(node.vx * node.vx + node.vy * node.vy);
+            if (speed > 2) {
+                node.vx *= 0.95;
+                node.vy *= 0.95;
+            } else if (speed < 0.5) {
+                node.vx *= 1.05;
+                node.vy *= 1.05;
+            }
+
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(10, 20, 15, 0.8)";
+            ctx.fill();
+            ctx.strokeStyle = "#39ff14";
+            ctx.stroke();
+
+            ctx.fillStyle = "#39ff14";
+            ctx.font = "12px monospace";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(node.label, node.x, node.y);
+        });
+
+        requestAnimationFrame(loop);
+    }
+    loop();
+})();
+
+/* ========================================
+   AMBIENT AUDIO & KONAMI CODE
+   ======================================== */
+(function() {
+    // 1. Ambient Audio
+    const audioToggleBtn = document.getElementById('ambient-audio-toggle');
+    const audioIcon = document.getElementById('audio-icon');
+    let ambientAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/02/10/audio_5b34f7831f.mp3?filename=dark-ambient-drone-24076.mp3'); 
+    ambientAudio.loop = true;
+    ambientAudio.volume = 0.2;
+    let isAudioPlaying = false;
+
+    if (audioToggleBtn) {
+        audioToggleBtn.addEventListener('click', () => {
+            if (isAudioPlaying) {
+                ambientAudio.pause();
+                audioIcon.innerText = '🔇';
+                isAudioPlaying = false;
+            } else {
+                ambientAudio.play();
+                audioIcon.innerText = '🔊';
+                isAudioPlaying = true;
+            }
+        });
+    }
+
+    // 2. Konami Code Lockdown
+    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    let konamiIndex = 0;
+    
+    window.addEventListener('keydown', (e) => {
+        if (e.key === konamiCode[konamiIndex]) {
+            konamiIndex++;
+            if (konamiIndex === konamiCode.length) {
+                konamiIndex = 0;
+                triggerLockdown();
+            }
+        } else {
+            konamiIndex = 0;
+        }
+    });
+
+    function triggerLockdown() {
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0'; overlay.style.left = '0';
+        overlay.style.width = '100vw'; overlay.style.height = '100vh';
+        overlay.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+        overlay.style.boxShadow = 'inset 0 0 150px red';
+        overlay.style.zIndex = '9999999';
+        overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.style.fontFamily = 'monospace';
+        overlay.innerHTML = '<h1 style="color:red; font-size:4vw; text-align:center; text-shadow: 0 0 20px red;">CLASSIFIED PROTOCOL UNLOCKED:<br>APEX-PARAGON CORE</h1>';
+        document.body.appendChild(overlay);
+
+        gsap.fromTo(overlay, {opacity: 0}, {opacity: 1, duration: 0.5, yoyo: true, repeat: 5});
+        
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime + 0.5);
+            osc.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 3);
+        } catch(e) {}
+
+        setTimeout(() => overlay.remove(), 4000);
+        
+        if(window.speechSynthesis) {
+            const u = new SpeechSynthesisUtterance("Warning. Classified clearance granted.");
+            u.pitch = 0.5; u.rate = 0.8;
+            window.speechSynthesis.speak(u);
+        }
+    }
+})();
