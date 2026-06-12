@@ -1968,10 +1968,66 @@ RULES:
             stopAlienChatter();
             isSpeaking = false;
         }
-        const randomMsg = dialogues[Math.floor(Math.random() * dialogues.length)];
-        // Pass playAudio = true since the user explicitly clicked
-        speak(randomMsg, 4000, true);
+        
+        if (currentHoveredProject && projectExplanations[currentHoveredProject]) {
+            // Loudly speak the non-technical project explanation
+            speak(projectExplanations[currentHoveredProject], 8000, true);
+        } else {
+            // Normal random loud message
+            const randomMsg = dialogues[Math.floor(Math.random() * dialogues.length)];
+            speak(randomMsg, 4000, true);
+        }
     });
+
+    // --- CONTEXT-AWARE USER MANUAL SYSTEM ---
+    let currentHoveredProject = null;
+
+    const projectExplanations = {
+        "Autonomous Self-Healing DevOps Swarm": "This project acts like a team of robot mechanics. If the website's code breaks, these robots automatically find the bug, write the fix, and repair it without any human help!",
+        "Enterprise Production Agent": "Think of this like a digital security guard and manager combined. It strictly controls what AI models can say and automatically switches to backups if one breaks.",
+        "PersonaDoc — Production RAG": "This is a smart document reader. You upload a massive PDF, and instead of reading it yourself, you can just ask it questions and it will instantly give you the exact answer.",
+        "AI Code Review Service": "This acts like a senior programmer. When someone writes new code, this AI scans it for bugs and security holes before it goes live."
+    };
+
+    const sectionExplanations = {
+        "hero": "Welcome! I'm Zorb, your personal guide. Scroll down to explore Adarsh's work.",
+        "about": "This is Adarsh's background. He specializes in building autonomous AI systems!",
+        "terminal-section": "Don't be intimidated by the code screen! You can type simple commands here, or just chat with the AI assistant."
+    };
+
+    // Intersection Observer for Section Tracking
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && !isDocked && !isDocking) {
+                const sectionId = entry.target.id;
+                if (sectionExplanations[sectionId]) {
+                    // Silently prompt section explanations
+                    speak(sectionExplanations[sectionId], 6000, false);
+                }
+            }
+        });
+    }, { threshold: 0.6 });
+
+    document.querySelectorAll('section').forEach(sec => observer.observe(sec));
+
+    // Hover logic for projects
+    document.querySelectorAll('.project-card').forEach(card => {
+        const titleEl = card.querySelector('h3');
+        if (!titleEl) return;
+        const title = titleEl.innerText;
+
+        card.addEventListener('mouseenter', () => {
+            currentHoveredProject = title;
+            if (!isDocked && !isDocking) {
+                speak("Would you like to know what's inside? (Click me to hear!)", 5000, false);
+            }
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            currentHoveredProject = null;
+        });
+    });
+    // ----------------------------------------
 
     // GSAP Roaming Engine
     function roam() {
