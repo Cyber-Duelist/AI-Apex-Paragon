@@ -1671,37 +1671,102 @@ RULES:
 })();
 
 /* ========================================
-   PREMIUM UFO CURSOR LOGIC
+   PREMIUM UFO CURSOR LOGIC (ADVANCED)
    ======================================== */
 (function() {
     const ufo = document.getElementById('ufo-cursor');
+    const particleContainer = document.getElementById('ufo-particles');
     if (!ufo) return;
 
     let mouseX = window.innerWidth / 2;
     let mouseY = window.innerHeight / 2;
     let ufoX = mouseX;
     let ufoY = mouseY;
+    let velX = 0;
+    let velY = 0;
     
     document.addEventListener('mousemove', (e) => {
         mouseX = e.clientX;
         mouseY = e.clientY;
     });
 
-    function animateUFO() {
-        // Lerp for smooth floating physics
-        ufoX += (mouseX - ufoX) * 0.15;
-        ufoY += (mouseY - ufoY) * 0.15;
+    // Hover effect for clickable elements
+    const clickables = document.querySelectorAll('a, button, input, .card, .project-card, .btn');
+    clickables.forEach(el => {
+        el.addEventListener('mouseenter', () => ufo.classList.add('scanning'));
+        el.addEventListener('mouseleave', () => ufo.classList.remove('scanning'));
+    });
+
+    // Particle System
+    const particles = [];
+    function createParticle(x, y) {
+        if (!particleContainer || Math.random() > 0.4) return; // Limit particle density
         
-        // Add a slight banking tilt based on velocity
-        const deltaX = mouseX - ufoX;
-        const tilt = Math.max(-20, Math.min(20, deltaX * 0.1));
+        const p = document.createElement('div');
+        p.className = 'ufo-particle';
+        particleContainer.appendChild(p);
+        
+        particles.push({
+            el: p,
+            x: x,
+            y: y,
+            life: 1.0,
+            vx: (Math.random() - 0.5) * 2,
+            vy: (Math.random() - 0.5) * 2 + 1 // slight downward drift
+        });
+    }
+
+    function updateParticles() {
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.life -= 0.03; // Fade out speed
+            p.x += p.vx;
+            p.y += p.vy;
+            
+            if (p.life <= 0) {
+                p.el.remove();
+                particles.splice(i, 1);
+            } else {
+                p.el.style.left = p.x + 'px';
+                p.el.style.top = p.y + 'px';
+                p.el.style.transform = `translate(-50%, -50%) scale(${p.life})`;
+                p.el.style.opacity = p.life;
+            }
+        }
+    }
+
+    function animateUFO() {
+        // Spring Physics parameters
+        const stiffness = 0.12;
+        const damping = 0.70;
+        
+        // Calculate spring force
+        const forceX = (mouseX - ufoX) * stiffness;
+        const forceY = (mouseY - ufoY) * stiffness;
+        
+        // Update velocity
+        velX = (velX + forceX) * damping;
+        velY = (velY + forceY) * damping;
+        
+        // Update position
+        ufoX += velX;
+        ufoY += velY;
+        
+        // Banking tilt based on horizontal velocity
+        const tilt = Math.max(-35, Math.min(35, velX * 1.5));
         
         ufo.style.transform = `translate(calc(-50% + ${ufoX}px), calc(-50% + ${ufoY}px)) rotate(${tilt}deg)`;
+        
+        // Generate exhaust particles if moving fast enough
+        if (Math.abs(velX) > 1.5 || Math.abs(velY) > 1.5) {
+            createParticle(ufoX, ufoY);
+        }
+        updateParticles();
         
         requestAnimationFrame(animateUFO);
     }
     
-    // Reset initial CSS transform which uses translate(-50%, -50%)
+    // Reset initial CSS transform
     ufo.style.left = '0px';
     ufo.style.top = '0px';
     
