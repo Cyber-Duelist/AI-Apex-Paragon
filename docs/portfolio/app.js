@@ -1884,14 +1884,11 @@ RULES:
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             
-            // Wait for voices to load if they haven't
-            let voices = window.speechSynthesis.getVoices();
-            // Try to pick a non-default, distinct voice
-            let alienVoice = voices.find(v => v.name.includes('Zira') || v.name.includes('Hazel') || v.name.includes('Google UK English'));
-            if(alienVoice) utterance.voice = alienVoice;
-            
-            utterance.pitch = 0.1; // Deep rumbling, distorted alien voice
-            utterance.rate = 0.85; // Slow and methodical
+            // To make it sound TRULY alien, we force a foreign phonetic engine (Finnish) to read English text
+            // This bypasses the OS's native English voice limitations and sounds extremely robotic/bizarre.
+            utterance.lang = 'fi-FI'; 
+            utterance.pitch = 0.1; // Deepest possible pitch
+            utterance.rate = 0.8; // Slow down the phonetic distortion
             
             // Add a sci-fi 'transmission beep' before speaking using Web Audio API
             if (audioCtx && audioCtx.state === 'running') {
@@ -2019,8 +2016,8 @@ RULES:
                 
                 const dist = Math.sqrt(Math.pow(window.currentUfoX - currentAlienX, 2) + Math.pow(window.currentUfoY - currentAlienY, 2));
                 
-                // If UFO is in the vicinity of the alien (Wide Tractor Beam)
-                if (dist < 600) { // Massive trigger radius (600px) for extreme long-distance abduction
+                // If UFO is in the vicinity (600px) AND the UFO is physically ABOVE the alien (currentUfoY < currentAlienY)
+                if (dist < 600 && window.currentUfoY < currentAlienY) {
                     isDocking = true;
                     gsap.killTweensOf(alien); // Stop current roam
                     speak("Abduction sequence engaged.", 3000);
