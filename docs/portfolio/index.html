@@ -422,7 +422,45 @@
         <div class="section-container">
             <p class="section-tag">MY ARSENAL</p>
             <h2 class="section-title">Technologies I Wield.</h2>
-            <div id="skills-canvas-container" style="position: relative; width: 100%; height: 500px; border-radius: 12px; overflow: hidden; background: rgba(5, 5, 10, 0.5); border: 1px solid rgba(57, 255, 20, 0.2); box-shadow: inset 0 0 20px rgba(0,0,0,0.8);">
+            
+            <div class="skills-grid">
+                <div class="skill-category">
+                    <h3>AI & Machine Learning</h3>
+                    <div class="skill-items">
+                        <span>LLMs (LLaMA 3, GPT)</span>
+                        <span>RAG Pipelines</span>
+                        <span>Multi-Agent Orchestration</span>
+                        <span>ReAct Loops</span>
+                        <span>AI Guardrails</span>
+                        <span>Prompt Engineering</span>
+                        <span>LLM-as-a-Judge Evals</span>
+                        <span>ChromaDB</span>
+                    </div>
+                </div>
+                <div class="skill-category">
+                    <h3>Backend & DevOps</h3>
+                    <div class="skill-items">
+                        <span>Python</span>
+                        <span>FastAPI</span>
+                        <span>REST APIs</span>
+                        <span>Pytest</span>
+                        <span>Git & GitHub</span>
+                        <span>Server-Sent Events</span>
+                        <span>CI/CD Pipelines</span>
+                        <span>Docker</span>
+                    </div>
+                </div>
+                <div class="skill-category">
+                    <h3>Certifications</h3>
+                    <div class="skill-items">
+                        <span>Oracle GenAI Professional</span>
+                        <span>Oracle Data Science</span>
+                        <span>IoT & Industrial Automation</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="skills-canvas-container" style="position: relative; width: 100%; height: 300px; margin-top: 2rem; border-radius: 12px; overflow: hidden; background: rgba(5, 5, 10, 0.5); border: 1px solid rgba(57, 255, 20, 0.2); box-shadow: inset 0 0 20px rgba(0,0,0,0.8);">
                 <canvas id="skills-canvas"></canvas>
             </div>
         </div>
@@ -619,9 +657,6 @@
                 </div>
             </div>
             <div class="chatbot-header-actions">
-                <button id="ambient-audio-toggle" class="btn btn-outline" style="padding: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                    <span id="audio-icon">🔇</span> <span style="font-size: 0.8rem">BGM</span>
-                </button>
                 <button class="chatbot-voice-toggle" id="chatbot-voice-toggle" title="Toggle voice responses">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
