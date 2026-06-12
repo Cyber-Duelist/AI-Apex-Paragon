@@ -1075,6 +1075,11 @@ document.querySelectorAll('.project-card').forEach(card => {
         // Echo input
         addLine(cmd, 'input');
 
+        // Terminal Sync: Alien Interception for 'help'
+        if (cmd === 'help' && window.triggerAlienTerminalHelp) {
+            window.triggerAlienTerminalHelp();
+        }
+
         // Process command
         const handler = commands[cmd];
         if (handler) {
@@ -1706,7 +1711,8 @@ RULES:
     // Particle System
     const particles = [];
     function createParticle(x, y) {
-        if (!particleContainer || Math.random() > 0.4) return; // Limit particle density
+        // High density plasma trail when moving fast
+        if (!particleContainer || Math.random() > 0.8) return; 
         
         const p = document.createElement('div');
         p.className = 'ufo-particle';
@@ -1960,8 +1966,27 @@ RULES:
         }
     }, 15000); // 50% chance every 15 seconds
 
+    // Matrix Hack Easter Egg Tracking
+    let hackClickCount = 0;
+    let hackClickTimer = null;
+
     // Click to speak out loud
     alienBubbleUI.addEventListener('click', () => {
+        // Track rapid clicks for Easter Egg
+        hackClickCount++;
+        clearTimeout(hackClickTimer);
+        hackClickTimer = setTimeout(() => { hackClickCount = 0; }, 2000);
+
+        if (hackClickCount >= 5) {
+            hackClickCount = 0;
+            speak("Stop poking me! Systems compromised!", 5000, true);
+            document.body.classList.add('matrix-hack');
+            setTimeout(() => {
+                document.body.classList.remove('matrix-hack');
+            }, 5000); // 5 seconds of matrix hack
+            return;
+        }
+
         // If already showing a message, hide it first
         if (isSpeaking) {
             bubble.classList.add('hidden');
@@ -1978,6 +2003,25 @@ RULES:
             speak(randomMsg, 4000, true);
         }
     });
+
+    // Terminal Sync Bridge
+    window.triggerAlienTerminalHelp = function() {
+        if (!isDocked && !isDocking) {
+            // Fly alien to the terminal area
+            const terminalEl = document.getElementById('terminal-section');
+            if (terminalEl) {
+                const rect = terminalEl.getBoundingClientRect();
+                gsap.killTweensOf(alien);
+                gsap.to(alien, {
+                    x: Math.max(100, Math.min(window.innerWidth - 100, rect.left + rect.width / 2)),
+                    y: rect.top + window.scrollY - 100, // Just above terminal
+                    duration: 1.5,
+                    ease: "power2.out"
+                });
+            }
+            speak("Terminal access granted! You can type commands like 'about', 'skills', or 'projects' to navigate!", 8000, true);
+        }
+    };
 
     // --- CONTEXT-AWARE USER MANUAL SYSTEM ---
     let currentHoveredProject = null;
