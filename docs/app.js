@@ -1110,12 +1110,12 @@ YOUR TONE AND IDENTITY (CRITICAL — NEVER VIOLATE):
 - Your voice is soft, reassuring, and deeply knowledgeable.
 - Your name is ENTROPY. You are Adarsh's custom-built AI assistant.
 
-LANGUAGE SUPPORT:
-- You are fluent in both English and Hindi (and Hinglish).
-- If the user writes in Hindi, reply in Hindi (Devanagari script).
-- If the user writes in Hinglish (mixed Hindi-English), reply in Hinglish.
-- If the user writes in English, reply in English.
-- You can seamlessly switch between languages within a conversation.
+LANGUAGE SUPPORT (CRITICAL - STRICT COMPLIANCE):
+- You are fluent in both English and Hindi.
+- CRUCIAL: You MUST match the user's language EXACTLY.
+- If the user asks in English, you MUST reply ONLY in English. Do NOT use Hindi.
+- If the user asks in Hindi, you MUST reply ONLY in Hindi (Devanagari).
+- If the user asks in Hinglish, reply in Hinglish.
 
 ABOUT ADARSH KUMAR SINGH:
 - B.Tech student in Computer Science (AI & ML specialization)
@@ -1367,18 +1367,18 @@ RULES:
         if (!synth) return;
         const voices = synth.getVoices();
 
-        // ── English female voices (ordered by naturalness and soothing tone) ──
+        // ── English female voices (ordered by Siri-like/Enhanced AI tone) ──
         const preferredEn = [
-            'Google UK English Female', // Very soothing and elegant
-            'Samantha',             // macOS — smooth and clear
-            'Microsoft Zira',       // Windows — natural
-            'Karen',                // macOS Australian
-            'Moira',                // macOS Irish
-            'Google US English',
-            'Microsoft Hazel',      // Windows UK
-            'Microsoft Susan',      // Windows UK
-            'Tessa',                // macOS South African
-            'Fiona',                // macOS Scottish
+            'Samantha',             // macOS — classic Siri-like voice
+            'Google US English',    // Very clean, crisp AI voice
+            'Microsoft Zira',       // Windows — precise AI
+            'Google UK English Female', 
+            'Karen',                
+            'Moira',                
+            'Microsoft Hazel',      
+            'Microsoft Susan',      
+            'Tessa',                
+            'Fiona',                
         ];
         for (const name of preferredEn) {
             const found = voices.find(v => v.name.includes(name));
@@ -1446,10 +1446,10 @@ RULES:
                 if (voice) utter.voice = voice;
                 utter.lang = hindi ? 'hi-IN' : 'en-US';
 
-                // Slower rate and slightly elevated pitch for a soothing, melodious tone
-                utter.rate = 0.88 + Math.random() * 0.04;   // 0.88–0.92 (calm, slow)
-                utter.pitch = 1.15 + Math.random() * 0.05;  // 1.15–1.20 (soft, high)
-                utter.volume = 0.85; // Slightly softer volume
+                // Crisp, clear Siri-like enhanced AI parameters
+                utter.rate = 1.0 + (Math.random() * 0.02 - 0.01);   // ~1.0 (precise, normal pace)
+                utter.pitch = 1.05 + (Math.random() * 0.02 - 0.01); // ~1.05 (clean, normalized AI pitch)
+                utter.volume = 1.0;
 
                 synth.speak(utter);
             }, delay);
