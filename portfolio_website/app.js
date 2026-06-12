@@ -1160,8 +1160,7 @@ LANGUAGE SUPPORT (CRITICAL - STRICT COMPLIANCE):
 - You are fluent in both English and Hindi.
 - CRUCIAL: You MUST match the user's language EXACTLY.
 - If the user asks in English, you MUST reply ONLY in English. Do NOT use Hindi.
-- If the user asks in Hindi, you MUST reply ONLY in Hindi (Devanagari).
-- If the user asks in Hinglish, reply in Hinglish.
+- If the user asks in Hindi or Hinglish, you MUST reply ONLY in pure Hindi (using Devanagari script). NEVER use Roman script for Hindi words.
 
 ABOUT ADARSH KUMAR SINGH:
 - B.Tech student in Computer Science (AI & ML specialization)
@@ -1533,7 +1532,7 @@ RULES:
 
         // Detect language and pick voice
         const hindi = isHindiText(clean);
-        const voice = hindi ? (selectedVoiceHi || selectedVoiceEn) : selectedVoiceEn;
+        const voice = hindi ? selectedVoiceHi : selectedVoiceEn;
 
         // Split into natural sentence chunks (supports Hindi purna viram ।)
         const sentences = clean.match(/[^.!?।]+[.!?।]+|[^.!?।]+$/g) || [clean];
