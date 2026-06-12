@@ -1672,22 +1672,39 @@ RULES:
 })();
 
 /* ========================================
-   UFO CURSOR LOGIC
+   PREMIUM UFO CURSOR LOGIC
    ======================================== */
 (function() {
     const ufo = document.getElementById('ufo-cursor');
     if (!ufo) return;
 
-    // We use a slight delay/lerp or direct transform for smooth tracking
-    // Direct left/top is fine but transform is much smoother for hardware acceleration.
-    // However, style.left/top is easier for a fixed element.
     let mouseX = window.innerWidth / 2;
     let mouseY = window.innerHeight / 2;
+    let ufoX = mouseX;
+    let ufoY = mouseY;
     
     document.addEventListener('mousemove', (e) => {
         mouseX = e.clientX;
         mouseY = e.clientY;
-        ufo.style.left = mouseX + 'px';
-        ufo.style.top = mouseY + 'px';
     });
+
+    function animateUFO() {
+        // Lerp for smooth floating physics
+        ufoX += (mouseX - ufoX) * 0.15;
+        ufoY += (mouseY - ufoY) * 0.15;
+        
+        // Add a slight banking tilt based on velocity
+        const deltaX = mouseX - ufoX;
+        const tilt = Math.max(-20, Math.min(20, deltaX * 0.1));
+        
+        ufo.style.transform = `translate(calc(-50% + ${ufoX}px), calc(-50% + ${ufoY}px)) rotate(${tilt}deg)`;
+        
+        requestAnimationFrame(animateUFO);
+    }
+    
+    // Reset initial CSS transform which uses translate(-50%, -50%)
+    ufo.style.left = '0px';
+    ufo.style.top = '0px';
+    
+    animateUFO();
 })();
