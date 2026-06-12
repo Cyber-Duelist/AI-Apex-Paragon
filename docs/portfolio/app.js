@@ -449,18 +449,18 @@ try {
     document.addEventListener('mousemove', (e) => {
         cx = e.clientX;
         cy = e.clientY;
-        dot.style.left = cx + 'px';
-        dot.style.top = cy + 'px';
     });
 
-    function animateRing() {
-        dx += (cx - dx) * 0.12;
-        dy += (cy - dy) * 0.12;
-        ring.style.left = dx + 'px';
-        ring.style.top = dy + 'px';
-        requestAnimationFrame(animateRing);
+    function animateCursor() {
+        dx += (cx - dx) * 0.2;
+        dy += (cy - dy) * 0.2;
+
+        dot.style.transform = `translate(${cx}px, ${cy}px)`;
+        ring.style.transform = `translate(${dx}px, ${dy}px)`;
+
+        requestAnimationFrame(animateCursor);
     }
-    animateRing();
+    animateCursor();
 
     // Hover effect on interactive elements
     const hoverTargets = document.querySelectorAll('a, button, .btn, .project-card, .highlight-card, .contact-card, .skill-items span, .timeline-card');
