@@ -1800,6 +1800,7 @@ RULES:
     let timeSpentSeconds = 0;
     let isDocked = false;
     let isDocking = false;
+    let abductionCooldown = false;
 
     const dialogues = [
         "Scanning sector...",
@@ -1994,7 +1995,7 @@ RULES:
             }
 
             // Check distance for abduction
-            if (!isDocked && !isDocking) {
+            if (!isDocked && !isDocking && !abductionCooldown) {
                 const currentAlienX = gsap.getProperty(alien, "x") || 0;
                 const currentAlienY = gsap.getProperty(alien, "y") || 0;
                 
@@ -2040,11 +2041,23 @@ RULES:
         window.addEventListener('dblclick', () => {
             if (isDocked || isDocking) {
                 isDocked = false;
+                abductionCooldown = true; // Prevent immediate re-abduction
+                
+                // Drop the alien slightly down from the UFO
+                gsap.to(alien, {
+                    y: window.currentUfoY + 100, // Drop it 100px below the UFO
+                    duration: 0.5,
+                    ease: "power2.out"
+                });
                 
                 // Pop back out and unspin
                 gsap.to(alienBubbleUI, { scale: 1, rotationZ: 0, opacity: 1, duration: 0.6, ease: "elastic.out(1, 0.5)" });
-                speak("Released from mothership. Resuming exploration.");
-                roam();
+                speak("Released from mothership.");
+                
+                setTimeout(() => {
+                    abductionCooldown = false;
+                    roam(); // Resume roaming after dropped
+                }, 2000); // 2 seconds of immunity
             }
         });
     }
