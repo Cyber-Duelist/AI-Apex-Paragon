@@ -1830,6 +1830,14 @@ RULES:
     let ufoOsc;
     let ufoGain;
     let isAudioInitialized = false;
+    
+    // Globally load voices to prevent async empty array bug
+    let synthVoices = [];
+    if ('speechSynthesis' in window) {
+        const loadVoices = () => { synthVoices = window.speechSynthesis.getVoices(); };
+        loadVoices();
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
 
     // Alien Chatter Synth
     let chatterOsc;
@@ -1943,19 +1951,23 @@ RULES:
                 // Restore Synth Voice and Handle Hindi
                 const isHindi = /[\u0900-\u097F]/.test(text);
                 
-                // Try to find a good robotic-sounding voice
-                const voices = window.speechSynthesis.getVoices();
                 let selectedVoice = null;
                 
                 if (isHindi) {
-                    selectedVoice = voices.find(v => v.lang.includes('hi'));
+                    selectedVoice = synthVoices.find(v => v.lang.includes('hi'));
                     utterance.pitch = 0.6;
                     utterance.rate = 1.0;
                 } else {
-                    // Look for Microsoft Mark or a deep English voice
-                    selectedVoice = voices.find(v => v.name.includes('Mark') || v.name.includes('David') || v.name.includes('Google'));
-                    utterance.pitch = 0.1; // Extremely deep, monotonic pitch
-                    utterance.rate = 0.85; // Slow, calculated speaking
+                    // Try to find the most robotic/computerized voice available
+                    selectedVoice = synthVoices.find(v => 
+                        v.name.includes('Zira') || 
+                        v.name.includes('Mark') || 
+                        v.name.includes('David') ||
+                        v.name.includes('Google')
+                    ) || synthVoices[0]; // fallback
+                    
+                    utterance.pitch = 0.0; // Flat 0 pitch forces monotonic tone
+                    utterance.rate = 0.8; // Slow, mechanical
                 }
                 
                 if (selectedVoice) {
