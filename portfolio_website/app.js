@@ -1874,39 +1874,6 @@ RULES:
         }
     }
 
-    function startAlienChatter() {
-        if (!audioCtx || audioCtx.state !== 'running') return;
-        try {
-            chatterOsc = audioCtx.createOscillator();
-            chatterGain = audioCtx.createGain();
-            chatterOsc.type = 'sawtooth';
-            
-            const bqFilter = audioCtx.createBiquadFilter();
-            bqFilter.type = 'lowpass';
-            bqFilter.frequency.value = 600;
-
-            chatterOsc.connect(bqFilter);
-            bqFilter.connect(chatterGain);
-            chatterGain.connect(audioCtx.destination);
-            chatterOsc.start();
-            
-            // Randomly modulate frequency and gain to sound like a deep mechanical robotic language
-            chatterInterval = setInterval(() => {
-                const freq = 80 + Math.random() * 120; // Deeper mechanical pitch
-                const vol = Math.random() > 0.2 ? 0.15 : 0.02; // Louder, more aggressive stutter
-                chatterOsc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                chatterGain.gain.setValueAtTime(vol, audioCtx.currentTime);
-            }, 80);
-        } catch(e) {}
-    }
-
-    function stopAlienChatter() {
-        try {
-            if (chatterOsc) chatterOsc.stop();
-            if (chatterInterval) clearInterval(chatterInterval);
-        } catch(e) {}
-    }
-
     // Initialize audio on first click anywhere
     document.addEventListener('click', initAudio, { once: true });
 
@@ -1976,9 +1943,9 @@ RULES:
                         selectedVoice = voices.find(v => v.lang.startsWith('en'));
                     }
                     
-                    // Force the pitch to absolute minimum for maximum robotic effect
-                    utterance.pitch = 0.01; 
-                    utterance.rate = 0.75; // Very slow and calculated
+                    // Force the pitch extremely high and fast for a hyperactive alien voice
+                    utterance.pitch = 2.0; // Max high pitch (chipmunk/alien effect)
+                    utterance.rate = 1.3; // Fast, energetic chatter
                 }
                 
                 if (selectedVoice) {
@@ -1988,9 +1955,6 @@ RULES:
                 window.globalUtterance = utterance; // Prevent garbage collection bug
                 window.speechSynthesis.speak(utterance);
             }
-            
-            // Start guaranteed Web Audio alien chatter
-            startAlienChatter();
         }
         
         setTimeout(() => {
@@ -2000,7 +1964,6 @@ RULES:
 
     function hideDialogue() {
         bubble.classList.add('hidden');
-        stopAlienChatter();
         setTimeout(() => { isSpeaking = false; }, 300);
     }
 
