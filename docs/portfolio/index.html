@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adarsh Kumar Singh | AI Software Engineer</title>
+    <meta name="description" content="Portfolio of Adarsh Kumar Singh — AI Software Engineer specializing in Multi-Agent Systems, RAG Pipelines, and Enterprise LLM Guardrails. 14 weeks of relentless building.">
+    <meta property="og:title" content="Adarsh Kumar Singh | AI Software Engineer">
+    <meta property="og:description" content="Multi-Agent Swarms · Production RAG · Enterprise Guardrails — 14 weeks of relentless building.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://cyber-duelist.github.io/AI-Apex-Paragon/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Adarsh Kumar Singh | AI Software Engineer">
+    <meta name="twitter:description" content="Multi-Agent Swarms · Production RAG · Enterprise Guardrails — 14 weeks of relentless building.">
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%23030308'/><text x='50' y='72' font-size='60' font-family='Arial' font-weight='900' fill='%2300e5ff' text-anchor='middle'>A</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Analytics (replace G-QQRF7HX975 with your Measurement ID) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QQRF7HX975"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-QQRF7HX975');
+    </script>
+    <script>
+        // Restore saved theme before first paint to avoid flash
+        (function() {
+            var t = localStorage.getItem('portfolio-theme');
+            if (t) document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+</head>
+<body class="loading">
+    <!-- ====== PORTAL LOADER ====== -->
+    <div id="portal-loader">
+        <div id="portal-gate">
+            <div class="gate-ring"></div>
+            <span class="gate-text">CLICK TO ENTER</span>
+        </div>
+        <canvas id="warp-canvas" style="display:none;"></canvas>
+        <div class="portal-ring" style="display:none;">
+            <div class="portal-ring-inner"></div>
+        </div>
+        <div class="portal-text" style="display:none;">
+            <span class="portal-label">INITIALIZING</span>
+            <span class="portal-name">ADARSH KUMAR SINGH</span>
+            <div class="portal-bar">
+                <div class="portal-bar-fill"></div>
+            </div>
+        </div>
+        <div class="portal-flash" style="display:none;"></div>
+        <button id="portal-skip" class="portal-skip">SKIP →</button>
+    </div>
+
+    <!-- Surreal Layers -->
+    <div class="noise-overlay"></div>
+    <div class="aurora">
+        <div class="aurora-blob"></div>
+        <div class="aurora-blob"></div>
+        <div class="aurora-blob"></div>
+    </div>
+
+    <!-- Custom Cursor -->
+    <div class="cursor">
+        <div class="cursor-dot"></div>
+        <div class="cursor-ring"></div>
+    </div>
+
+    <!-- Three.js Canvas -->
+    <canvas id="hero-canvas"></canvas>
+
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="nav-logo glitch" data-text="AKS.">AKS<span class="accent">.</span></div>
+        <div class="nav-links" id="nav-links">
+            <a href="#about">About</a>
+            <a href="#grind">The Grind</a>
+            <a href="#projects">Projects</a>
+            <a href="#skills">Skills</a>
+            <a href="#terminal-section">Terminal</a>
+            <a href="#contact">Contact</a>
+        </div>
+        <a href="#contact" class="nav-cta desktop-only">Hire Me</a>
+        <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero">
+        <div class="hero-content">
+            <p class="hero-tag">&mdash; AI SOFTWARE ENGINEER &mdash;</p>
+            <h1 class="hero-title">
+                <span class="line">I Build</span>
+                <span class="line gradient-text">Autonomous</span>
+                <span class="line">AI Systems.</span>
+            </h1>
+            <p class="hero-subtitle">Multi-Agent Swarms &middot; Production RAG &middot; Enterprise Guardrails</p>
+            <div class="hero-buttons">
+                <a href="#projects" class="btn btn-primary">View Projects</a>
+                <a href="https://github.com/Cyber-Duelist/AI-Apex-Paragon" target="_blank" class="btn btn-outline">GitHub Portfolio</a>
+                <a href="resume.html" download class="btn btn-outline">Download CV ↓</a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-number" data-count="14">0</span>
+                    <span class="stat-label">Weeks of Grind</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" data-count="7">0</span>
+                    <span class="stat-label">Production Systems</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" data-count="4">0</span>
+                    <span class="stat-label">AI Agents Built</span>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <div class="mouse">
+                <div class="wheel"></div>
+            </div>
+            <span>Scroll to explore</span>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about">
+        <div class="section-container">
+            <p class="section-tag">WHO AM I</p>
+            <h2 class="section-title">Not Another Tutorial Follower.</h2>
+            <div class="about-grid">
+                <div class="about-text">
+                    <p>I'm <strong>Adarsh Kumar Singh</strong>, a B.Tech student who decided to stop watching tutorials and start building real, deployable AI systems from scratch.</p>
+                    <p>Over <strong>14 relentless weeks</strong>, I went from Python fundamentals to engineering autonomous multi-agent swarms that fix CI/CD pipelines without human intervention. I didn't follow a bootcamp. I didn't copy boilerplate. I built every line of code, every architecture, every guardrail myself.</p>
+                    <p>The result? A production-grade portfolio that proves I can ship AI systems that solve real, painful engineering problems.</p>
+                </div>
+                <div class="about-highlights">
+                    <div class="highlight-card">
+                        <span class="highlight-icon">🧠</span>
+                        <h3>LLM Architecture</h3>
+                        <p>ReAct Loops, Tool Calling, Guardrails, RAG Pipelines</p>
+                    </div>
+                    <div class="highlight-card">
+                        <span class="highlight-icon">⚡</span>
+                        <h3>Backend Engineering</h3>
+                        <p>FastAPI, SSE Streaming, REST APIs, Pytest</p>
+                    </div>
+                    <div class="highlight-card">
+                        <span class="highlight-icon">🛡️</span>
+                        <h3>Production Security</h3>
+                        <p>Prompt Injection Prevention, Scope Guardrails, Model Failover</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Grind Timeline -->
+    <section id="grind">
+        <div class="section-container">
+            <p class="section-tag">THE JOURNEY</p>
+            <h2 class="section-title">14 Weeks. Zero Shortcuts.</h2>
+            <p class="section-subtitle">From <code>print("hello")</code> to autonomous AI agents that write, test, and deploy code.</p>
+            <div class="timeline">
+                <div class="timeline-line"></div>
+                <div class="timeline-item" data-week="1-2">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-card">
+                        <span class="timeline-week">WEEK 1-2</span>
+                        <h3>Python Foundations</h3>
+                        <p>Mastered Python, NumPy, and Pandas. Built data processing pipelines from scratch.</p>
+                        <div class="timeline-tags"><span>Python</span><span>NumPy</span><span>Pandas</span></div>
+                    </div>
+                </div>
+                <div class="timeline-item" data-week="3-4">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-card">
+                        <span class="timeline-week">WEEK 3-4</span>
+                        <h3>Machine Learning</h3>
+                        <p>Built a Document Risk Prediction system. Feature engineering, hyperparameter tuning, model comparison.</p>
+                        <div class="timeline-tags"><span>scikit-learn</span><span>Random Forest</span><span>ML</span></div>
+                    </div>
+                </div>
+                <div class="timeline-item" data-week="5-6">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-card">
+                        <span class="timeline-week">WEEK 5-6</span>
+                        <h3>Production Python & APIs</h3>
+                        <p>Built database-backed REST APIs using FastAPI. Pydantic validation and production deployment patterns.</p>
+                        <div class="timeline-tags"><span>FastAPI</span><span>SQL</span><span>Pydantic</span></div>
+                    </div>
+                </div>
+                <div class="timeline-item" data-week="7">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-card">
+                        <span class="timeline-week">WEEK 7</span>
+                        <h3>LLM APIs</h3>
+                        <p>First contact with Large Language Models. Built an LLM Assistant with structured prompting and JSON output.</p>
+                        <div class="timeline-tags"><span>Groq API</span><span>LLaMA 3</span><span>Prompting</span></div>
+                    </div>
+                </div>
+                <div class="timeline-item" data-week="8-9">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-card">
+                        <span class="timeline-week">WEEK 8-9</span>
+                        <h3>RAG System: PersonaDoc</h3>
+                        <p>Full Retrieval-Augmented Generation pipeline with ChromaDB, semantic chunking, reranking, and hallucination control.</p>
+                        <div class="timeline-tags"><span>RAG</span><span>ChromaDB</span><span>Embeddings</span></div>
+                    </div>
+                </div>
+                <div class="timeline-item" data-week="10">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-card">
+                        <span class="timeline-week">WEEK 10</span>
+                        <h3>AI Agents & Tool Calling</h3>
+                        <p>Built multimodal agents with Function Calling. Agents that read files, scrape websites, and execute code.</p>
+                        <div class="timeline-tags"><span>ReAct</span><span>Tool Calling</span><span>Agents</span></div>
+                    </div>
+                </div>
+                <div class="timeline-item" data-week="11">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-card">
+                        <span class="timeline-week">WEEK 11</span>
+                        <h3>LLMOps & Evaluations</h3>
+                        <p>Real-time Eval Dashboard with SSE streaming, LLM-as-a-Judge, and automatic Model Failover (70B → 8B).</p>
+                        <div class="timeline-tags"><span>LLMOps</span><span>SSE</span><span>Failover</span></div>
+                    </div>
+                </div>
+                <div class="timeline-item" data-week="12">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-card">
+                        <span class="timeline-week">WEEK 12</span>
+                        <h3>Production Agent + Guardrails</h3>
+                        <p>Hardened AI agent with Input/Output guardrails blocking prompt injection and out-of-scope queries.</p>
+                        <div class="timeline-tags"><span>Guardrails</span><span>Security</span><span>Evals</span></div>
+                    </div>
+                </div>
+                <div class="timeline-item" data-week="13">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-card">
+                        <span class="timeline-week">WEEK 13</span>
+                        <h3>AI Code Reviewer & Meeting Intel</h3>
+                        <p>Automated GitHub PR reviewer and a Meeting Intelligence pipeline extracting decisions and action items.</p>
+                        <div class="timeline-tags"><span>GitHub API</span><span>Whisper</span><span>NLP</span></div>
+                    </div>
+                </div>
+                <div class="timeline-item highlight" data-week="14">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-card">
+                        <span class="timeline-week">WEEK 14</span>
+                        <h3>🚀 The Autonomous DevOps Swarm</h3>
+                        <p>The capstone. A multi-agent system that intercepts CI/CD failures, diagnoses bugs, writes patches, runs tests, and opens Pull Requests — all without a human.</p>
+                        <div class="timeline-tags"><span>Multi-Agent</span><span>Orchestration</span><span>Autonomous</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects">
+        <div class="section-container">
+            <p class="section-tag">THE PROOF</p>
+            <h2 class="section-title">Heavy Hitter Projects.</h2>
+            <p class="section-subtitle">Not tutorials. Not clones. Real systems solving real problems.</p>
+            <div class="projects-grid">
+                <div class="project-card featured">
+                    <div class="project-glow"></div>
+                    <span class="project-badge">CAPSTONE</span>
+                    <h3>Autonomous Self-Healing DevOps Swarm</h3>
+                    <p>A multi-agent orchestration framework that intercepts CI/CD pipeline failures, diagnoses root causes, writes code patches, verifies fixes via sandboxed testing, and opens Pull Requests — fully autonomously.</p>
+                    <div class="project-tech">
+                        <span>Python</span><span>Groq</span><span>LLaMA 3</span><span>Pytest</span><span>Multi-Agent</span>
+                    </div>
+                    <div class="project-links">
+                        <a href="https://github.com/Cyber-Duelist/AI-Apex-Paragon/tree/main/week_14" target="_blank">View on GitHub →</a>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <h3>Enterprise Production Agent</h3>
+                    <p>A hardened compliance AI agent with Input/Output Guardrails, persistent memory, structured logging, and an LLM-as-a-Judge Evaluation Dashboard with automatic Model Failover routing.</p>
+                    <div class="project-tech">
+                        <span>Python</span><span>FastAPI</span><span>Guardrails</span><span>LLMOps</span>
+                    </div>
+                    <div class="project-links">
+                        <a href="https://github.com/Cyber-Duelist/AI-Apex-Paragon/tree/main/week_12" target="_blank">View on GitHub →</a>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <h3>PersonaDoc — Production RAG</h3>
+                    <p>Upload any PDF. Ask questions. Get cited, accurate answers. Built with ChromaDB vector search, semantic chunking, reranking, and hallucination control.</p>
+                    <div class="project-tech">
+                        <span>RAG</span><span>ChromaDB</span><span>Embeddings</span><span>FastAPI</span>
+                    </div>
+                    <div class="project-links">
+                        <a href="https://github.com/Cyber-Duelist/AI-Apex-Paragon/tree/main/week_09" target="_blank">View on GitHub →</a>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <h3>AI Code Review Service</h3>
+                    <p>Submit any GitHub PR URL. Get a structured LLM-powered code review with bugs, security issues, severity ratings, and approval decisions. Connects to real GitHub diffs.</p>
+                    <div class="project-tech">
+                        <span>GitHub API</span><span>LLaMA 3</span><span>JSON Schema</span>
+                    </div>
+                    <div class="project-links">
+                        <a href="https://github.com/Cyber-Duelist/AI-Apex-Paragon/tree/main/week_13" target="_blank">View on GitHub →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills">
+        <div class="section-container">
+            <p class="section-tag">MY ARSENAL</p>
+            <h2 class="section-title">Technologies I Wield.</h2>
+            <div class="skills-grid">
+                <div class="skill-category">
+                    <h3>AI & Machine Learning</h3>
+                    <div class="skill-items">
+                        <span>LLMs (LLaMA 3, GPT)</span>
+                        <span>RAG Pipelines</span>
+                        <span>Multi-Agent Orchestration</span>
+                        <span>ReAct Loops</span>
+                        <span>AI Guardrails</span>
+                        <span>Prompt Engineering</span>
+                        <span>LLM-as-a-Judge Evals</span>
+                        <span>ChromaDB</span>
+                    </div>
+                </div>
+                <div class="skill-category">
+                    <h3>Backend & DevOps</h3>
+                    <div class="skill-items">
+                        <span>Python</span>
+                        <span>FastAPI</span>
+                        <span>REST APIs</span>
+                        <span>Pytest</span>
+                        <span>Git & GitHub</span>
+                        <span>Server-Sent Events</span>
+                        <span>CI/CD Pipelines</span>
+                        <span>Docker</span>
+                    </div>
+                </div>
+                <div class="skill-category">
+                    <h3>Certifications</h3>
+                    <div class="skill-items">
+                        <span>Oracle GenAI Professional</span>
+                        <span>Oracle Data Science</span>
+                        <span>IoT & Industrial Automation</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact">
+        <div class="section-container">
+            <p class="section-tag">LET'S CONNECT</p>
+            <h2 class="section-title">Ready to Build Together?</h2>
+            <p class="section-subtitle">I'm actively seeking AI Engineer and Backend Software Engineer roles.</p>
+            <div class="contact-links">
+                <a href="mailto:adarshentity098@gmail.com" class="contact-card">
+                    <span class="contact-icon">✉️</span>
+                    <span class="contact-label">Email</span>
+                    <span class="contact-value">adarshentity098@gmail.com</span>
+                </a>
+                <a href="https://github.com/Cyber-Duelist/AI-Apex-Paragon" target="_blank" class="contact-card">
+                    <span class="contact-icon">💻</span>
+                    <span class="contact-label">GitHub</span>
+                    <span class="contact-value">Cyber-Duelist/AI-Apex-Paragon</span>
+                </a>
+                <a href="https://www.linkedin.com/in/i-am-entity" target="_blank" class="contact-card">
+                    <span class="contact-icon">🔗</span>
+                    <span class="contact-label">LinkedIn</span>
+                    <span class="contact-value">in/i-am-entity</span>
+                </a>
+                <a href="tel:+919439440544" class="contact-card">
+                    <span class="contact-icon">📱</span>
+                    <span class="contact-label">Phone</span>
+                    <span class="contact-value">+91-94394-40544</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== GITHUB ACTIVITY SECTION ====== -->
+    <section id="github-activity">
+        <div class="section-container">
+            <p class="section-tag">BUILDING IN PUBLIC</p>
+            <h2 class="section-title">GitHub <span class="gradient-text">Activity</span></h2>
+            <p class="section-subtitle">Real-time stats pulled from the GitHub API.</p>
+            <div class="github-stats-grid" id="github-stats-grid">
+                <div class="github-stat-card">
+                    <span class="github-stat-icon">📦</span>
+                    <span class="github-stat-number" id="gh-repos">—</span>
+                    <span class="github-stat-label">Public Repos</span>
+                </div>
+                <div class="github-stat-card">
+                    <span class="github-stat-icon">⭐</span>
+                    <span class="github-stat-number" id="gh-stars">—</span>
+                    <span class="github-stat-label">Stars Earned</span>
+                </div>
+                <div class="github-stat-card">
+                    <span class="github-stat-icon">🔀</span>
+                    <span class="github-stat-number" id="gh-forks">—</span>
+                    <span class="github-stat-label">Forks</span>
+                </div>
+                <div class="github-stat-card">
+                    <span class="github-stat-icon">🔥</span>
+                    <span class="github-stat-number" id="gh-commits">—</span>
+                    <span class="github-stat-label">Recent Commits</span>
+                </div>
+            </div>
+            <div class="github-languages" id="github-languages"></div>
+            <div class="github-recent" id="github-recent">
+                <h3>Recent Activity</h3>
+                <div class="github-events" id="github-events"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== AI NEWS TICKER ====== -->
+    <div class="news-ticker" id="news-ticker">
+        <span class="ticker-label">AI PULSE</span>
+        <div class="ticker-track">
+            <div class="ticker-content" id="ticker-content">
+                Loading latest AI news...
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== INTERACTIVE TERMINAL ====== -->
+    <section id="terminal-section">
+        <div class="section-container">
+            <p class="section-tag">EXPLORE</p>
+            <h2 class="section-title">Interactive <span class="gradient-text">Terminal</span></h2>
+            <p class="section-subtitle">Type <code>help</code> to see available commands.</p>
+            <div class="terminal" id="terminal">
+                <div class="terminal-header">
+                    <div class="terminal-dots">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <span class="terminal-title">entity@apex-paragon:~</span>
+                </div>
+                <div class="terminal-body" id="terminal-body">
+                    <div class="terminal-line output">Welcome to APEX-PARAGON v1.0</div>
+                    <div class="terminal-line output">Type <span class="cmd-highlight">help</span> to get started.</div>
+                </div>
+                <div class="terminal-input-line">
+                    <span class="terminal-prompt">$</span>
+                    <input type="text" class="terminal-input" id="terminal-input" autocomplete="off" spellcheck="false" placeholder="type a command...">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== ENTROPY AI CHATBOT ====== -->
+    <div class="chatbot-fab" id="chatbot-fab">
+        <svg class="fab-icon-svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="entropy-grad" x1="0" y1="0" x2="48" y2="48">
+                    <stop offset="0%" stop-color="#00e5ff"/>
+                    <stop offset="40%" stop-color="#a855f7"/>
+                    <stop offset="100%" stop-color="#ff006e"/>
+                </linearGradient>
+                <radialGradient id="entropy-core-glow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.6"/>
+                    <stop offset="60%" stop-color="#a855f7" stop-opacity="0.2"/>
+                    <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+                </radialGradient>
+                <filter id="entropy-glow">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="1.5"/>
+                </filter>
+            </defs>
+            <!-- Outer orbital ring -->
+            <circle cx="24" cy="24" r="22" stroke="url(#entropy-grad)" stroke-width="1" fill="none" opacity="0.3" stroke-dasharray="4 3"/>
+            <!-- Inner orbital ring -->
+            <circle cx="24" cy="24" r="17" stroke="url(#entropy-grad)" stroke-width="1.2" fill="none" opacity="0.5" stroke-dasharray="8 4"/>
+            <!-- Core glow background -->
+            <circle cx="24" cy="24" r="12" fill="url(#entropy-core-glow)"/>
+            <!-- AI Eye — outer -->
+            <path d="M12 24 C16 16, 32 16, 36 24 C32 32, 16 32, 12 24Z" fill="rgba(0,229,255,0.08)" stroke="url(#entropy-grad)" stroke-width="1.5"/>
+            <!-- AI Eye — iris -->
+            <circle cx="24" cy="24" r="5.5" fill="rgba(168,85,247,0.2)" stroke="url(#entropy-grad)" stroke-width="1.2"/>
+            <!-- AI Eye — pupil -->
+            <circle cx="24" cy="24" r="2.5" fill="url(#entropy-grad)"/>
+            <!-- AI Eye — pupil highlight -->
+            <circle cx="22.8" cy="22.8" r="1" fill="#fff" opacity="0.9"/>
+            <!-- Neural nodes -->
+            <circle cx="8" cy="18" r="1.5" fill="#00e5ff" opacity="0.7" filter="url(#entropy-glow)"/>
+            <circle cx="40" cy="18" r="1.5" fill="#a855f7" opacity="0.7" filter="url(#entropy-glow)"/>
+            <circle cx="8" cy="30" r="1.5" fill="#a855f7" opacity="0.7" filter="url(#entropy-glow)"/>
+            <circle cx="40" cy="30" r="1.5" fill="#ff006e" opacity="0.7" filter="url(#entropy-glow)"/>
+            <!-- Neural connections -->
+            <line x1="8" y1="18" x2="14" y2="22" stroke="#00e5ff" stroke-width="0.6" opacity="0.4"/>
+            <line x1="40" y1="18" x2="34" y2="22" stroke="#a855f7" stroke-width="0.6" opacity="0.4"/>
+            <line x1="8" y1="30" x2="14" y2="26" stroke="#a855f7" stroke-width="0.6" opacity="0.4"/>
+            <line x1="40" y1="30" x2="34" y2="26" stroke="#ff006e" stroke-width="0.6" opacity="0.4"/>
+            <!-- "AI" micro text -->
+            <text x="24" y="43" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="5" font-weight="700" fill="url(#entropy-grad)" opacity="0.8" letter-spacing="1.5">AI</text>
+        </svg>
+        <span class="fab-pulse"></span>
+        <span class="fab-label">ENTROPY AI</span>
+    </div>
+    <div class="chatbot-window" id="chatbot-window">
+        <div class="chatbot-header">
+            <div class="chatbot-header-info">
+                <div class="chatbot-avatar-container">
+                    <svg class="chatbot-avatar-svg" viewBox="0 0 40 40" fill="none">
+                        <defs>
+                            <linearGradient id="avatar-grad" x1="0" y1="0" x2="40" y2="40">
+                                <stop offset="0%" stop-color="#00e5ff"/>
+                                <stop offset="50%" stop-color="#a855f7"/>
+                                <stop offset="100%" stop-color="#ff006e"/>
+                            </linearGradient>
+                            <radialGradient id="avatar-core" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.4"/>
+                                <stop offset="100%" stop-color="transparent"/>
+                            </radialGradient>
+                        </defs>
+                        <!-- Orbital ring -->
+                        <circle cx="20" cy="20" r="18" stroke="url(#avatar-grad)" stroke-width="0.8" fill="none" opacity="0.4" stroke-dasharray="3 2"/>
+                        <!-- Core glow -->
+                        <circle cx="20" cy="20" r="10" fill="url(#avatar-core)"/>
+                        <!-- AI Eye -->
+                        <path d="M8 20 C12 14, 28 14, 32 20 C28 26, 12 26, 8 20Z" fill="rgba(0,229,255,0.06)" stroke="url(#avatar-grad)" stroke-width="1.2"/>
+                        <circle cx="20" cy="20" r="4.5" fill="rgba(168,85,247,0.15)" stroke="url(#avatar-grad)" stroke-width="1"/>
+                        <circle cx="20" cy="20" r="2" fill="url(#avatar-grad)"/>
+                        <circle cx="19" cy="19" r="0.8" fill="#fff" opacity="0.9"/>
+                        <!-- Neural dots -->
+                        <circle cx="5" cy="15" r="1" fill="#00e5ff" opacity="0.5"/>
+                        <circle cx="35" cy="15" r="1" fill="#a855f7" opacity="0.5"/>
+                        <circle cx="5" cy="25" r="1" fill="#a855f7" opacity="0.5"/>
+                        <circle cx="35" cy="25" r="1" fill="#ff006e" opacity="0.5"/>
+                    </svg>
+                    <span class="avatar-online-dot"></span>
+                </div>
+                <div>
+                    <span class="chatbot-name">ENTROPY</span>
+                    <span class="chatbot-status"><span class="status-dot"></span> Online — AI Assistant</span>
+                </div>
+            </div>
+            <div class="chatbot-header-actions">
+                <button class="chatbot-voice-toggle" id="chatbot-voice-toggle" title="Toggle voice responses">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                    </svg>
+                </button>
+                <button class="chatbot-close" id="chatbot-close">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+        </div>
+        <div class="chatbot-messages" id="chatbot-messages">
+            <div class="chat-msg bot">
+                <span class="chat-bubble">Hey! ✨ I'm <strong>ENTROPY</strong> — Adarsh's AI assistant. I can answer questions about his projects, skills, and experience, or chat about anything you'd like. Try asking me something, or tap the 🎤 to talk!</span>
+            </div>
+        </div>
+        <div class="chatbot-input-area">
+            <button class="chatbot-mic" id="chatbot-mic" title="Hold to speak">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="23"/>
+                    <line x1="8" y1="23" x2="16" y2="23"/>
+                </svg>
+            </button>
+            <button class="chatbot-lang-toggle" id="chatbot-lang-toggle" title="Switch Speech Language (EN/HI)">EN</button>
+            <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Ask ENTROPY anything..." autocomplete="off">
+            <button class="chatbot-send" id="chatbot-send">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Theme Switcher -->
+    <div class="theme-switcher" id="theme-switcher">
+        <div class="theme-icon"></div>
+        <span class="theme-label">ENTITY</span>
+    </div>
+
+    <footer>
+        <p>Designed & Built with stubborn persistence by <strong>Adarsh Kumar Singh</strong> &middot; <span id="footer-year">2024</span></p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
