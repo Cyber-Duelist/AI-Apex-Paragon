@@ -1668,5 +1668,26 @@ RULES:
             }
         });
     }
+    }
 })();
 
+/* ========================================
+   UFO CURSOR LOGIC
+   ======================================== */
+(function() {
+    const ufo = document.getElementById('ufo-cursor');
+    if (!ufo) return;
+
+    // We use a slight delay/lerp or direct transform for smooth tracking
+    // Direct left/top is fine but transform is much smoother for hardware acceleration.
+    // However, style.left/top is easier for a fixed element.
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        ufo.style.left = mouseX + 'px';
+        ufo.style.top = mouseY + 'px';
+    });
+})();
