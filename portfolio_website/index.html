@@ -391,6 +391,106 @@
         </div>
     </section>
 
+    <!-- ====== GITHUB ACTIVITY SECTION ====== -->
+    <section id="github-activity">
+        <div class="section-container">
+            <p class="section-tag">BUILDING IN PUBLIC</p>
+            <h2 class="section-title">GitHub <span class="gradient-text">Activity</span></h2>
+            <p class="section-subtitle">Real-time stats pulled from the GitHub API.</p>
+            <div class="github-stats-grid" id="github-stats-grid">
+                <div class="github-stat-card">
+                    <span class="github-stat-icon">📦</span>
+                    <span class="github-stat-number" id="gh-repos">—</span>
+                    <span class="github-stat-label">Public Repos</span>
+                </div>
+                <div class="github-stat-card">
+                    <span class="github-stat-icon">⭐</span>
+                    <span class="github-stat-number" id="gh-stars">—</span>
+                    <span class="github-stat-label">Stars Earned</span>
+                </div>
+                <div class="github-stat-card">
+                    <span class="github-stat-icon">🔀</span>
+                    <span class="github-stat-number" id="gh-forks">—</span>
+                    <span class="github-stat-label">Forks</span>
+                </div>
+                <div class="github-stat-card">
+                    <span class="github-stat-icon">🔥</span>
+                    <span class="github-stat-number" id="gh-commits">—</span>
+                    <span class="github-stat-label">Recent Commits</span>
+                </div>
+            </div>
+            <div class="github-languages" id="github-languages"></div>
+            <div class="github-recent" id="github-recent">
+                <h3>Recent Activity</h3>
+                <div class="github-events" id="github-events"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== AI NEWS TICKER ====== -->
+    <div class="news-ticker" id="news-ticker">
+        <span class="ticker-label">AI PULSE</span>
+        <div class="ticker-track">
+            <div class="ticker-content" id="ticker-content">
+                Loading latest AI news...
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== INTERACTIVE TERMINAL ====== -->
+    <section id="terminal-section">
+        <div class="section-container">
+            <p class="section-tag">EXPLORE</p>
+            <h2 class="section-title">Interactive <span class="gradient-text">Terminal</span></h2>
+            <p class="section-subtitle">Type <code>help</code> to see available commands.</p>
+            <div class="terminal" id="terminal">
+                <div class="terminal-header">
+                    <div class="terminal-dots">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <span class="terminal-title">entity@apex-paragon:~</span>
+                </div>
+                <div class="terminal-body" id="terminal-body">
+                    <div class="terminal-line output">Welcome to APEX-PARAGON v1.0</div>
+                    <div class="terminal-line output">Type <span class="cmd-highlight">help</span> to get started.</div>
+                </div>
+                <div class="terminal-input-line">
+                    <span class="terminal-prompt">$</span>
+                    <input type="text" class="terminal-input" id="terminal-input" autocomplete="off" spellcheck="false" placeholder="type a command...">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== AI CHATBOT ====== -->
+    <div class="chatbot-fab" id="chatbot-fab">
+        <span class="fab-icon">🤖</span>
+        <span class="fab-pulse"></span>
+    </div>
+    <div class="chatbot-window" id="chatbot-window">
+        <div class="chatbot-header">
+            <div class="chatbot-header-info">
+                <span class="chatbot-avatar">🤖</span>
+                <div>
+                    <span class="chatbot-name">APEX AI</span>
+                    <span class="chatbot-status">Online</span>
+                </div>
+            </div>
+            <button class="chatbot-close" id="chatbot-close">✕</button>
+        </div>
+        <div class="chatbot-messages" id="chatbot-messages">
+            <div class="chat-msg bot">
+                <span class="chat-bubble">Hey! 👋 I'm Adarsh's AI assistant. Ask me anything about his skills, projects, or experience!</span>
+            </div>
+        </div>
+        <div class="chatbot-input-area">
+            <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Ask me anything..." autocomplete="off">
+            <button class="chatbot-send" id="chatbot-send">→</button>
+        </div>
+    </div>
+
     <!-- Theme Switcher -->
     <div class="theme-switcher" id="theme-switcher">
         <div class="theme-icon"></div>

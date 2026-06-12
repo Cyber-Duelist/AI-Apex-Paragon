@@ -689,3 +689,394 @@ document.querySelectorAll('.project-card').forEach(card => {
         });
     });
 })();
+
+/* ========================================
+   GITHUB ACTIVITY (Public API)
+   ======================================== */
+(function() {
+    const GH_USER = 'Cyber-Duelist';
+
+    async function fetchGitHub() {
+        try {
+            // Fetch user profile
+            const user = await fetch(`https://api.github.com/users/${GH_USER}`).then(r => r.json());
+            document.getElementById('gh-repos').textContent = user.public_repos || 0;
+
+            // Fetch repos for stars/forks/languages
+            const repos = await fetch(`https://api.github.com/users/${GH_USER}/repos?per_page=100&sort=updated`).then(r => r.json());
+            
+            let totalStars = 0, totalForks = 0;
+            const langs = {};
+            repos.forEach(r => {
+                totalStars += r.stargazers_count || 0;
+                totalForks += r.forks_count || 0;
+                if (r.language) langs[r.language] = (langs[r.language] || 0) + 1;
+            });
+            
+            document.getElementById('gh-stars').textContent = totalStars;
+            document.getElementById('gh-forks').textContent = totalForks;
+
+            // Languages
+            const langContainer = document.getElementById('github-languages');
+            Object.keys(langs).sort((a, b) => langs[b] - langs[a]).forEach(lang => {
+                const tag = document.createElement('span');
+                tag.className = 'lang-tag';
+                tag.textContent = lang;
+                langContainer.appendChild(tag);
+            });
+
+            // Fetch recent events
+            const events = await fetch(`https://api.github.com/users/${GH_USER}/events?per_page=10`).then(r => r.json());
+            const container = document.getElementById('github-events');
+            let commitCount = 0;
+
+            events.slice(0, 6).forEach(evt => {
+                const div = document.createElement('div');
+                div.className = 'github-event';
+
+                let icon = '📌', text = '';
+                const repo = evt.repo ? evt.repo.name.split('/')[1] : '';
+                const timeAgo = getTimeAgo(new Date(evt.created_at));
+
+                if (evt.type === 'PushEvent') {
+                    const commits = evt.payload.commits ? evt.payload.commits.length : 0;
+                    commitCount += commits;
+                    icon = '⚡';
+                    text = `Pushed <strong>${commits} commit${commits > 1 ? 's' : ''}</strong> to ${repo}`;
+                } else if (evt.type === 'CreateEvent') {
+                    icon = '🌱';
+                    text = `Created ${evt.payload.ref_type} <strong>${evt.payload.ref || repo}</strong>`;
+                } else if (evt.type === 'WatchEvent') {
+                    icon = '⭐';
+                    text = `Starred <strong>${repo}</strong>`;
+                } else if (evt.type === 'ForkEvent') {
+                    icon = '🔀';
+                    text = `Forked <strong>${repo}</strong>`;
+                } else {
+                    icon = '📋';
+                    text = `${evt.type.replace('Event', '')} on <strong>${repo}</strong>`;
+                }
+
+                div.innerHTML = `
+                    <span class="event-icon">${icon}</span>
+                    <span class="event-text">${text}</span>
+                    <span class="event-time">${timeAgo}</span>
+                `;
+                container.appendChild(div);
+            });
+
+            document.getElementById('gh-commits').textContent = commitCount || '—';
+        } catch(e) {
+            console.warn('GitHub API error:', e);
+        }
+    }
+
+    function getTimeAgo(date) {
+        const seconds = Math.floor((new Date() - date) / 1000);
+        if (seconds < 60) return 'just now';
+        if (seconds < 3600) return Math.floor(seconds / 60) + 'm ago';
+        if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ago';
+        return Math.floor(seconds / 86400) + 'd ago';
+    }
+
+    fetchGitHub();
+})();
+
+/* ========================================
+   AI NEWS TICKER (RSS via proxy)
+   ======================================== */
+(function() {
+    const tickerContent = document.getElementById('ticker-content');
+    if (!tickerContent) return;
+
+    // Curated AI headlines as fallback + live fetch attempt
+    const fallbackHeadlines = [
+        'Google DeepMind unveils Gemini 2.0 with native multimodal reasoning',
+        'OpenAI releases GPT-5 with 1M token context window',
+        'Meta open-sources LLaMA 4 with 400B parameters',
+        'Anthropic introduces Constitutional AI v2 for safer AI systems',
+        'NVIDIA launches Blackwell Ultra GPU for next-gen AI workloads',
+        'Hugging Face crosses 1 million public models on the Hub',
+        'Microsoft integrates Copilot deeply into Windows 12',
+        'AI coding assistants now write 40% of all new code at Google',
+        'Retrieval-Augmented Generation becomes industry standard for enterprise LLMs',
+        'Multi-agent orchestration frameworks see 300% growth in adoption',
+    ];
+
+    async function loadNews() {
+        try {
+            // Try fetching from a public RSS-to-JSON proxy
+            const resp = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://news.google.com/rss/search?q=artificial+intelligence&hl=en-US&gl=US&ceid=US:en&count=10');
+            const data = await resp.json();
+            
+            if (data.status === 'ok' && data.items && data.items.length > 0) {
+                const headlines = data.items.slice(0, 10).map(item => item.title);
+                renderTicker(headlines);
+                return;
+            }
+        } catch(e) {
+            console.warn('News fetch failed, using fallback headlines');
+        }
+        
+        renderTicker(fallbackHeadlines);
+    }
+
+    function renderTicker(headlines) {
+        // Duplicate headlines for seamless loop
+        const allHeadlines = [...headlines, ...headlines];
+        tickerContent.innerHTML = allHeadlines.map(h =>
+            `<span>${h}</span><span class="ticker-dot">◆</span>`
+        ).join('');
+    }
+
+    loadNews();
+})();
+
+/* ========================================
+   INTERACTIVE TERMINAL
+   ======================================== */
+(function() {
+    const input = document.getElementById('terminal-input');
+    const body = document.getElementById('terminal-body');
+    if (!input || !body) return;
+
+    const commands = {
+        help: () => [
+            '<span class="cmd-highlight">Available commands:</span>',
+            '  <span class="cmd-highlight">about</span>      — Who is Adarsh?',
+            '  <span class="cmd-highlight">skills</span>     — Technical skill set',
+            '  <span class="cmd-highlight">projects</span>   — Featured projects',
+            '  <span class="cmd-highlight">experience</span> — Work & grind timeline',
+            '  <span class="cmd-highlight">contact</span>    — Get in touch',
+            '  <span class="cmd-highlight">resume</span>     — Download resume',
+            '  <span class="cmd-highlight">theme</span>      — Toggle theme',
+            '  <span class="cmd-highlight">whoami</span>     — Current user',
+            '  <span class="cmd-highlight">stack</span>      — Tech stack breakdown',
+            '  <span class="cmd-highlight">clear</span>      — Clear terminal',
+        ],
+        about: () => [
+            'Adarsh Kumar Singh — AI Software Engineer',
+            'B.Tech in Computer Science (AI & ML specialization)',
+            'Built 14 production-grade AI systems in 14 weeks.',
+            'Specializations: Multi-Agent Systems, RAG Pipelines,',
+            'Enterprise Guardrails, Autonomous DevOps.',
+            'Certifications: Oracle GenAI Professional, Oracle Data Science.',
+        ],
+        skills: () => [
+            '<span class="cmd-highlight">Languages:</span>    Python, JavaScript, SQL, Bash',
+            '<span class="cmd-highlight">AI/ML:</span>        LangChain, LlamaIndex, HuggingFace, OpenAI API',
+            '<span class="cmd-highlight">Frameworks:</span>   FastAPI, Flask, Streamlit, Gradio',
+            '<span class="cmd-highlight">Databases:</span>    PostgreSQL, ChromaDB, Pinecone, FAISS',
+            '<span class="cmd-highlight">DevOps:</span>       Docker, CI/CD, GitHub Actions',
+            '<span class="cmd-highlight">Cloud:</span>        AWS, GCP (basics)',
+        ],
+        projects: () => [
+            '<span class="cmd-highlight">1.</span> Enterprise AI Agent — Multi-layer guardrail system',
+            '<span class="cmd-highlight">2.</span> DevOps Swarm — Autonomous CI/CD repair agents',
+            '<span class="cmd-highlight">3.</span> RAG Pipeline — Production retrieval with hallucination control',
+            '<span class="cmd-highlight">4.</span> AI Code Reviewer — Automated GitHub PR analysis',
+            '<span class="cmd-highlight">5.</span> Legal Doc Analyzer — Contract intelligence system',
+            '→ View all at: <a href="#projects" style="color:var(--accent-1)">Projects Section</a>',
+        ],
+        experience: () => [
+            '<span class="cmd-highlight">14-WEEK GRIND (2024):</span>',
+            '  Week 1-3:   Python → ML Foundations → Deep Learning',
+            '  Week 4-6:   NLP → Transformers → LLM Engineering',
+            '  Week 7-9:   RAG Systems → Agent Frameworks → Multi-Agent',
+            '  Week 10-12: Production Deployment → Security → DevOps',
+            '  Week 13-14: Capstone Projects → Portfolio Launch',
+            '',
+            'Zero to production AI engineer in 98 days.',
+        ],
+        contact: () => [
+            '<span class="cmd-highlight">Email:</span>    adarshentity098@gmail.com',
+            '<span class="cmd-highlight">GitHub:</span>   github.com/Cyber-Duelist',
+            '<span class="cmd-highlight">LinkedIn:</span> linkedin.com/in/i-am-entity',
+            '<span class="cmd-highlight">Phone:</span>    +91-94394-40544',
+        ],
+        resume: () => {
+            window.open('resume.html', '_blank');
+            return ['Opening resume... ⬇'];
+        },
+        theme: () => {
+            document.getElementById('theme-switcher').click();
+            return ['Theme switched! ⚡'];
+        },
+        whoami: () => ['entity@apex-paragon — AI Software Engineer'],
+        stack: () => [
+            '╔══════════════════════════════════════╗',
+            '║  APEX-PARAGON TECH STACK             ║',
+            '╠══════════════════════════════════════╣',
+            '║  Frontend:  HTML + SCSS + Three.js   ║',
+            '║  Particles: WebGL + GLSL Shaders     ║',
+            '║  Audio:     Web Audio API (5 layers)  ║',
+            '║  Themes:    CSS Custom Properties     ║',
+            '║  Analytics: Google Analytics 4        ║',
+            '║  Hosting:   GitHub Pages              ║',
+            '╚══════════════════════════════════════╝',
+        ],
+        clear: () => {
+            body.innerHTML = '';
+            return [];
+        },
+    };
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter') return;
+        const cmd = input.value.trim().toLowerCase();
+        input.value = '';
+
+        if (!cmd) return;
+
+        // Echo input
+        addLine(cmd, 'input');
+
+        // Process command
+        const handler = commands[cmd];
+        if (handler) {
+            const output = handler();
+            if (output && output.length) {
+                output.forEach(line => addLine(line, 'output'));
+            }
+        } else {
+            addLine(`Command not found: ${cmd}. Type <span class="cmd-highlight">help</span> for available commands.`, 'error');
+        }
+
+        body.scrollTop = body.scrollHeight;
+    });
+
+    function addLine(text, type) {
+        const div = document.createElement('div');
+        div.className = `terminal-line ${type}`;
+        div.innerHTML = text;
+        body.appendChild(div);
+    }
+})();
+
+/* ========================================
+   AI CHATBOT
+   ======================================== */
+(function() {
+    const fab = document.getElementById('chatbot-fab');
+    const win = document.getElementById('chatbot-window');
+    const closeBtn = document.getElementById('chatbot-close');
+    const input = document.getElementById('chatbot-input');
+    const sendBtn = document.getElementById('chatbot-send');
+    const messages = document.getElementById('chatbot-messages');
+    if (!fab || !win) return;
+
+    fab.addEventListener('click', () => {
+        win.classList.toggle('open');
+        if (win.classList.contains('open')) {
+            input.focus();
+        }
+    });
+
+    closeBtn.addEventListener('click', () => {
+        win.classList.remove('open');
+    });
+
+    function sendMessage() {
+        const text = input.value.trim();
+        if (!text) return;
+
+        addMsg(text, 'user');
+        input.value = '';
+
+        // Simulate typing delay
+        setTimeout(() => {
+            const reply = generateReply(text);
+            addMsg(reply, 'bot');
+        }, 500 + Math.random() * 500);
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    function addMsg(text, type) {
+        const div = document.createElement('div');
+        div.className = `chat-msg ${type}`;
+        div.innerHTML = `<span class="chat-bubble">${text}</span>`;
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function generateReply(query) {
+        const q = query.toLowerCase();
+
+        // Greeting
+        if (/^(hi|hello|hey|sup|yo)/i.test(q)) {
+            return "Hey there! 👋 I'm Adarsh's AI assistant. Ask me about his skills, projects, experience, or anything else!";
+        }
+
+        // Skills
+        if (q.includes('skill') || q.includes('tech') || q.includes('stack') || q.includes('language')) {
+            return "🛠️ <strong>Core:</strong> Python, JavaScript, SQL, Bash<br><strong>AI/ML:</strong> LangChain, LlamaIndex, HuggingFace, OpenAI API<br><strong>Frameworks:</strong> FastAPI, Flask, Streamlit<br><strong>Databases:</strong> PostgreSQL, ChromaDB, Pinecone, FAISS<br><strong>DevOps:</strong> Docker, CI/CD, GitHub Actions";
+        }
+
+        // Projects
+        if (q.includes('project') || q.includes('built') || q.includes('build') || q.includes('portfolio')) {
+            return "🚀 Adarsh built 14 production AI systems including:<br>• <strong>Enterprise AI Agent</strong> with multi-layer guardrails<br>• <strong>DevOps Swarm</strong> — autonomous CI/CD repair<br>• <strong>Production RAG</strong> with hallucination control<br>• <strong>AI Code Reviewer</strong> for GitHub PRs<br>Scroll up to the Projects section to see them all!";
+        }
+
+        // Experience / Background
+        if (q.includes('experience') || q.includes('background') || q.includes('education') || q.includes('grind') || q.includes('journey')) {
+            return "🎓 B.Tech in Computer Science (AI & ML specialization)<br>📜 Oracle GenAI Professional + Oracle Data Science certified<br>🔥 Completed a 14-week intensive AI engineering grind — from Python basics to production multi-agent systems in 98 days.";
+        }
+
+        // Contact
+        if (q.includes('contact') || q.includes('email') || q.includes('reach') || q.includes('hire') || q.includes('phone')) {
+            return "📬 You can reach Adarsh at:<br>✉️ adarshentity098@gmail.com<br>🔗 <a href='https://linkedin.com/in/i-am-entity' target='_blank' style='color:var(--accent-1)'>LinkedIn</a><br>💻 <a href='https://github.com/Cyber-Duelist' target='_blank' style='color:var(--accent-1)'>GitHub</a><br>📱 +91-94394-40544";
+        }
+
+        // Resume
+        if (q.includes('resume') || q.includes('cv')) {
+            return "📄 You can download Adarsh's resume by clicking the 'Download CV' button in the hero section, or <a href='resume.html' download style='color:var(--accent-1)'>click here</a>!";
+        }
+
+        // RAG
+        if (q.includes('rag') || q.includes('retrieval')) {
+            return "📚 Adarsh built a production RAG pipeline with:<br>• Semantic chunking with overlap<br>• FAISS + ChromaDB vector stores<br>• Hallucination detection & citation verification<br>• Query rewriting and hybrid search<br>It processes 1000+ pages with sub-second retrieval.";
+        }
+
+        // Agents / Multi-agent
+        if (q.includes('agent') || q.includes('swarm') || q.includes('multi-agent')) {
+            return "🤖 Multi-agent systems are Adarsh's specialty!<br>• <strong>DevOps Swarm:</strong> Autonomous agents that detect CI/CD failures, diagnose root causes, and apply fixes using LLaMA 3<br>• <strong>Enterprise Agent:</strong> Multi-layer guardrails blocking prompt injection, PII leaks, and off-topic queries<br>These aren't demos — they're production architectures.";
+        }
+
+        // Guardrails / Security
+        if (q.includes('guardrail') || q.includes('security') || q.includes('safety')) {
+            return "🛡️ Adarsh built enterprise-grade AI guardrails including:<br>• Input sanitization (prompt injection detection)<br>• PII masking with regex + NER<br>• Topic boundary enforcement<br>• Output validation with confidence scoring<br>• Rate limiting and abuse prevention";
+        }
+
+        // Certification
+        if (q.includes('certif') || q.includes('oracle')) {
+            return "📜 Certifications:<br>• Oracle Generative AI Professional<br>• Oracle Data Science Professional<br>• IoT & Industrial Automation";
+        }
+
+        // Website / How built
+        if (q.includes('website') || q.includes('this site') || q.includes('how') || q.includes('three.js')) {
+            return "🌐 This portfolio was built with:<br>• <strong>Three.js</strong> with GLSL shaders for the particle cosmos<br>• <strong>SCSS</strong> architecture with glassmorphism<br>• <strong>Web Audio API</strong> for the portal sound (5 synthesized layers!)<br>• <strong>CSS Custom Properties</strong> for the dual-theme system<br>• Hosted on <strong>GitHub Pages</strong>";
+        }
+
+        // Availability
+        if (q.includes('available') || q.includes('open') || q.includes('looking') || q.includes('job')) {
+            return "✅ Yes! Adarsh is actively looking for <strong>AI Engineer</strong> and <strong>Backend Software Engineer</strong> roles. He's open to both remote and on-site positions. Feel free to reach out!";
+        }
+
+        // Thanks
+        if (q.includes('thank') || q.includes('thanks') || q.includes('awesome') || q.includes('cool') || q.includes('great')) {
+            return "Thank you! 🙏 Adarsh appreciates the kind words. If you'd like to work with him, don't hesitate to reach out!";
+        }
+
+        // Fallback
+        const fallbacks = [
+            "That's a great question! For more details, I'd suggest reaching out directly to Adarsh at adarshentity098@gmail.com 📬",
+            "Hmm, I'm not sure about that one. Try asking about Adarsh's skills, projects, experience, or how to contact him! 🤔",
+            "I'm specialized in answering questions about Adarsh's AI engineering work. Try: 'What projects has he built?' or 'What are his skills?' 💡",
+        ];
+        return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+    }
+})();
