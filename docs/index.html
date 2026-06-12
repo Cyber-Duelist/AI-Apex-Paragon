@@ -471,19 +471,47 @@
             <defs>
                 <linearGradient id="entropy-grad" x1="0" y1="0" x2="48" y2="48">
                     <stop offset="0%" stop-color="#00e5ff"/>
-                    <stop offset="50%" stop-color="#a855f7"/>
+                    <stop offset="40%" stop-color="#a855f7"/>
                     <stop offset="100%" stop-color="#ff006e"/>
                 </linearGradient>
+                <radialGradient id="entropy-core-glow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.6"/>
+                    <stop offset="60%" stop-color="#a855f7" stop-opacity="0.2"/>
+                    <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+                </radialGradient>
+                <filter id="entropy-glow">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="1.5"/>
+                </filter>
             </defs>
-            <circle cx="24" cy="24" r="22" stroke="url(#entropy-grad)" stroke-width="2" fill="none" opacity="0.6"/>
-            <path d="M24 8 C18 14, 12 18, 12 24 C12 30, 18 36, 24 40 C30 36, 36 30, 36 24 C36 18, 30 14, 24 8Z" fill="url(#entropy-grad)" opacity="0.15"/>
-            <circle cx="24" cy="22" r="6" fill="url(#entropy-grad)" opacity="0.9"/>
-            <path d="M16 32 Q20 28, 24 28 Q28 28, 32 32" stroke="url(#entropy-grad)" stroke-width="2" fill="none" stroke-linecap="round"/>
-            <circle cx="21" cy="21" r="1.2" fill="#fff"/>
-            <circle cx="27" cy="21" r="1.2" fill="#fff"/>
+            <!-- Outer orbital ring -->
+            <circle cx="24" cy="24" r="22" stroke="url(#entropy-grad)" stroke-width="1" fill="none" opacity="0.3" stroke-dasharray="4 3"/>
+            <!-- Inner orbital ring -->
+            <circle cx="24" cy="24" r="17" stroke="url(#entropy-grad)" stroke-width="1.2" fill="none" opacity="0.5" stroke-dasharray="8 4"/>
+            <!-- Core glow background -->
+            <circle cx="24" cy="24" r="12" fill="url(#entropy-core-glow)"/>
+            <!-- AI Eye — outer -->
+            <path d="M12 24 C16 16, 32 16, 36 24 C32 32, 16 32, 12 24Z" fill="rgba(0,229,255,0.08)" stroke="url(#entropy-grad)" stroke-width="1.5"/>
+            <!-- AI Eye — iris -->
+            <circle cx="24" cy="24" r="5.5" fill="rgba(168,85,247,0.2)" stroke="url(#entropy-grad)" stroke-width="1.2"/>
+            <!-- AI Eye — pupil -->
+            <circle cx="24" cy="24" r="2.5" fill="url(#entropy-grad)"/>
+            <!-- AI Eye — pupil highlight -->
+            <circle cx="22.8" cy="22.8" r="1" fill="#fff" opacity="0.9"/>
+            <!-- Neural nodes -->
+            <circle cx="8" cy="18" r="1.5" fill="#00e5ff" opacity="0.7" filter="url(#entropy-glow)"/>
+            <circle cx="40" cy="18" r="1.5" fill="#a855f7" opacity="0.7" filter="url(#entropy-glow)"/>
+            <circle cx="8" cy="30" r="1.5" fill="#a855f7" opacity="0.7" filter="url(#entropy-glow)"/>
+            <circle cx="40" cy="30" r="1.5" fill="#ff006e" opacity="0.7" filter="url(#entropy-glow)"/>
+            <!-- Neural connections -->
+            <line x1="8" y1="18" x2="14" y2="22" stroke="#00e5ff" stroke-width="0.6" opacity="0.4"/>
+            <line x1="40" y1="18" x2="34" y2="22" stroke="#a855f7" stroke-width="0.6" opacity="0.4"/>
+            <line x1="8" y1="30" x2="14" y2="26" stroke="#a855f7" stroke-width="0.6" opacity="0.4"/>
+            <line x1="40" y1="30" x2="34" y2="26" stroke="#ff006e" stroke-width="0.6" opacity="0.4"/>
+            <!-- "AI" micro text -->
+            <text x="24" y="43" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="5" font-weight="700" fill="url(#entropy-grad)" opacity="0.8" letter-spacing="1.5">AI</text>
         </svg>
         <span class="fab-pulse"></span>
-        <span class="fab-label">ENTROPY</span>
+        <span class="fab-label">ENTROPY AI</span>
     </div>
     <div class="chatbot-window" id="chatbot-window">
         <div class="chatbot-header">
@@ -493,14 +521,28 @@
                         <defs>
                             <linearGradient id="avatar-grad" x1="0" y1="0" x2="40" y2="40">
                                 <stop offset="0%" stop-color="#00e5ff"/>
-                                <stop offset="100%" stop-color="#a855f7"/>
+                                <stop offset="50%" stop-color="#a855f7"/>
+                                <stop offset="100%" stop-color="#ff006e"/>
                             </linearGradient>
+                            <radialGradient id="avatar-core" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.4"/>
+                                <stop offset="100%" stop-color="transparent"/>
+                            </radialGradient>
                         </defs>
-                        <circle cx="20" cy="20" r="19" stroke="url(#avatar-grad)" stroke-width="1.5" fill="rgba(0,229,255,0.08)"/>
-                        <circle cx="20" cy="17" r="5" fill="url(#avatar-grad)" opacity="0.85"/>
-                        <circle cx="18" cy="16.5" r="1" fill="#fff"/>
-                        <circle cx="22" cy="16.5" r="1" fill="#fff"/>
-                        <path d="M14 28 Q17 24, 20 24 Q23 24, 26 28" stroke="url(#avatar-grad)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                        <!-- Orbital ring -->
+                        <circle cx="20" cy="20" r="18" stroke="url(#avatar-grad)" stroke-width="0.8" fill="none" opacity="0.4" stroke-dasharray="3 2"/>
+                        <!-- Core glow -->
+                        <circle cx="20" cy="20" r="10" fill="url(#avatar-core)"/>
+                        <!-- AI Eye -->
+                        <path d="M8 20 C12 14, 28 14, 32 20 C28 26, 12 26, 8 20Z" fill="rgba(0,229,255,0.06)" stroke="url(#avatar-grad)" stroke-width="1.2"/>
+                        <circle cx="20" cy="20" r="4.5" fill="rgba(168,85,247,0.15)" stroke="url(#avatar-grad)" stroke-width="1"/>
+                        <circle cx="20" cy="20" r="2" fill="url(#avatar-grad)"/>
+                        <circle cx="19" cy="19" r="0.8" fill="#fff" opacity="0.9"/>
+                        <!-- Neural dots -->
+                        <circle cx="5" cy="15" r="1" fill="#00e5ff" opacity="0.5"/>
+                        <circle cx="35" cy="15" r="1" fill="#a855f7" opacity="0.5"/>
+                        <circle cx="5" cy="25" r="1" fill="#a855f7" opacity="0.5"/>
+                        <circle cx="35" cy="25" r="1" fill="#ff006e" opacity="0.5"/>
                     </svg>
                     <span class="avatar-online-dot"></span>
                 </div>
