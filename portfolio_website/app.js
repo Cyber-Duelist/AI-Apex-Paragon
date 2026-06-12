@@ -1111,7 +1111,7 @@ document.querySelectorAll('.project-card').forEach(card => {
     const closeBtn = document.getElementById('chatbot-close');
     const input = document.getElementById('chatbot-input');
     const sendBtn = document.getElementById('chatbot-send');
-    const messagesEl = document.getElementById('chatbot-messages');
+    const messagesEl = document.getElementById('chatbot-body');
     const micBtn = document.getElementById('chatbot-mic');
     const voiceToggle = document.getElementById('chatbot-voice-toggle');
     if (!fab || !win) return;
