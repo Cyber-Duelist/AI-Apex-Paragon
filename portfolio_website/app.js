@@ -1462,16 +1462,14 @@ RULES:
 
         // ── English female voices (ordered by naturalness and melodious tone) ──
         const preferredEn = [
-            'Google UK English Female', // Most natural, soothing, and human-like
-            'Microsoft Zira',       // Natural Windows voice
-            'Samantha',             // macOS smooth voice
-            'Karen',                
-            'Moira',                
-            'Google US English',    
-            'Microsoft Hazel',      
-            'Microsoft Susan',      
-            'Tessa',                
-            'Fiona',                
+            'Microsoft Neerja Online (Natural)', // Best Indian English natural voice
+            'Microsoft Neerja',                  // Windows Indian English
+            'Veena',                             // macOS Indian English
+            'Microsoft Aria Online (Natural)',   // High-quality natural fallback
+            'Google UK English Female',          // Smooth, soothing fallback
+            'Microsoft Zira',
+            'Samantha',
+            'Google US English'
         ];
         for (const name of preferredEn) {
             const found = voices.find(v => v.name.includes(name));
@@ -1486,11 +1484,13 @@ RULES:
 
         // ── Hindi female voices ──
         const preferredHi = [
-            'Google हिन्दी',          // Google Cloud Hindi (most natural, Chrome default)
-            'Microsoft Swara',       // Windows native Hindi
-            'Lekha',                 // macOS native Hindi
-            'Microsoft Neerja',      // Windows Indian English (excellent fallback for Hindi)
-            'Veena'                  // macOS Indian English
+            'Microsoft Swara Online (Natural)', // Best natural Hindi voice
+            'Google हिन्दी',                      // Google Cloud Hindi
+            'Microsoft Swara',                  // Windows native Hindi
+            'Lekha',                            // macOS native Hindi
+            'Microsoft Neerja Online (Natural)',// Excellent fallback
+            'Microsoft Neerja',                 
+            'Veena'                             
         ];
         for (const name of preferredHi) {
             const found = voices.find(v => v.name.includes(name));
@@ -1558,15 +1558,15 @@ RULES:
                 utter.lang = hindi ? 'hi-IN' : 'en-US';
 
                 if (hindi) {
-                    // Hindi TTS engines sound rushed at 1.0. Slower rate + normal pitch = natural Indian tone
-                    utter.rate = 0.9;
+                    // Slower rate for Hindi to sound more calm and authentically Indian, avoiding the "rushed" robotic tone
+                    utter.rate = 0.85;
                     utter.pitch = 1.0;
                     utter.volume = 1.0;
                 } else {
-                    // Soft, natural, human-like melodious parameters for English
-                    utter.rate = 0.95;   
-                    utter.pitch = 1.1;  
-                    utter.volume = 0.95; 
+                    // Smooth, elegant English settings
+                    utter.rate = 0.9;   
+                    utter.pitch = 1.05;  
+                    utter.volume = 1.0; 
                 }
 
                 utter.onstart = () => {
