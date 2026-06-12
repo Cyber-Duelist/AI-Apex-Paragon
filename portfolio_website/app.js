@@ -956,7 +956,7 @@ document.querySelectorAll('.project-card').forEach(card => {
 })();
 
 /* ========================================
-   AI CHATBOT
+   ENTROPY — AI CHATBOT (Real LLM + Voice)
    ======================================== */
 (function() {
     const fab = document.getElementById('chatbot-fab');
@@ -964,121 +964,314 @@ document.querySelectorAll('.project-card').forEach(card => {
     const closeBtn = document.getElementById('chatbot-close');
     const input = document.getElementById('chatbot-input');
     const sendBtn = document.getElementById('chatbot-send');
-    const messages = document.getElementById('chatbot-messages');
+    const messagesEl = document.getElementById('chatbot-messages');
+    const micBtn = document.getElementById('chatbot-mic');
+    const voiceToggle = document.getElementById('chatbot-voice-toggle');
     if (!fab || !win) return;
 
-    fab.addEventListener('click', () => {
-        win.classList.toggle('open');
-        if (win.classList.contains('open')) {
-            input.focus();
-        }
-    });
+    // ── State ──
+    let voiceEnabled = true; // auto-speak replies
+    let isListening = false;
+    let isSending = false;
+    const conversationHistory = [];
 
-    closeBtn.addEventListener('click', () => {
-        win.classList.remove('open');
-    });
+    // ── System Prompt — ENTROPY's personality + portfolio knowledge ──
+    const SYSTEM_PROMPT = `You are ENTROPY, a charming, witty, and highly intelligent AI assistant embedded in the portfolio website of Adarsh Kumar Singh. You have a warm, slightly playful personality. You use occasional emojis but stay professional.
 
-    function sendMessage() {
-        const text = input.value.trim();
-        if (!text) return;
+ABOUT ADARSH KUMAR SINGH:
+- B.Tech student in Computer Science (AI & ML specialization)
+- Completed a grueling 14-week self-taught AI engineering journey ("The Grind") — from Python basics to production multi-agent systems in 98 days
+- Certifications: Oracle Generative AI Professional, Oracle Data Science Professional, IoT & Industrial Automation
+- Contact: adarshentity098@gmail.com, LinkedIn: linkedin.com/in/i-am-entity, GitHub: github.com/Cyber-Duelist, Phone: +91-94394-40544
+- Actively seeking AI Engineer and Backend Software Engineer roles (remote or on-site)
 
-        addMsg(text, 'user');
-        input.value = '';
+TECHNICAL SKILLS:
+- Core: Python, JavaScript, SQL, Bash
+- AI/ML: LangChain, LlamaIndex, HuggingFace, OpenAI API, Groq, LLaMA 3
+- Frameworks: FastAPI, Flask, Streamlit
+- Databases: PostgreSQL, ChromaDB, Pinecone, FAISS
+- DevOps: Docker, CI/CD, GitHub Actions
 
-        // Simulate typing delay
-        setTimeout(() => {
-            const reply = generateReply(text);
-            addMsg(reply, 'bot');
-        }, 500 + Math.random() * 500);
+KEY PROJECTS:
+1. Enterprise AI Agent — Multi-layer guardrails (prompt injection detection, PII masking, topic enforcement, output validation)
+2. Autonomous DevOps Swarm — Multi-agent system using LLaMA 3 that detects CI/CD failures, diagnoses root causes, and applies fixes autonomously
+3. Production RAG System (PersonaDoc) — Semantic chunking, FAISS + ChromaDB, hallucination detection, citation verification, 1000+ pages sub-second retrieval
+4. AI Code Review Service — Automated GitHub PR reviews
+
+THE 14-WEEK GRIND TIMELINE:
+- Weeks 1-2: Python, NumPy, Pandas fundamentals
+- Weeks 3-4: Machine Learning, scikit-learn, Random Forest
+- Weeks 5-6: Production Python, FastAPI, REST APIs
+- Week 7: LLM APIs, prompt engineering
+- Week 8: RAG pipelines, vector databases
+- Week 9: Tool-calling agents, ReAct loops
+- Week 10: Production guardrails, safety systems
+- Weeks 11-12: Multi-agent architectures
+- Weeks 13-14: Autonomous DevOps Swarm (capstone)
+
+THIS WEBSITE:
+- Built with Three.js (GLSL shaders for particle cosmos), CSS with glassmorphism, Web Audio API for portal sound, CSS Custom Properties for dual-theme system
+- Hosted on GitHub Pages
+- Features: Interactive terminal, GitHub activity tracker, AI news ticker
+
+RULES:
+- You CAN answer general knowledge questions, coding questions, and have casual conversations — you are a real AI, not a FAQ bot
+- When asked about Adarsh, use the information above
+- Keep responses concise (2-4 sentences for simple questions, more for complex ones)
+- You are named ENTROPY. If asked about yourself, explain you are Adarsh's custom AI assistant
+- Be helpful, friendly, and slightly witty`;
+
+    // ── Voice Toggle ──
+    if (voiceToggle) {
+        voiceToggle.classList.add('active');
+        voiceToggle.addEventListener('click', () => {
+            voiceEnabled = !voiceEnabled;
+            voiceToggle.classList.toggle('active', voiceEnabled);
+            if (!voiceEnabled) window.speechSynthesis && window.speechSynthesis.cancel();
+        });
     }
 
-    sendBtn.addEventListener('click', sendMessage);
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') sendMessage();
+    // ── FAB toggle ──
+    fab.addEventListener('click', () => {
+        win.classList.toggle('open');
+        if (win.classList.contains('open')) input.focus();
+    });
+    closeBtn.addEventListener('click', () => {
+        win.classList.remove('open');
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
     });
 
+    // ── Send message ──
+    sendBtn.addEventListener('click', () => handleSend());
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+    });
+
+    async function handleSend() {
+        const text = input.value.trim();
+        if (!text || isSending) return;
+        input.value = '';
+        addMsg(text, 'user');
+        conversationHistory.push({ role: 'user', content: text });
+        await getAIReply();
+    }
+
+    // ── Add message to chat ──
     function addMsg(text, type) {
         const div = document.createElement('div');
         div.className = `chat-msg ${type}`;
-        div.innerHTML = `<span class="chat-bubble">${text}</span>`;
-        messages.appendChild(div);
-        messages.scrollTop = messages.scrollHeight;
+        div.innerHTML = `<span class="chat-bubble">${escapeHtml(text)}</span>`;
+        messagesEl.appendChild(div);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
-    function generateReply(query) {
-        const q = query.toLowerCase();
+    function addBotMsg(html) {
+        const div = document.createElement('div');
+        div.className = 'chat-msg bot';
+        div.innerHTML = `<span class="chat-bubble">${html}</span>`;
+        messagesEl.appendChild(div);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
 
-        // Greeting
-        if (/^(hi|hello|hey|sup|yo)/i.test(q)) {
-            return "Hey there! 👋 I'm Adarsh's AI assistant. Ask me about his skills, projects, experience, or anything else!";
-        }
+    function escapeHtml(str) {
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+    }
 
-        // Skills
-        if (q.includes('skill') || q.includes('tech') || q.includes('stack') || q.includes('language')) {
-            return "🛠️ <strong>Core:</strong> Python, JavaScript, SQL, Bash<br><strong>AI/ML:</strong> LangChain, LlamaIndex, HuggingFace, OpenAI API<br><strong>Frameworks:</strong> FastAPI, Flask, Streamlit<br><strong>Databases:</strong> PostgreSQL, ChromaDB, Pinecone, FAISS<br><strong>DevOps:</strong> Docker, CI/CD, GitHub Actions";
-        }
+    // ── Typing indicator ──
+    function showTyping() {
+        const div = document.createElement('div');
+        div.className = 'chat-msg bot';
+        div.id = 'entropy-typing';
+        div.innerHTML = `<span class="chat-bubble"><span class="typing-indicator"><span></span><span></span><span></span></span></span>`;
+        messagesEl.appendChild(div);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+    function removeTyping() {
+        const el = document.getElementById('entropy-typing');
+        if (el) el.remove();
+    }
 
-        // Projects
-        if (q.includes('project') || q.includes('built') || q.includes('build') || q.includes('portfolio')) {
-            return "🚀 Adarsh built 14 production AI systems including:<br>• <strong>Enterprise AI Agent</strong> with multi-layer guardrails<br>• <strong>DevOps Swarm</strong> — autonomous CI/CD repair<br>• <strong>Production RAG</strong> with hallucination control<br>• <strong>AI Code Reviewer</strong> for GitHub PRs<br>Scroll up to the Projects section to see them all!";
-        }
+    // ── Call Free LLM API (Pollinations.ai — no API key required) ──
+    async function getAIReply() {
+        isSending = true;
+        showTyping();
+        input.disabled = true;
+        sendBtn.disabled = true;
 
-        // Experience / Background
-        if (q.includes('experience') || q.includes('background') || q.includes('education') || q.includes('grind') || q.includes('journey')) {
-            return "🎓 B.Tech in Computer Science (AI & ML specialization)<br>📜 Oracle GenAI Professional + Oracle Data Science certified<br>🔥 Completed a 14-week intensive AI engineering grind — from Python basics to production multi-agent systems in 98 days.";
-        }
-
-        // Contact
-        if (q.includes('contact') || q.includes('email') || q.includes('reach') || q.includes('hire') || q.includes('phone')) {
-            return "📬 You can reach Adarsh at:<br>✉️ adarshentity098@gmail.com<br>🔗 <a href='https://linkedin.com/in/i-am-entity' target='_blank' style='color:var(--accent-1)'>LinkedIn</a><br>💻 <a href='https://github.com/Cyber-Duelist' target='_blank' style='color:var(--accent-1)'>GitHub</a><br>📱 +91-94394-40544";
-        }
-
-        // Resume
-        if (q.includes('resume') || q.includes('cv')) {
-            return "📄 You can download Adarsh's resume by clicking the 'Download CV' button in the hero section, or <a href='resume.html' download style='color:var(--accent-1)'>click here</a>!";
-        }
-
-        // RAG
-        if (q.includes('rag') || q.includes('retrieval')) {
-            return "📚 Adarsh built a production RAG pipeline with:<br>• Semantic chunking with overlap<br>• FAISS + ChromaDB vector stores<br>• Hallucination detection & citation verification<br>• Query rewriting and hybrid search<br>It processes 1000+ pages with sub-second retrieval.";
-        }
-
-        // Agents / Multi-agent
-        if (q.includes('agent') || q.includes('swarm') || q.includes('multi-agent')) {
-            return "🤖 Multi-agent systems are Adarsh's specialty!<br>• <strong>DevOps Swarm:</strong> Autonomous agents that detect CI/CD failures, diagnose root causes, and apply fixes using LLaMA 3<br>• <strong>Enterprise Agent:</strong> Multi-layer guardrails blocking prompt injection, PII leaks, and off-topic queries<br>These aren't demos — they're production architectures.";
-        }
-
-        // Guardrails / Security
-        if (q.includes('guardrail') || q.includes('security') || q.includes('safety')) {
-            return "🛡️ Adarsh built enterprise-grade AI guardrails including:<br>• Input sanitization (prompt injection detection)<br>• PII masking with regex + NER<br>• Topic boundary enforcement<br>• Output validation with confidence scoring<br>• Rate limiting and abuse prevention";
-        }
-
-        // Certification
-        if (q.includes('certif') || q.includes('oracle')) {
-            return "📜 Certifications:<br>• Oracle Generative AI Professional<br>• Oracle Data Science Professional<br>• IoT & Industrial Automation";
-        }
-
-        // Website / How built
-        if (q.includes('website') || q.includes('this site') || q.includes('how') || q.includes('three.js')) {
-            return "🌐 This portfolio was built with:<br>• <strong>Three.js</strong> with GLSL shaders for the particle cosmos<br>• <strong>SCSS</strong> architecture with glassmorphism<br>• <strong>Web Audio API</strong> for the portal sound (5 synthesized layers!)<br>• <strong>CSS Custom Properties</strong> for the dual-theme system<br>• Hosted on <strong>GitHub Pages</strong>";
-        }
-
-        // Availability
-        if (q.includes('available') || q.includes('open') || q.includes('looking') || q.includes('job')) {
-            return "✅ Yes! Adarsh is actively looking for <strong>AI Engineer</strong> and <strong>Backend Software Engineer</strong> roles. He's open to both remote and on-site positions. Feel free to reach out!";
-        }
-
-        // Thanks
-        if (q.includes('thank') || q.includes('thanks') || q.includes('awesome') || q.includes('cool') || q.includes('great')) {
-            return "Thank you! 🙏 Adarsh appreciates the kind words. If you'd like to work with him, don't hesitate to reach out!";
-        }
-
-        // Fallback
-        const fallbacks = [
-            "That's a great question! For more details, I'd suggest reaching out directly to Adarsh at adarshentity098@gmail.com 📬",
-            "Hmm, I'm not sure about that one. Try asking about Adarsh's skills, projects, experience, or how to contact him! 🤔",
-            "I'm specialized in answering questions about Adarsh's AI engineering work. Try: 'What projects has he built?' or 'What are his skills?' 💡",
+        const messages = [
+            { role: 'system', content: SYSTEM_PROMPT },
+            ...conversationHistory.slice(-10) // Keep last 10 messages for context
         ];
-        return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+
+        try {
+            const response = await fetch('https://text.pollinations.ai/openai', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'openai',
+                    messages: messages,
+                    temperature: 0.7,
+                    max_tokens: 512
+                })
+            });
+
+            if (!response.ok) throw new Error(`API error: ${response.status}`);
+
+            const data = await response.json();
+            const reply = data.choices?.[0]?.message?.content?.trim();
+
+            removeTyping();
+
+            if (reply) {
+                conversationHistory.push({ role: 'assistant', content: reply });
+                addBotMsg(formatReply(reply));
+                if (voiceEnabled) speak(reply);
+            } else {
+                addBotMsg("Hmm, I didn't get a response. Could you try again? 🔄");
+            }
+        } catch (err) {
+            console.warn('ENTROPY API error:', err);
+            removeTyping();
+            // Fallback to local knowledge base
+            const fallback = localFallback(conversationHistory[conversationHistory.length - 1]?.content || '');
+            addBotMsg(fallback);
+            conversationHistory.push({ role: 'assistant', content: fallback });
+            if (voiceEnabled) speak(fallback.replace(/<[^>]*>/g, ''));
+        } finally {
+            isSending = false;
+            input.disabled = false;
+            sendBtn.disabled = false;
+            input.focus();
+        }
+    }
+
+    // ── Format reply (basic markdown-like) ──
+    function formatReply(text) {
+        return text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`(.*?)`/g, '<code style="background:rgba(0,229,255,0.1);padding:2px 6px;border-radius:4px;font-size:0.78rem">$1</code>')
+            .replace(/\n/g, '<br>');
+    }
+
+    // ── Local fallback (when API fails) ──
+    function localFallback(query) {
+        const q = query.toLowerCase();
+        if (/^(hi|hello|hey|sup|yo)/i.test(q))
+            return "Hey there! ✨ I'm <strong>ENTROPY</strong> — Adarsh's AI assistant. I'm having a bit of trouble connecting right now, but ask me about his skills, projects, or experience!";
+        if (q.includes('skill') || q.includes('tech') || q.includes('stack'))
+            return "🛠️ <strong>Core:</strong> Python, JavaScript, SQL, Bash<br><strong>AI/ML:</strong> LangChain, LlamaIndex, HuggingFace, OpenAI API<br><strong>Frameworks:</strong> FastAPI, Flask, Streamlit<br><strong>Databases:</strong> PostgreSQL, ChromaDB, Pinecone, FAISS";
+        if (q.includes('project') || q.includes('built') || q.includes('build'))
+            return "🚀 Adarsh built 14 production AI systems including:<br>• <strong>Enterprise AI Agent</strong> with guardrails<br>• <strong>DevOps Swarm</strong> — autonomous CI/CD repair<br>• <strong>Production RAG</strong> with hallucination control<br>• <strong>AI Code Reviewer</strong> for GitHub PRs";
+        if (q.includes('contact') || q.includes('email') || q.includes('hire'))
+            return "📬 Reach Adarsh at: adarshentity098@gmail.com | <a href='https://linkedin.com/in/i-am-entity' target='_blank' style='color:#00e5ff'>LinkedIn</a> | <a href='https://github.com/Cyber-Duelist' target='_blank' style='color:#00e5ff'>GitHub</a>";
+        return "I'm having trouble connecting right now 😅 Try asking about Adarsh's <strong>skills</strong>, <strong>projects</strong>, or <strong>experience</strong>, or try again in a moment!";
+    }
+
+    // ── Voice Output (Web Speech API) ──
+    let selectedVoice = null;
+
+    function loadVoices() {
+        const synth = window.speechSynthesis;
+        if (!synth) return;
+        const voices = synth.getVoices();
+        // Prefer a nice female English voice
+        const preferred = [
+            'Microsoft Zira', 'Google UK English Female', 'Google US English',
+            'Samantha', 'Karen', 'Moira', 'Tessa', 'Fiona',
+            'Microsoft Hazel', 'Microsoft Susan'
+        ];
+        for (const name of preferred) {
+            const found = voices.find(v => v.name.includes(name));
+            if (found) { selectedVoice = found; return; }
+        }
+        // Fallback: any English female voice
+        const englishFemale = voices.find(v => v.lang.startsWith('en') &&
+            (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('woman') ||
+             v.name.includes('Zira') || v.name.includes('Samantha') || v.name.includes('Karen')));
+        if (englishFemale) { selectedVoice = englishFemale; return; }
+        // Fallback: any English voice
+        selectedVoice = voices.find(v => v.lang.startsWith('en')) || voices[0] || null;
+    }
+
+    if (window.speechSynthesis) {
+        loadVoices();
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+
+    function speak(text) {
+        const synth = window.speechSynthesis;
+        if (!synth || !voiceEnabled) return;
+        synth.cancel(); // stop any current speech
+        const clean = text.replace(/<[^>]*>/g, '').replace(/[*_`#]/g, '').substring(0, 500);
+        const utter = new SpeechSynthesisUtterance(clean);
+        if (selectedVoice) utter.voice = selectedVoice;
+        utter.rate = 1.0;
+        utter.pitch = 1.1; // slightly higher for feminine tone
+        utter.volume = 0.9;
+        synth.speak(utter);
+    }
+
+    // ── Voice Input (Web Speech API) ──
+    let recognition = null;
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = () => {
+            isListening = true;
+            micBtn.classList.add('listening');
+            input.placeholder = '🎤 Listening...';
+        };
+
+        recognition.onresult = (event) => {
+            let transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                transcript += event.results[i][0].transcript;
+            }
+            input.value = transcript;
+            if (event.results[event.results.length - 1].isFinal) {
+                // Auto-send on final result
+                setTimeout(() => handleSend(), 300);
+            }
+        };
+
+        recognition.onerror = (event) => {
+            console.warn('Speech recognition error:', event.error);
+            isListening = false;
+            micBtn.classList.remove('listening');
+            input.placeholder = 'Ask ENTROPY anything...';
+            if (event.error === 'not-allowed') {
+                addBotMsg("🎤 Microphone access was denied. Please enable it in your browser settings to use voice input.");
+            }
+        };
+
+        recognition.onend = () => {
+            isListening = false;
+            micBtn.classList.remove('listening');
+            input.placeholder = 'Ask ENTROPY anything...';
+        };
+    }
+
+    if (micBtn) {
+        micBtn.addEventListener('click', () => {
+            if (!recognition) {
+                addBotMsg("🎤 Voice input isn't supported in this browser. Try Chrome or Edge for the best experience!");
+                return;
+            }
+            if (isListening) {
+                recognition.stop();
+            } else {
+                // Stop any ongoing speech first
+                if (window.speechSynthesis) window.speechSynthesis.cancel();
+                recognition.start();
+            }
+        });
     }
 })();
+
