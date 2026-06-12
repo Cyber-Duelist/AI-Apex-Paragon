@@ -948,8 +948,9 @@ document.querySelectorAll('.project-card').forEach(card => {
 
     async function loadNews() {
         try {
-            // Try fetching from a public RSS-to-JSON proxy
-            const resp = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://news.google.com/rss/search?q=artificial+intelligence&hl=en-US&gl=US&ceid=US:en&count=10');
+            // URL encode the Google News RSS URL to prevent parsing errors at the proxy
+            const rssUrl = encodeURIComponent('https://news.google.com/rss/search?q=artificial+intelligence&hl=en-US&gl=US&ceid=US:en');
+            const resp = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}&count=10`);
             const data = await resp.json();
             
             if (data.status === 'ok' && data.items && data.items.length > 0) {
