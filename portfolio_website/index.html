@@ -210,9 +210,35 @@
                 <a href="https://github.com/Cyber-Duelist/AI-Apex-Paragon" target="_blank" class="btn btn-outline">GitHub Portfolio</a>
                 <a href="resume.pdf" download class="btn btn-outline">Download CV ↓</a>
             </div>
-            <div class="hero-cert-buttons" style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-start; flex-wrap: wrap;">
-                <a href="oracle-genai.pdf" target="_blank" class="btn btn-outline" style="font-size: 0.85rem; padding: 0.5rem 1rem; border-color: rgba(255, 215, 0, 0.4); color: #ffd700; background: rgba(255, 215, 0, 0.05);">🏆 Oracle GenAI Certified</a>
-                <a href="oracle-data-science.pdf" target="_blank" class="btn btn-outline" style="font-size: 0.85rem; padding: 0.5rem 1rem; border-color: rgba(255, 215, 0, 0.4); color: #ffd700; background: rgba(255, 215, 0, 0.05);">🏆 Oracle Data Science</a>
+            <div class="hero-cert-dropdown" style="margin-top: 1.5rem; display: flex; justify-content: flex-start; position: relative;">
+                <style>
+                    .cert-dropbtn {
+                        font-size: 0.85rem; padding: 0.6rem 1.2rem; border-color: rgba(255, 215, 0, 0.4); color: #ffd700; background: rgba(255, 215, 0, 0.05); cursor: pointer; border-radius: 4px; border-width: 1px; border-style: solid; text-decoration: none; display: inline-block; transition: all 0.3s;
+                    }
+                    .cert-dropdown-content {
+                        display: none; position: absolute; top: 100%; left: 0; margin-top: 0.5rem; background-color: rgba(10, 10, 15, 0.95); min-width: 220px; box-shadow: 0px 8px 24px 0px rgba(0,0,0,0.8); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 6px; z-index: 10; overflow: hidden;
+                    }
+                    .cert-dropdown-content a {
+                        color: #ffd700; padding: 12px 16px; text-decoration: none; display: block; font-size: 0.85rem; transition: 0.2s; border-bottom: 1px solid rgba(255, 215, 0, 0.05);
+                    }
+                    .cert-dropdown-content a:last-child {
+                        border-bottom: none;
+                    }
+                    .cert-dropdown-content a:hover {
+                        background-color: rgba(255, 215, 0, 0.15);
+                    }
+                    .hero-cert-dropdown:hover .cert-dropdown-content {
+                        display: block;
+                    }
+                    .hero-cert-dropdown:hover .cert-dropbtn {
+                        background: rgba(255, 215, 0, 0.15); border-color: rgba(255, 215, 0, 0.8);
+                    }
+                </style>
+                <div class="cert-dropbtn">🏆 View Oracle Certifications ▾</div>
+                <div class="cert-dropdown-content">
+                    <a href="oracle-genai.pdf" target="_blank">🏅 GenAI Certified Professional</a>
+                    <a href="oracle-data-science.pdf" target="_blank">🏅 Data Science Professional</a>
+                </div>
             </div>
             <div class="hero-stats">
                 <div class="stat">
@@ -714,6 +740,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-    <script src="app.js?v=20260612_epic_final_v21"></script>
+    <script src="app.js?v=20260612_epic_final_v22"></script>
 </body>
 </html>
