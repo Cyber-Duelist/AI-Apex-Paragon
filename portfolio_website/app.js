@@ -1754,8 +1754,11 @@ RULES:
         const stiffness = 0.12;
         const damping = 0.70;
         
-        const forceX = (mouseX - ufoX) * stiffness;
-        const forceY = (mouseY - ufoY) * stiffness;
+        const targetX = (window.isIdleMode && window.idleTargetX !== undefined) ? window.idleTargetX : mouseX;
+        const targetY = (window.isIdleMode && window.idleTargetY !== undefined) ? window.idleTargetY : mouseY;
+
+        const forceX = (targetX - ufoX) * stiffness;
+        const forceY = (targetY - ufoY) * stiffness;
         
         velX = (velX + forceX) * damping;
         velY = (velY + forceY) * damping;
@@ -2434,5 +2437,224 @@ RULES:
             u.pitch = 0.5; u.rate = 0.8;
             window.speechSynthesis.speak(u);
         }
+    }
+})();
+
+/* ========================================
+   IDLE FIGHT MODE (ZORB SPACE BATTLE)
+======================================== */
+(function initIdleFightMode() {
+    let idleTimer = null;
+    const IDLE_TIMEOUT = 10000; // 10 seconds timeout for testing
+    let isIdleMode = false;
+    let fightInterval = null;
+    let enemies = [];
+    const alien = document.getElementById('alien-companion');
+
+    function resetIdleTimer() {
+        if (isIdleMode) {
+            stopIdleFightSequence();
+        }
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(startIdleFightSequence, IDLE_TIMEOUT);
+    }
+
+    // Reset on various user interactions
+    window.addEventListener('mousemove', resetIdleTimer);
+    window.addEventListener('mousedown', resetIdleTimer);
+    window.addEventListener('keydown', resetIdleTimer);
+    window.addEventListener('touchstart', resetIdleTimer);
+    window.addEventListener('scroll', resetIdleTimer);
+    
+    // Start initial timer
+    resetIdleTimer();
+
+    function startIdleFightSequence() {
+        if (isIdleMode) return;
+        isIdleMode = true;
+        window.isIdleMode = true;
+
+        // Force Zorb into UFO immediately (simulate boarding)
+        if (alien) {
+            const alienBubbleUI = alien.querySelector('.alien-bubble');
+            gsap.to(alienBubbleUI, { scale: 0, rotationZ: 1080, duration: 0.8, ease: "power3.in" });
+        }
+
+        // Create container
+        const container = document.createElement('div');
+        container.id = 'idle-fight-container';
+        document.body.appendChild(container);
+
+        // Spawn Enemies
+        const colors = ['#ff0055', '#00ffcc', '#ffcc00', '#9900ff', '#ff5500'];
+        for (let i = 0; i < 5; i++) {
+            spawnEnemy(container, colors[i % colors.length]);
+        }
+
+        // Fight Loop
+        fightInterval = setInterval(() => {
+            if (enemies.length === 0) return;
+            
+            // Find nearest enemy to UFO
+            let nearestEnemy = null;
+            let minDistance = Infinity;
+            const ux = window.currentUfoX || window.innerWidth/2;
+            const uy = window.currentUfoY || window.innerHeight/2;
+
+            enemies.forEach(enemy => {
+                const ex = parseFloat(enemy.dataset.x);
+                const ey = parseFloat(enemy.dataset.y);
+                const dist = Math.hypot(ex - ux, ey - uy);
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    nearestEnemy = enemy;
+                }
+            });
+
+            if (nearestEnemy) {
+                // Set Auto-Pilot target for UFO
+                window.idleTargetX = parseFloat(nearestEnemy.dataset.x);
+                window.idleTargetY = parseFloat(nearestEnemy.dataset.y);
+
+                // Shoot laser
+                if (Math.random() > 0.3) {
+                    shootLaser(ux, uy, window.idleTargetX, window.idleTargetY, nearestEnemy);
+                }
+            }
+        }, 300); // Shoot every 300ms
+    }
+
+    function spawnEnemy(container, color) {
+        const enemy = document.createElement('div');
+        enemy.className = 'enemy-ship';
+        enemy.style.setProperty('--enemy-color', color);
+        enemy.innerHTML = `
+            <div class="enemy-ship-dome"><div class="enemy-alien"></div></div>
+            <div class="enemy-ship-base"></div>
+        `;
+        
+        // Random start position
+        const ex = Math.random() * window.innerWidth;
+        const ey = Math.random() * window.innerHeight * 0.7;
+        enemy.dataset.x = ex;
+        enemy.dataset.y = ey;
+        enemy.style.left = ex + 'px';
+        enemy.style.top = ey + 'px';
+        
+        container.appendChild(enemy);
+        enemies.push(enemy);
+
+        // Erratic movement loop
+        animateEnemy(enemy);
+    }
+
+    function animateEnemy(enemy) {
+        if (!isIdleMode || !enemy.parentElement) return;
+        
+        const newX = parseFloat(enemy.dataset.x) + (Math.random() - 0.5) * 200;
+        const newY = parseFloat(enemy.dataset.y) + (Math.random() - 0.5) * 150;
+        
+        const clampedX = Math.max(50, Math.min(window.innerWidth - 50, newX));
+        const clampedY = Math.max(50, Math.min(window.innerHeight - 50, newY));
+        
+        enemy.dataset.x = clampedX;
+        enemy.dataset.y = clampedY;
+        
+        enemy.style.transform = `translate(-50%, -50%) rotate(${(Math.random() - 0.5) * 20}deg)`;
+        
+        gsap.to(enemy, {
+            left: clampedX,
+            top: clampedY,
+            duration: 1 + Math.random() * 2,
+            ease: "sine.inOut",
+            onComplete: () => animateEnemy(enemy)
+        });
+    }
+
+    function shootLaser(startX, startY, endX, endY, targetEnemy) {
+        if (!isIdleMode) return;
+        const container = document.getElementById('idle-fight-container');
+        if (!container) return;
+
+        const laser = document.createElement('div');
+        laser.className = 'laser-beam';
+        laser.style.left = startX + 'px';
+        laser.style.top = startY + 'px';
+        
+        const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+        const distance = Math.hypot(endX - startX, endY - startY);
+        
+        laser.style.transform = `rotate(${angle}deg)`;
+        laser.style.width = '0px';
+        container.appendChild(laser);
+
+        // Animate laser
+        setTimeout(() => {
+            laser.style.width = distance + 'px';
+        }, 10);
+
+        setTimeout(() => {
+            laser.style.left = endX + 'px';
+            laser.style.top = endY + 'px';
+            laser.style.width = '0px';
+            
+            // Hit effect
+            if (targetEnemy && targetEnemy.parentElement && Math.random() > 0.5) { // 50% chance to destroy
+                createExplosion(endX, endY, targetEnemy.style.getPropertyValue('--enemy-color'));
+                targetEnemy.classList.add('destroyed');
+                setTimeout(() => targetEnemy.remove(), 300);
+                enemies = enemies.filter(e => e !== targetEnemy);
+                
+                // Respawn enemy to keep it infinite until user returns
+                setTimeout(() => {
+                    if(isIdleMode) spawnEnemy(container, targetEnemy.style.getPropertyValue('--enemy-color'));
+                }, 1000);
+            }
+            
+            setTimeout(() => laser.remove(), 100);
+        }, 100);
+    }
+
+    function createExplosion(x, y, color) {
+        const container = document.getElementById('idle-fight-container');
+        if (!container) return;
+        for (let i = 0; i < 8; i++) {
+            const p = document.createElement('div');
+            p.className = 'explosion-particle';
+            p.style.setProperty('--enemy-color', color);
+            p.style.left = x + 'px';
+            p.style.top = y + 'px';
+            p.style.setProperty('--dx', (Math.random() - 0.5) * 100 + 'px');
+            p.style.setProperty('--dy', (Math.random() - 0.5) * 100 + 'px');
+            container.appendChild(p);
+            setTimeout(() => p.remove(), 500);
+        }
+    }
+
+    function stopIdleFightSequence() {
+        if (!isIdleMode) return;
+        isIdleMode = false;
+        window.isIdleMode = false;
+        clearInterval(fightInterval);
+
+        // Return Zorb to normal
+        if (alien) {
+            const alienBubbleUI = alien.querySelector('.alien-bubble');
+            gsap.to(alienBubbleUI, { scale: 1, rotationZ: 0, duration: 0.5, ease: "back.out(1.5)" });
+        }
+
+        // Explode all remaining enemies
+        enemies.forEach(enemy => {
+            if (enemy.parentElement) {
+                createExplosion(parseFloat(enemy.dataset.x), parseFloat(enemy.dataset.y), enemy.style.getPropertyValue('--enemy-color'));
+                enemy.classList.add('destroyed');
+            }
+        });
+        
+        setTimeout(() => {
+            const container = document.getElementById('idle-fight-container');
+            if (container) container.remove();
+            enemies = [];
+        }, 500);
     }
 })();
