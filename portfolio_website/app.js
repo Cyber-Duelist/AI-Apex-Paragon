@@ -2450,6 +2450,7 @@ RULES:
     let fightInterval = null;
     let enemies = [];
     const alien = document.getElementById('alien-companion');
+    let fightAudioCtx = null;
 
     function resetIdleTimer() {
         if (isIdleMode) {
@@ -2478,6 +2479,15 @@ RULES:
         if (alien) {
             const alienBubbleUI = alien.querySelector('.alien-bubble');
             gsap.to(alienBubbleUI, { scale: 0, rotationZ: 1080, duration: 0.8, ease: "power3.in" });
+        }
+
+        // Initialize AudioContext to eliminate sound latency
+        if (!fightAudioCtx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) fightAudioCtx = new AudioContext();
+        }
+        if (fightAudioCtx && fightAudioCtx.state === 'suspended') {
+            fightAudioCtx.resume();
         }
 
         // Create container
@@ -2600,9 +2610,8 @@ RULES:
 
     function playBlasterSound() {
         try {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContext) return;
-            const ctx = new AudioContext();
+            if (!fightAudioCtx) return;
+            const ctx = fightAudioCtx;
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain);
@@ -2668,9 +2677,8 @@ RULES:
 
     function playEnemyBlasterSound() {
         try {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContext) return;
-            const ctx = new AudioContext();
+            if (!fightAudioCtx) return;
+            const ctx = fightAudioCtx;
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain);
@@ -2738,9 +2746,8 @@ RULES:
 
     function playExplosionSound() {
         try {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContext) return;
-            const ctx = new AudioContext();
+            if (!fightAudioCtx) return;
+            const ctx = fightAudioCtx;
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain);
