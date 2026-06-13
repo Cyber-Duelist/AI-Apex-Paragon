@@ -2856,3 +2856,141 @@ code {
   pointer-events: none;
   transition: width 0.15s linear, left 0.15s linear, top 0.15s linear;
 }
+
+/* ========================================
+   GITHUB CONTRIBUTION HEATMAP
+======================================== */
+.gh-heatmap-wrapper {
+  margin: 32px 0;
+}
+
+.gh-heatmap-title {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.7rem;
+  color: var(--text-silver);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.gh-heatmap {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(7, 1fr);
+  gap: 4px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.gh-heatmap-cell {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-width: 12px;
+  min-height: 12px;
+}
+
+.gh-heatmap-cell:hover {
+  transform: scale(1.4);
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+  z-index: 2;
+  position: relative;
+}
+
+.gh-heatmap-cell[title] {
+  cursor: pointer;
+}
+
+.gh-heatmap-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.6rem;
+  color: var(--text-ghost);
+  letter-spacing: 1px;
+}
+
+.gh-heatmap-legend .gh-heatmap-cell {
+  width: 12px;
+  height: 12px;
+  min-width: 12px;
+  min-height: 12px;
+  aspect-ratio: unset;
+}
+
+/* ========================================
+   MOBILE POLISH
+======================================== */
+@media (max-width: 768px) {
+  .hero-buttons {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+
+  .hero-buttons .btn,
+  .hero-buttons .hero-cert-dropdown {
+    width: 100%;
+    max-width: 280px;
+    text-align: center;
+  }
+
+  .github-event {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 14px;
+  }
+
+  .github-event .event-time {
+    margin-left: 0;
+    width: 100%;
+    text-align: right;
+  }
+
+  .gh-heatmap {
+    grid-template-columns: repeat(12, 1fr);
+    gap: 3px;
+    max-width: 100%;
+  }
+
+  .gh-heatmap-cell {
+    min-width: 8px;
+    min-height: 8px;
+  }
+
+  #alien-companion {
+    transform: scale(0.7) !important;
+    transform-origin: bottom right;
+  }
+}
+
+@media (max-width: 480px) {
+  .github-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .github-stat-card {
+    padding: 20px 12px;
+  }
+
+  .github-stat-number {
+    font-size: 1.5rem;
+  }
+
+  .gh-heatmap {
+    gap: 2px;
+  }
+
+  .gh-heatmap-cell {
+    min-width: 6px;
+    min-height: 6px;
+    border-radius: 2px;
+  }
+}

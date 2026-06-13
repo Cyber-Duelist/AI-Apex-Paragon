@@ -817,6 +817,23 @@ document.querySelectorAll('.project-card').forEach(card => {
                 container.appendChild(div);
             });
         }
+
+        // Heatmap
+        const heatmap = document.getElementById('gh-heatmap');
+        if (heatmap && data.heatmap) {
+            heatmap.innerHTML = '';
+            data.heatmap.forEach(day => {
+                const cell = document.createElement('span');
+                cell.className = 'gh-heatmap-cell';
+                const intensity = day.count === 0 ? 0.03 : Math.min(0.8, 0.15 + day.count * 0.15);
+                cell.style.background = `rgba(0, 229, 255, ${intensity})`;
+                if (day.count > 0) {
+                    cell.style.border = `1px solid rgba(0, 229, 255, ${intensity * 0.5})`;
+                }
+                cell.title = `${day.date}: ${day.count} commit${day.count !== 1 ? 's' : ''}`;
+                heatmap.appendChild(cell);
+            });
+        }
     }
 
     // ── Parse GitHub API response into our data shape ──
@@ -880,13 +897,39 @@ document.querySelectorAll('.project-card').forEach(card => {
             });
         }
 
+        // Build heatmap data from events (last 84 days = 12 weeks)
+        const heatmapData = [];
+        const now = new Date();
+        for (let i = 83; i >= 0; i--) {
+            const d = new Date(now);
+            d.setDate(d.getDate() - i);
+            const dateStr = d.toISOString().split('T')[0];
+            heatmapData.push({ date: dateStr, count: 0 });
+        }
+
+        if (Array.isArray(events)) {
+            events.forEach(evt => {
+                if (evt.type === 'PushEvent') {
+                    const evtDate = evt.created_at.split('T')[0];
+                    const match = heatmapData.find(d => d.date === evtDate);
+                    if (match) {
+                        let count = 1;
+                        if (evt.payload.size !== undefined) count = evt.payload.size;
+                        else if (evt.payload.commits) count = evt.payload.commits.length;
+                        match.count += count;
+                    }
+                }
+            });
+        }
+
         return {
             repos: user.public_repos || 0,
             stars: totalStars,
             forks: totalForks,
             commits: totalCommits,
             languages: sortedLangs,
-            events: eventData
+            events: eventData,
+            heatmap: heatmapData
         };
     }
 
