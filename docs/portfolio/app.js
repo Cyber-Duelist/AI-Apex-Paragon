@@ -714,22 +714,25 @@ document.querySelectorAll('.project-card').forEach(card => {
 })();
 
 /* ========================================
-   GITHUB ACTIVITY (Public API — with caching & rate-limit handling)
+   GITHUB ACTIVITY (Public API — stale-while-revalidate + live indicator)
    ======================================== */
 (function() {
     const GH_USER = 'Cyber-Duelist';
-    const CACHE_KEY = 'gh_activity_cache';
-    const CACHE_TTL = 60 * 1000; // 60 seconds for real-time updates while respecting limits
+    const CACHE_KEY = 'gh_activity_cache_v2';
+    const CACHE_TTL = 5 * 60 * 1000; // 5 minutes — stays well within 60 req/hr limit
+    const POLL_INTERVAL = 5 * 60 * 1000; // Poll every 5 minutes (3 calls × 12 = 36/hr, safe)
+    let lastRenderedCommits = null; // Track to avoid re-animating same value
 
-    // ── Animated counter ──
+    // ── Animated counter (only animates when value actually changes) ──
     function animateCounter(el, target, duration = 1200) {
         if (typeof target !== 'number' || isNaN(target)) { el.textContent = target || '—'; return; }
-        const start = 0;
+        const current = parseInt(el.textContent) || 0;
+        if (current === target) return; // No change, skip animation
+        const start = current;
         const startTime = performance.now();
         function update(currentTime) {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            // Ease out cubic
             const eased = 1 - Math.pow(1 - progress, 3);
             el.textContent = Math.round(start + (target - start) * eased);
             if (progress < 1) requestAnimationFrame(update);
@@ -737,26 +740,51 @@ document.querySelectorAll('.project-card').forEach(card => {
         requestAnimationFrame(update);
     }
 
-    // ── Load from cache if fresh ──
+    // ── Cache helpers ──
     function getCache() {
         try {
             const raw = localStorage.getItem(CACHE_KEY);
             if (!raw) return null;
-            const parsed = JSON.parse(raw);
-            if (Date.now() - parsed.timestamp > CACHE_TTL) return null;
-            return parsed.data;
+            return JSON.parse(raw);
         } catch(e) { return null; }
+    }
+
+    function isCacheFresh(cacheEntry) {
+        return cacheEntry && (Date.now() - cacheEntry.timestamp < CACHE_TTL);
     }
 
     function setCache(data) {
         try {
             localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data }));
-        } catch(e) { /* localStorage full or disabled */ }
+        } catch(e) {}
+    }
+
+    // ── Update live status indicator ──
+    function updateStatusIndicator(status, timestamp) {
+        let indicator = document.getElementById('gh-live-status');
+        if (!indicator) {
+            // Create the indicator below the subtitle
+            const subtitle = document.querySelector('#github-activity .section-subtitle');
+            if (!subtitle) return;
+            indicator = document.createElement('div');
+            indicator.id = 'gh-live-status';
+            indicator.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;font-family:"JetBrains Mono",monospace;font-size:0.65rem;letter-spacing:1px;color:var(--text-ghost);';
+            subtitle.after(indicator);
+        }
+
+        if (status === 'live') {
+            const timeStr = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            indicator.innerHTML = `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#00ff88;box-shadow:0 0 6px #00ff88;animation:pulse 2s infinite;"></span> LIVE — Updated ${timeStr}`;
+        } else if (status === 'cached') {
+            const ago = getTimeAgo(new Date(timestamp));
+            indicator.innerHTML = `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ffcc00;box-shadow:0 0 6px #ffcc00;"></span> CACHED — ${ago}`;
+        } else if (status === 'offline') {
+            indicator.innerHTML = `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ff4444;box-shadow:0 0 6px #ff4444;"></span> OFFLINE — Using last known data`;
+        }
     }
 
     // ── Render data to DOM ──
     function renderData(data) {
-        // Stats with animation
         animateCounter(document.getElementById('gh-repos'), data.repos);
         animateCounter(document.getElementById('gh-stars'), data.stars);
         animateCounter(document.getElementById('gh-forks'), data.forks);
@@ -765,7 +793,7 @@ document.querySelectorAll('.project-card').forEach(card => {
         // Languages
         const langContainer = document.getElementById('github-languages');
         if (langContainer && data.languages) {
-            langContainer.innerHTML = ''; // Clear for live updates
+            langContainer.innerHTML = '';
             data.languages.forEach(lang => {
                 const tag = document.createElement('span');
                 tag.className = 'lang-tag';
@@ -777,7 +805,7 @@ document.querySelectorAll('.project-card').forEach(card => {
         // Events
         const container = document.getElementById('github-events');
         if (container && data.events) {
-            container.innerHTML = ''; // Clear for live updates
+            container.innerHTML = '';
             data.events.forEach(evt => {
                 const div = document.createElement('div');
                 div.className = 'github-event';
@@ -791,128 +819,149 @@ document.querySelectorAll('.project-card').forEach(card => {
         }
     }
 
-    // ── Fetch from GitHub API ──
-    async function fetchGitHub() {
-        // Try cache first
-        const cached = getCache();
-        if (cached) {
-            renderData(cached);
-            return;
+    // ── Parse GitHub API response into our data shape ──
+    function parseGitHubData(user, repos, events) {
+        let totalStars = 0, totalForks = 0;
+        const langs = {};
+
+        repos.forEach(r => {
+            totalStars += r.stargazers_count || 0;
+            totalForks += r.forks_count || 0;
+            if (r.language) langs[r.language] = (langs[r.language] || 0) + 1;
+        });
+
+        const sortedLangs = Object.keys(langs).sort((a, b) => langs[b] - langs[a]);
+
+        const eventData = [];
+        let totalCommits = 0;
+
+        if (Array.isArray(events)) {
+            events.forEach(evt => {
+                if (evt.type === 'PushEvent') {
+                    let count = 1;
+                    if (evt.payload.size !== undefined) count = evt.payload.size;
+                    else if (evt.payload.commits) count = evt.payload.commits.length;
+                    totalCommits += count;
+                }
+            });
+
+            events.slice(0, 6).forEach(evt => {
+                let icon = '📌', text = '';
+                const repo = evt.repo ? evt.repo.name.split('/')[1] : '';
+                const timeAgo = getTimeAgo(new Date(evt.created_at));
+
+                if (evt.type === 'PushEvent') {
+                    let count = 1;
+                    if (evt.payload.size !== undefined) count = evt.payload.size;
+                    else if (evt.payload.commits) count = evt.payload.commits.length;
+                    icon = '⚡';
+                    text = `Pushed <strong>${count} commit${count !== 1 ? 's' : ''}</strong> to ${repo}`;
+                } else if (evt.type === 'CreateEvent') {
+                    icon = '🌱';
+                    text = `Created ${evt.payload.ref_type} <strong>${evt.payload.ref || repo}</strong>`;
+                } else if (evt.type === 'WatchEvent') {
+                    icon = '⭐';
+                    text = `Starred <strong>${repo}</strong>`;
+                } else if (evt.type === 'ForkEvent') {
+                    icon = '🔀';
+                    text = `Forked <strong>${repo}</strong>`;
+                } else if (evt.type === 'IssuesEvent') {
+                    icon = '🐛';
+                    text = `${evt.payload.action} issue on <strong>${repo}</strong>`;
+                } else if (evt.type === 'PullRequestEvent') {
+                    icon = '🔃';
+                    text = `${evt.payload.action} PR on <strong>${repo}</strong>`;
+                } else {
+                    icon = '📋';
+                    text = `${evt.type.replace('Event', '')} on <strong>${repo}</strong>`;
+                }
+
+                eventData.push({ icon, text, time: timeAgo });
+            });
         }
 
-        try {
-            // Fetch user profile (1 call)
-            const userResp = await fetch(`https://api.github.com/users/${GH_USER}`);
-            if (userResp.status === 403 || userResp.status === 429) {
-                throw new Error('Rate limited');
-            }
-            const user = await userResp.json();
+        return {
+            repos: user.public_repos || 0,
+            stars: totalStars,
+            forks: totalForks,
+            commits: totalCommits,
+            languages: sortedLangs,
+            events: eventData
+        };
+    }
 
-            // Fetch repos (1 call)
-            const reposResp = await fetch(`https://api.github.com/users/${GH_USER}/repos?per_page=100&sort=updated`);
-            const repos = await reposResp.json();
+    // ── Main fetch with stale-while-revalidate ──
+    async function fetchGitHub() {
+        const cacheEntry = getCache();
+
+        // Step 1: Immediately render stale cache so user sees data instantly
+        if (cacheEntry && cacheEntry.data) {
+            renderData(cacheEntry.data);
+            // If cache is still fresh, skip the API call entirely
+            if (isCacheFresh(cacheEntry)) {
+                updateStatusIndicator('live', cacheEntry.timestamp);
+                return;
+            }
+            // Show cached indicator while we fetch fresh data
+            updateStatusIndicator('cached', cacheEntry.timestamp);
+        }
+
+        // Step 2: Fetch fresh data from GitHub API
+        try {
+            const headers = { 'Accept': 'application/vnd.github.v3+json' };
+
+            const [userResp, reposResp, eventsResp] = await Promise.all([
+                fetch(`https://api.github.com/users/${GH_USER}`, { headers }),
+                fetch(`https://api.github.com/users/${GH_USER}/repos?per_page=100&sort=updated`, { headers }),
+                fetch(`https://api.github.com/users/${GH_USER}/events?per_page=100`, { headers })
+            ]);
+
+            // Check rate limit
+            const remaining = parseInt(userResp.headers.get('X-RateLimit-Remaining'));
+            if (remaining !== null && remaining < 5) {
+                console.warn(`GitHub API: Only ${remaining} requests remaining. Backing off.`);
+                if (cacheEntry && cacheEntry.data) {
+                    updateStatusIndicator('cached', cacheEntry.timestamp);
+                    return;
+                }
+            }
+
+            if (!userResp.ok || !reposResp.ok || !eventsResp.ok) {
+                throw new Error(`HTTP error: ${userResp.status}`);
+            }
+
+            const [user, repos, events] = await Promise.all([
+                userResp.json(),
+                reposResp.json(),
+                eventsResp.json()
+            ]);
 
             if (!Array.isArray(repos)) throw new Error('Invalid repos response');
 
-            let totalStars = 0, totalForks = 0;
-            const langs = {};
+            const data = parseGitHubData(user, repos, events);
 
-            repos.forEach(r => {
-                totalStars += r.stargazers_count || 0;
-                totalForks += r.forks_count || 0;
-                if (r.language) langs[r.language] = (langs[r.language] || 0) + 1;
-            });
-
-            // Languages sorted by frequency
-            const sortedLangs = Object.keys(langs).sort((a, b) => langs[b] - langs[a]);
-
-            // Fetch recent events (1 call) - get 100 events to count recent commits accurately
-            const eventsResp = await fetch(`https://api.github.com/users/${GH_USER}/events?per_page=100`);
-            const events = await eventsResp.json();
-
-            const eventData = [];
-            let totalCommits = 0;
-
-            if (Array.isArray(events)) {
-                // Count ALL commits pushed in the recent 100 events
-                events.forEach(evt => {
-                    if (evt.type === 'PushEvent') {
-                        let count = 1;
-                        if (evt.payload.size !== undefined) count = evt.payload.size;
-                        else if (evt.payload.commits) count = evt.payload.commits.length;
-                        totalCommits += count;
-                    }
-                });
-
-                // Render only the top 6 events for the activity feed
-                events.slice(0, 6).forEach(evt => {
-                    let icon = '📌', text = '';
-                    const repo = evt.repo ? evt.repo.name.split('/')[1] : '';
-                    const timeAgo = getTimeAgo(new Date(evt.created_at));
-
-                    if (evt.type === 'PushEvent') {
-                        let count = 1;
-                        if (evt.payload.size !== undefined) count = evt.payload.size;
-                        else if (evt.payload.commits) count = evt.payload.commits.length;
-
-                        icon = '⚡';
-                        text = `Pushed <strong>${count} commit${count !== 1 ? 's' : ''}</strong> to ${repo}`;
-                    } else if (evt.type === 'CreateEvent') {
-                        icon = '🌱';
-                        text = `Created ${evt.payload.ref_type} <strong>${evt.payload.ref || repo}</strong>`;
-                    } else if (evt.type === 'WatchEvent') {
-                        icon = '⭐';
-                        text = `Starred <strong>${repo}</strong>`;
-                    } else if (evt.type === 'ForkEvent') {
-                        icon = '🔀';
-                        text = `Forked <strong>${repo}</strong>`;
-                    } else if (evt.type === 'IssuesEvent') {
-                        icon = '🐛';
-                        text = `${evt.payload.action} issue on <strong>${repo}</strong>`;
-                    } else if (evt.type === 'PullRequestEvent') {
-                        icon = '🔃';
-                        text = `${evt.payload.action} PR on <strong>${repo}</strong>`;
-                    } else {
-                        icon = '📋';
-                        text = `${evt.type.replace('Event', '')} on <strong>${repo}</strong>`;
-                    }
-
-                    eventData.push({ icon, text, time: timeAgo });
-                });
-            }
-
-            const data = {
-                repos: user.public_repos || 0,
-                stars: totalStars,
-                forks: totalForks,
-                commits: totalCommits,
-                languages: sortedLangs,
-                events: eventData
-            };
-
-            // Cache the data
+            // Cache and render
             setCache(data);
             renderData(data);
+            updateStatusIndicator('live', Date.now());
 
         } catch(e) {
             console.warn('GitHub API error:', e.message);
-            // Try to show stale cache if available
-            try {
-                const raw = localStorage.getItem(CACHE_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    renderData(parsed.data);
-                    return;
-                }
-            } catch(e2) {}
 
-            // Last resort: show fallback values so it doesn't look broken
+            // If we already rendered cache above, just update indicator
+            if (cacheEntry && cacheEntry.data) {
+                updateStatusIndicator('cached', cacheEntry.timestamp);
+                return;
+            }
+
+            // Last resort fallback
             const fallback = {
                 repos: 2, stars: 0, forks: 0, commits: 87,
                 languages: ['Python', 'JavaScript', 'HTML', 'CSS', 'Shell'],
                 events: [{ icon: '⚡', text: 'Pushed commits to <strong>AI-Apex-Paragon</strong>', time: 'recently' }]
             };
             renderData(fallback);
+            updateStatusIndicator('offline', Date.now());
         }
     }
 
@@ -925,7 +974,7 @@ document.querySelectorAll('.project-card').forEach(card => {
     }
 
     fetchGitHub();
-    setInterval(fetchGitHub, 60000); // Auto-update every 60 seconds
+    setInterval(fetchGitHub, POLL_INTERVAL); // Auto-update every 5 minutes (rate-limit safe)
 })();
 
 /* ========================================
