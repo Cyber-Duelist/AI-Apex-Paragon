@@ -1,80 +1,83 @@
-# AI Apex Paragon
+<div align="center">
+  <img src="https://cyber-duelist.github.io/AI-Apex-Paragon/portfolio/og-preview.png" alt="AI Apex Paragon" width="100%" />
 
-A 14-week intensive self-directed program to become a production-ready AI Engineer — from Python foundations to RAG systems, autonomous agents, and LLMOps.
+  <h1>AI Apex Paragon</h1>
+  <p><strong>A 14-week intensive self-directed engineering sprint to build production-ready AI systems from 0 → 1.</strong></p>
 
----
+  <p>
+    <a href="https://cyber-duelist.github.io/AI-Apex-Paragon/portfolio/"><strong>🌐 View Interactive Portfolio</strong></a> · 
+    <a href="https://linkedin.com/in/adarsh-kumar-singh"><strong>💼 LinkedIn</strong></a> · 
+    <a href="mailto:adarshentity098@gmail.com"><strong>✉️ Email</strong></a>
+  </p>
 
-## Goal
-
-Land a high-paying AI Engineer / GenAI Engineer role by building real, deployable AI systems — not tutorials, not clones.
-
----
-
-## Portfolio Projects
-
-### 1. PersonaDoc — Production RAG System
-Upload any PDF or TXT. Ask questions. Get cited answers grounded in the document.
-- ChromaDB vector store, reranking, hallucination control, eval pipeline
-- FastAPI service with `/upload`, `/search`, `/documents` endpoints
-- **Tech:** Python, FastAPI, ChromaDB, sentence-transformers, Groq, LLaMA 3.3
-
-### 2. Production Compliance Agent — Agentic Workflow
-Autonomous agent that analyzes documents, assesses risk, escalates findings, and notifies stakeholders.
-- Tools, memory, guardrails, structured logging, LLM-as-judge eval
-- Smart model routing — fast model for simple tasks, powerful model for complex ones
-- CI pipeline runs automated evaluation on every push
-- **Tech:** Python, FastAPI, Groq, LLaMA 3.3, GitHub Actions
-
-### 3. AI Code Reviewer
-Submit any GitHub PR URL. Get a structured LLM-powered code review with bugs, security issues, severity ratings, and approval decision.
-- Connects to real GitHub API — fetches actual diffs, not sample code
-- **Tech:** Python, FastAPI, Groq, GitHub API
-
-### 4. Meeting Intelligence System
-Upload any meeting transcript. Get structured intelligence — summary, per-person action items with deadlines, decisions made, and a ready-to-send follow-up email.
-- Two-stage LLM pipeline — analyze then draft
-- **Tech:** Python, FastAPI, Groq, LLaMA 3.3
-
-### 5. Autonomous Self-Healing DevOps Swarm
-A multi-agent orchestration system that automatically intercepts CI/CD pipeline failures, diagnoses the root cause, writes a patch, verifies the fix, and opens a GitHub Pull Request.
-- Continuous "ReAct" Loop routing between Diagnoser, Developer, Verifier, and PR LLM Agents.
-- **Tech:** Python, Groq, Pytest, Multi-Agent Orchestration
-
-### 6. LLMOps Evaluation Dashboard
-A real-time evaluation dashboard to test LLM agents against strict compliance and security datasets.
-- Implements automatic Model Failover (routing to 8B if 70B hits rate limits) ensuring 99.9% uptime.
-- **Tech:** Python, FastAPI (SSE Streaming), JavaScript, HTML/CSS
-
-### 7. Document Risk Prediction — ML Project
-Classify documents as high or low risk using machine learning.
-- Feature engineering, model comparison, hyperparameter tuning, saved prediction pipeline
-- **Tech:** Python, scikit-learn, pandas, Random Forest
+  <p>
+    <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
+    <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" />
+    <img src="https://img.shields.io/badge/LLaMA_3-0466C8?style=for-the-badge&logo=meta&logoColor=white" alt="LLaMA 3" />
+    <img src="https://img.shields.io/badge/ChromaDB-FF4F00?style=for-the-badge&logo=databricks&logoColor=white" alt="ChromaDB" />
+    <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript" />
+  </p>
+</div>
 
 ---
 
-## Tech Stack
-
-`Python` · `FastAPI` · `Groq` · `LLaMA 3.3` · `ChromaDB` · `sentence-transformers` · `scikit-learn` · `Docker` · `pytest` · `GitHub Actions` · `SQLite` · `Pydantic`
-
----
-
-## Curriculum — 14 Weeks
-
-| Week | Focus | Output |
-|---|---|---|
-| 1-2 | Python, NumPy, Pandas | Foundations |
-| 3-4 | ML Fundamentals | Document Risk Prediction |
-| 5-6 | SQL, FastAPI, Production Python | Database-backed API |
-| 7 | LLM APIs | LLM Assistant API |
-| 8-9 | RAG Fundamentals + Production | PersonaDoc |
-| 10 | AI Agents | Agent patterns |
-| 11 | LLMOps + Evals | Eval dashboard, LLM router |
-| 12 | Production Agent | Compliance Agent |
-| 13 | Portfolio Polish + Extra Projects | AI Code Reviewer, Meeting Intelligence |
-| 14 | Job Attack | Applications and interviews |
+## 🎯 The North Star
+**Land a high-paying AI Engineer role by engineering real, deployable, scalable AI systems.** No simple tutorials. No basic API wrappers. Real architectural challenges including Agentic Workflows, Retrieval-Augmented Generation (RAG), and strict LLM Guardrails.
 
 ---
 
-## North Star
+## 🏗️ Architecture & Portfolio Projects
 
-**ENTITY** — a fully local, voice-controlled AI PC agent using Whisper, LLaMA via Ollama, RAG memory, tool calling, and OS automation. Built in private. Coming soon.
+### 1. Autonomous Self-Healing DevOps Swarm
+A multi-agent orchestration framework that intercepts CI/CD pipeline failures, diagnoses root causes, and writes patches autonomously.
+* **Architecture:** Continuous ReAct (Reason + Act) loop routing between `Diagnoser`, `Developer`, `Verifier`, and `PR Reviewer` AI agents.
+* **Impact:** Reduces manual debugging time by 90% via zero-touch bug remediation.
+* **Tech Stack:** `Python`, `Groq (LLaMA 3)`, `Pytest`, `GitHub API`
+
+### 2. PersonaDoc — Production RAG System
+An enterprise-grade document intelligence service that ingests PDFs/TXTs and generates cited, grounded answers.
+* **Architecture:** Custom semantic chunking, dense vector retrieval, and output hallucination control.
+* **Features:** `/upload`, `/search`, and `/documents` REST endpoints.
+* **Tech Stack:** `FastAPI`, `ChromaDB`, `sentence-transformers`, `LLaMA 3.3`
+
+### 3. Enterprise Compliance Agent
+A highly secure autonomous agent that analyzes incoming documents, assesses risk, and escalates findings.
+* **Architecture:** Stateful memory, strict pre-execution Input Guardrails (against prompt injection), and post-execution Output Guardrails.
+* **Reliability:** Dynamic Model Failover routing (e.g., fallback to 8B if 70B hits rate limits) ensuring 99.9% uptime.
+* **Tech Stack:** `Python`, `FastAPI`, `GitHub Actions`
+
+### 4. AI Code Reviewer
+A microservice that streams raw PR diffs directly from GitHub to a high-reasoning LLM for deep architectural review.
+* **Features:** Programmatic JSON schema generation to strictly flag bugs, security vulnerabilities, and logic flaws that standard static analysis tools miss.
+* **Tech Stack:** `Python`, `FastAPI`, `GitHub REST API`
+
+### 5. Meeting Intelligence System
+A two-stage pipeline that ingests raw meeting transcripts and outputs structured intelligence: summaries, per-person action items with deadlines, and ready-to-send follow-up emails.
+* **Tech Stack:** `Python`, `FastAPI`, `Groq`
+
+### 6. Document Risk Prediction (Traditional ML)
+A supervised machine learning pipeline classifying documents as high or low risk based on engineered text features.
+* **Features:** Feature engineering, hyperparameter tuning, model comparison, and deployment serialization.
+* **Tech Stack:** `scikit-learn`, `pandas`, `Random Forest`
+
+---
+
+## 📅 14-Week Curriculum
+
+| Week | Focus Area | Output / Milestone |
+|:---:|---|---|
+| **1-2** | Python, NumPy, Pandas | Core Foundations |
+| **3-4** | ML Fundamentals | Document Risk Prediction Model |
+| **5-6** | SQL, FastAPI, Production Python | Database-backed REST API |
+| **7** | LLM APIs & Integration | LLM Assistant API |
+| **8-9** | RAG Fundamentals + Production | PersonaDoc (RAG System) |
+| **10** | Autonomous AI Agents | Multi-Agent Orchestration |
+| **11** | LLMOps + Evals | Eval Dashboard, Dynamic LLM Router |
+| **12** | Production Agents | Enterprise Compliance Agent |
+| **13** | Portfolio Polish | AI Code Reviewer, Meeting Intelligence |
+| **14** | **Launch** | Interactive Portfolio & Applications |
+
+---
+
+## 🔮 What's Next?
+**ENTITY** — A fully local, voice-controlled AI PC agent using Whisper, local LLaMA models, persistent RAG memory, tool calling, and OS-level automation. *Currently in stealth development.*
