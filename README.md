@@ -6,7 +6,7 @@
 
   <p>
     <a href="https://cyber-duelist.github.io/AI-Apex-Paragon/portfolio/"><strong>🌐 View Interactive Portfolio</strong></a> · 
-    <a href="https://linkedin.com/in/adarsh-kumar-singh"><strong>💼 LinkedIn</strong></a> · 
+    <a href="https://www.linkedin.com/in/i-am-entity/"><strong>💼 LinkedIn</strong></a> · 
     <a href="mailto:adarshentity098@gmail.com"><strong>✉️ Email</strong></a>
   </p>
 
