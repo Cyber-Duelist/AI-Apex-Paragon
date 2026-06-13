@@ -199,6 +199,21 @@
     <section id="hero">
         <div class="hero-content">
             <p class="hero-tag">&mdash; AI SOFTWARE ENGINEER &mdash;</p>
+            <style>
+                @keyframes gradientShift {
+                    0% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                    100% { background-position: 0% 50%; }
+                }
+                .hero-title .line.gradient-text {
+                    background-size: 200% auto !important;
+                    animation: gradientShift 4s ease infinite !important;
+                    text-shadow: 0 0 30px rgba(0, 229, 255, 0.5);
+                }
+                .hero-title .line:not(.gradient-text) {
+                    text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+                }
+            </style>
             <h1 class="hero-title">
                 <span class="line">I Build</span>
                 <span class="line gradient-text">Autonomous</span>
@@ -741,6 +756,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-    <script src="app.js?v=20260612_epic_final_v23"></script>
+    <script src="app.js?v=20260612_epic_final_v24"></script>
 </body>
 </html>
