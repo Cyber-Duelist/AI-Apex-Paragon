@@ -2571,10 +2571,34 @@ RULES:
         });
     }
 
+    function playBlasterSound() {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(880, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.15);
+            
+            gain.gain.setValueAtTime(window.isMuted ? 0 : 0.05, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+            
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.15);
+        } catch (e) {}
+    }
+
     function shootLaser(startX, startY, endX, endY, targetEnemy) {
         if (!isIdleMode) return;
         const container = document.getElementById('idle-fight-container');
         if (!container) return;
+        
+        playBlasterSound();
 
         const laser = document.createElement('div');
         laser.className = 'laser-beam';
@@ -2615,9 +2639,32 @@ RULES:
         }, 100);
     }
 
+    function playExplosionSound() {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(150, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(20, ctx.currentTime + 0.3);
+            
+            gain.gain.setValueAtTime(window.isMuted ? 0 : 0.08, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+            
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.3);
+        } catch (e) {}
+    }
+
     function createExplosion(x, y, color) {
         const container = document.getElementById('idle-fight-container');
         if (!container) return;
+        playExplosionSound();
         for (let i = 0; i < 8; i++) {
             const p = document.createElement('div');
             p.className = 'explosion-particle';
