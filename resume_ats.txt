@@ -21,27 +21,27 @@ WORK EXPERIENCE
 
 AI-Apex-Paragon Capstone
 Lead AI Engineer
-Jan 2024 - Present
+Mar 2026 - Present
 - Engineered a multi-agent orchestration framework from scratch to automatically intercept CI/CD pipeline failures and remediate broken codebase branches, reducing manual debugging time by 90%.
 - Implemented a continuous ReAct (Reason + Act) loop utilizing LLaMA 3 to diagnose raw error logs, inject Python patches via custom file operations, and verify fixes using local sandboxed testing.
 - Created dynamic agent personas (Diagnoser, Developer, Verifier, PR Reviewer) to successfully enforce zero-touch bug remediation across 100% of tested workflows.
 
 AI-Apex-Paragon Capstone
 Backend AI Developer
-Nov 2023 - Dec 2023
+Jan 2026 - Feb 2026
 - Developed a highly secure compliance AI agent equipped with persistent state memory and rigorous LLM security boundaries.
 - Designed pre-execution Input Guardrails to prevent adversarial prompt injection and post-execution Output Guardrails to guarantee strict domain-scope adherence.
 - Built an automated LLM-as-a-Judge Evaluation Dashboard with Dynamic Model Failover routing, guaranteeing 99.9% uptime during strict API rate-limit bottlenecks.
 
 AI-Apex-Paragon Capstone
 AI Software Engineer
-Sep 2023 - Oct 2023
+Nov 2025 - Dec 2025
 - Architected a Retrieval-Augmented Generation (RAG) service capable of ingesting enterprise PDFs and generating cited, accurate answers to eliminate LLM hallucination.
 - Exposed the service via a FastAPI backend, utilizing robust semantic search and chunking strategies to retrieve the highest-context data dynamically.
 
 AI-Apex-Paragon Capstone
 Software Engineer
-Jul 2023 - Aug 2023
+Sep 2025 - Oct 2025
 - Built a microservice that connects directly to the GitHub API, fetches raw pull request diffs, and streams changes to a high-reasoning LLM for deep architectural review.
 - Forced strict JSON schema generation to programmatically flag bugs, security vulnerabilities, and logic flaws that standard static analysis tools fail to catch.
 
@@ -49,7 +49,7 @@ EDUCATION
 
 Dr. Abdul Kalam Technical University
 B. Tech in Electronics and Communication Engineering
-Aug 2022 - May 2026
+Aug 2022 - May 2026 | CGPA: 7.9
 
 CERTIFICATIONS
 
