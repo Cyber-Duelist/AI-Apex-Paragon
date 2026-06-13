@@ -2839,3 +2839,15 @@ code {
   opacity: 0;
   transform: scale(0) !important;
 }
+
+.enemy-laser-beam {
+  position: absolute;
+  height: 4px;
+  background: #ff3333;
+  box-shadow: 0 0 10px #ff3333, 0 0 20px #ff0000;
+  border-radius: 2px;
+  transform-origin: left center;
+  z-index: 9999;
+  pointer-events: none;
+  transition: width 0.15s linear, left 0.15s linear, top 0.15s linear;
+}

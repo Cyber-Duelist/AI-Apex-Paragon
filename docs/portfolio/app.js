@@ -2491,6 +2491,9 @@ RULES:
             spawnEnemy(container, colors[i % colors.length]);
         }
 
+        // Setup Evasion Vector
+        window.evasionVector = { x: 0, y: 0 };
+
         // Fight Loop
         fightInterval = setInterval(() => {
             if (enemies.length === 0) return;
@@ -2512,16 +2515,40 @@ RULES:
             });
 
             if (nearestEnemy) {
-                // Set Auto-Pilot target for UFO
-                window.idleTargetX = parseFloat(nearestEnemy.dataset.x);
-                window.idleTargetY = parseFloat(nearestEnemy.dataset.y);
+                const ex = parseFloat(nearestEnemy.dataset.x);
+                const ey = parseFloat(nearestEnemy.dataset.y);
+                
+                // Calculate standoff position (300px away)
+                let dirX = ux - ex;
+                let dirY = uy - ey;
+                const len = Math.hypot(dirX, dirY) || 1;
+                dirX /= len; dirY /= len;
+                
+                // Decay evasion vector
+                window.evasionVector.x *= 0.8;
+                window.evasionVector.y *= 0.8;
 
-                // Shoot laser
-                if (Math.random() > 0.3) {
-                    shootLaser(ux, uy, window.idleTargetX, window.idleTargetY, nearestEnemy);
+                // Set Auto-Pilot target for UFO (standoff + evasion)
+                window.idleTargetX = ex + dirX * 300 + window.evasionVector.x;
+                window.idleTargetY = ey + dirY * 300 + window.evasionVector.y;
+
+                // Clamp to screen
+                window.idleTargetX = Math.max(100, Math.min(window.innerWidth - 100, window.idleTargetX));
+                window.idleTargetY = Math.max(100, Math.min(window.innerHeight - 100, window.idleTargetY));
+
+                // Zorb shoots
+                if (Math.random() > 0.4) {
+                    shootLaser(ux, uy, ex, ey, nearestEnemy);
                 }
+
+                // Enemies shoot back
+                enemies.forEach(enemy => {
+                    if (Math.random() > 0.95) { // 5% chance per tick per enemy to shoot
+                        shootEnemyLaser(parseFloat(enemy.dataset.x), parseFloat(enemy.dataset.y), ux, uy);
+                    }
+                });
             }
-        }, 300); // Shoot every 300ms
+        }, 300); // Fight logic every 300ms
     }
 
     function spawnEnemy(container, color) {
@@ -2637,6 +2664,76 @@ RULES:
             
             setTimeout(() => laser.remove(), 100);
         }, 100);
+    }
+
+    function playEnemyBlasterSound() {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(400, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.2);
+            
+            gain.gain.setValueAtTime(window.isMuted ? 0 : 0.04, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+            
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.2);
+        } catch (e) {}
+    }
+
+    function shootEnemyLaser(startX, startY, endX, endY) {
+        if (!isIdleMode) return;
+        const container = document.getElementById('idle-fight-container');
+        if (!container) return;
+        
+        playEnemyBlasterSound();
+
+        // Perfect evasion!
+        // Calculate perpendicular vector for dodge
+        const dx = endX - startX;
+        const dy = endY - startY;
+        const len = Math.hypot(dx, dy) || 1;
+        const perpX = -dy / len;
+        const perpY = dx / len;
+        
+        // Boost evasion vector for Zorb's auto-pilot to dodge
+        window.evasionVector.x += perpX * 500 * (Math.random() > 0.5 ? 1 : -1);
+        window.evasionVector.y += perpY * 500 * (Math.random() > 0.5 ? 1 : -1);
+
+        const laser = document.createElement('div');
+        laser.className = 'enemy-laser-beam';
+        laser.style.left = startX + 'px';
+        laser.style.top = startY + 'px';
+        
+        const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+        
+        // Laser travels to original endX/Y + overshoot
+        const distance = Math.hypot(endX - startX, endY - startY) + 300; 
+        const finalX = startX + Math.cos(angle * Math.PI / 180) * distance;
+        const finalY = startY + Math.sin(angle * Math.PI / 180) * distance;
+        
+        laser.style.transform = `rotate(${angle}deg)`;
+        laser.style.width = '0px';
+        container.appendChild(laser);
+
+        // Animate laser
+        setTimeout(() => {
+            laser.style.width = distance + 'px';
+        }, 10);
+
+        setTimeout(() => {
+            laser.style.left = finalX + 'px';
+            laser.style.top = finalY + 'px';
+            laser.style.width = '0px';
+            setTimeout(() => laser.remove(), 150);
+        }, 150);
     }
 
     function playExplosionSound() {
