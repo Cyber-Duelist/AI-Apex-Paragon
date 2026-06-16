@@ -1,14 +1,554 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADARSH KUMAR SINGH — CV</title>
 <style>
-    body { font-family: "Times New Roman", Times, serif; font-size: 12pt; line-height: 1.2; margin: 40px; }
-    h1 { font-size: 14pt; font-weight: bold; text-align: center; text-transform: uppercase; margin-bottom: 2px; }
-    h2 { font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid black; padding-bottom: 2px; margin-top: 15px; margin-bottom: 10px; }
-    p { margin: 0; padding: 0; }
-    .contact { text-align: center; margin-bottom: 15px; }
+  @font-face {
+    font-family: 'Space Grotesk';
+    src: url('./fonts/space-grotesk-latin.woff2') format('woff2');
+    font-weight: 300 700;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
+  @font-face {
+    font-family: 'Space Grotesk';
+    src: url('./fonts/space-grotesk-latin-ext.woff2') format('woff2');
+    font-weight: 300 700;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  }
+
+  @font-face {
+    font-family: 'DM Sans';
+    src: url('./fonts/dm-sans-latin.woff2') format('woff2');
+    font-weight: 100 1000;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
+  @font-face {
+    font-family: 'DM Sans';
+    src: url('./fonts/dm-sans-latin-ext.woff2') format('woff2');
+    font-weight: 100 1000;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    line-height: 1.5;
+    color: #1a1a2e;
+    background: #ffffff;
+    padding: 0;
+    margin: 0;
+  }
+
+  .page {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2px 0;
+  }
+
+  /* === HEADER === */
+  .header {
+    margin-bottom: 20px;
+  }
+
+  .header h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a1a2e;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+    line-height: 1.1;
+  }
+
+  .header-gradient {
+    height: 2px;
+    background: linear-gradient(to right, hsl(187, 74%, 32%), hsl(270, 70%, 45%));
+    border-radius: 1px;
+    margin-bottom: 10px;
+  }
+
+  .contact-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10.5px;
+    line-height: 1.4;
+    color: #555;
+  }
+
+  .contact-row a {
+    color: #555;
+    text-decoration: none;
+  }
+
+  .contact-row .separator {
+    color: #ccc;
+  }
+
+  /* === SECTIONS === */
+  .section {
+    margin-bottom: 18px;
+  }
+
+  .section-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: hsl(187, 74%, 32%);
+    border-bottom: 1.5px solid #e2e2e2;
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+
+  /* === PROFESSIONAL SUMMARY === */
+  .summary-text {
+    font-size: 11px;
+    line-height: 1.7;
+    color: #2f2f2f;
+  }
+
+  /* Links must never break across lines */
+  a {
+    white-space: nowrap;
+  }
+
+  /* === CORE COMPETENCIES === */
+  .competencies-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .competency-tag {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    color: hsl(187, 74%, 28%);
+    background: hsl(187, 40%, 95%);
+    padding: 4px 10px;
+    border-radius: 3px;
+    border: 1px solid hsl(187, 40%, 88%);
+  }
+
+  /* === WORK EXPERIENCE === */
+  .job {
+    margin-bottom: 14px;
+  }
+
+  .job-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+
+  .job-company {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: hsl(270, 70%, 45%);
+  }
+
+  .job-period {
+    font-size: 10.5px;
+    color: #777;
+    white-space: nowrap;
+  }
+
+  .job-role {
+    font-size: 11px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 6px;
+  }
+
+  .job-location {
+    font-size: 10px;
+    color: #888;
+  }
+
+  .job ul {
+    padding-left: 18px;
+    margin-top: 6px;
+  }
+
+  .job li {
+    font-size: 10.5px;
+    line-height: 1.6;
+    color: #333;
+    margin-bottom: 4px;
+  }
+
+  .job li strong {
+    font-weight: 600;
+  }
+
+  /* === PROJECTS === */
+  .project {
+    margin-bottom: 12px;
+  }
+
+  .project-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: hsl(270, 70%, 45%);
+  }
+
+  .project-badge {
+    font-size: 9px;
+    font-weight: 500;
+    color: hsl(187, 74%, 32%);
+    background: hsl(187, 40%, 95%);
+    padding: 1px 6px;
+    border-radius: 2px;
+    margin-left: 6px;
+  }
+
+  .project-desc {
+    font-size: 10.5px;
+    color: #444;
+    margin-top: 3px;
+    line-height: 1.55;
+  }
+
+  .project-tech {
+    font-size: 9.5px;
+    color: #888;
+    margin-top: 3px;
+  }
+
+  /* === EDUCATION === */
+  .edu-item {
+    margin-bottom: 8px;
+  }
+
+  .edu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .edu-title {
+    font-weight: 600;
+    font-size: 11px;
+    color: #333;
+  }
+
+  .edu-org {
+    color: hsl(270, 70%, 45%);
+    font-weight: 500;
+  }
+
+  .edu-year {
+    font-size: 10px;
+    color: #777;
+    white-space: nowrap;
+  }
+
+  .edu-desc {
+    font-size: 10px;
+    color: #666;
+    margin-top: 2px;
+    line-height: 1.5;
+  }
+
+  /* === CERTIFICATIONS === */
+  .cert-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(90px, max-content) 44px;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+
+  .cert-title {
+    font-size: 10.5px;
+    font-weight: 500;
+    color: #333;
+    min-width: 0;
+  }
+
+  .cert-org {
+    color: hsl(270, 70%, 45%);
+    white-space: nowrap;
+  }
+
+  .cert-year {
+    font-size: 10px;
+    color: #777;
+    white-space: nowrap;
+    text-align: right;
+  }
+
+  /* === SKILLS === */
+  .skills-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+  }
+
+  .skill-item {
+    font-size: 10.5px;
+    color: #444;
+  }
+
+  .skill-category {
+    font-weight: 600;
+    color: #333;
+    font-size: 10.5px;
+  }
+
+  /* === PRINT === */
+  @media print {
+    body {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .page {
+      padding: 0;
+    }
+  }
+
+  /* === PAGE BREAK CONTROL === */
+  .avoid-break,
+  .job,
+  .project,
+  .edu-item,
+  .cert-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* === RTL (Arabic) Support === */
+  html[lang="ar"] body {
+    direction: rtl;
+    text-align: right;
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+  }
+
+  html[lang="ar"] .header h1,
+  html[lang="ar"] .section-title,
+  html[lang="ar"] .job-company,
+  html[lang="ar"] .project-title,
+  html[lang="ar"] .competency-tag,
+  html[lang="ar"] .skill-category {
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+  }
+
+  html[lang="ar"] .header-gradient {
+    background: linear-gradient(to left, hsl(187, 74%, 32%), hsl(270, 70%, 45%));
+  }
+
+  html[lang="ar"] .job ul {
+    padding-right: 18px;
+    padding-left: 0;
+  }
+
+  html[lang="ar"] .project-badge {
+    margin-right: 6px;
+    margin-left: 0;
+  }
+
+  html[lang="ar"] .cert-year {
+    text-align: left;
+  }
 </style>
 </head>
 <body>
-<h1>ADARSH KUMAR SINGH</h1><div class='contact'><p>Ghaziabad, Uttar Pradesh</p><p>+91-94394-40544</p><p>adarshentity098@gmail.com</p><p>github.com/Cyber-Duelist/AI-Apex-Paragon</p><p>linkedin.com/in/adarsh-kumar-singh</p></div><h2>SUMMARY</h2><p><strong>Results-driven Backend Software Engineer specializing in Large Language Models (LLMs), Agentic Workflows, and scalable Python architectures. Proven ability to engineer autonomous multi-agent systems, implement Retrieval-Augmented Generation (RAG) pipelines, and build robust enterprise LLM guardrails. Seeking a role to leverage expertise in Python, FastAPI, and GenAI to build secure, highly automated applications.</strong></p><h2>SKILLS</h2><p><strong>Programming Languages: Python, SQL, Bash</strong></p><p>Frameworks & Libraries: FastAPI, Pytest, Sentence-Transformers</p><p>AI & Machine Learning: Large Language Models (LLaMA 3, GPT), Retrieval-Augmented Generation (RAG), Multi-Agent Orchestration (ReAct Loops), AI Guardrails, Prompt Engineering</p><p>Databases & Cloud: ChromaDB (Vector Databases), Oracle Cloud Infrastructure (OCI), Oracle Database Design, Data Warehousing</p><p>Developer Tools: Git, REST APIs, JSON validation, Server-Sent Events (SSE)</p><h2>WORK EXPERIENCE</h2><p><strong>AI-Apex-Paragon Capstone</strong></p><p>Lead AI Engineer</p><p>Jan 2024 - Present</p><ul><li>Engineered a multi-agent orchestration framework from scratch to automatically intercept CI/CD pipeline failures and remediate broken codebase branches, reducing manual debugging time by 90%.</li></ul><ul><li>Implemented a continuous ReAct (Reason + Act) loop utilizing LLaMA 3 to diagnose raw error logs, inject Python patches via custom file operations, and verify fixes using local sandboxed testing.</li></ul><ul><li>Created dynamic agent personas (Diagnoser, Developer, Verifier, PR Reviewer) to successfully enforce zero-touch bug remediation across 100% of tested workflows.</li></ul><p><strong>AI-Apex-Paragon Capstone</strong></p><p>Backend AI Developer</p><p>Nov 2023 - Dec 2023</p><ul><li>Developed a highly secure compliance AI agent equipped with persistent state memory and rigorous LLM security boundaries.</li></ul><ul><li>Designed pre-execution Input Guardrails to prevent adversarial prompt injection and post-execution Output Guardrails to guarantee strict domain-scope adherence.</li></ul><ul><li>Built an automated LLM-as-a-Judge Evaluation Dashboard with Dynamic Model Failover routing, guaranteeing 99.9% uptime during strict API rate-limit bottlenecks.</li></ul><p><strong>AI-Apex-Paragon Capstone</strong></p><p>AI Software Engineer</p><p>Sep 2023 - Oct 2023</p><ul><li>Architected a Retrieval-Augmented Generation (RAG) service capable of ingesting enterprise PDFs and generating cited, accurate answers to eliminate LLM hallucination.</li></ul><ul><li>Exposed the service via a FastAPI backend, utilizing robust semantic search and chunking strategies to retrieve the highest-context data dynamically.</li></ul><p><strong>AI-Apex-Paragon Capstone</strong></p><p>Software Engineer</p><p>Jul 2023 - Aug 2023</p><ul><li>Built a microservice that connects directly to the GitHub API, fetches raw pull request diffs, and streams changes to a high-reasoning LLM for deep architectural review.</li></ul><ul><li>Forced strict JSON schema generation to programmatically flag bugs, security vulnerabilities, and logic flaws that standard static analysis tools fail to catch.</li></ul><h2>EDUCATION</h2><p><strong>Dr. Abdul Kalam Technical University</strong></p><p>B. Tech in Electronics and Communication Engineering</p><p>Aug 2022 - May 2026</p><h2>CERTIFICATIONS</h2><p><strong>Oracle GenAI Certified Professional (2025)</strong></p><p>Oracle Data Science Professional Certification (2025)</p><p>IoT and Industrial Automation Certification (2025)</p></body></html>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header avoid-break">
+    <h1>ADARSH KUMAR SINGH</h1>
+    <div class="header-gradient"></div>
+    <div class="contact-row">
+      <span>+91-94394-40544</span>
+      <span class="separator">|</span>
+      <span>adarshentity098@gmail.com</span>
+      <span class="separator">|</span>
+      <a href="https://linkedin.com/in/i-am-entity">linkedin.com/in/i-am-entity</a>
+      <span class="separator">|</span>
+      <a href="https://cyber-duelist.github.io/AI-Apex-Paragon/">cyber-duelist.github.io</a>
+      <span class="separator">|</span>
+      <span>Ghaziabad, Uttar Pradesh</span>
+    </div>
+  </div>
+
+  <!-- PROFESSIONAL SUMMARY -->
+  <div class="section avoid-break">
+    <div class="section-title">SUMMARY</div>
+    <div class="summary-text">B.Tech graduate with hands-on experience building multi-agent systems, Retrieval-Augmented Generation (RAG) data pipelines, and LLM guardrails using Python, FastAPI, and Docker. Deployed scalable AI microservices on AWS and OCI with Kubernetes. Active contributor in Software Incubator, Programming Club, and Cloud Computing Club at AKGEC. Oracle GenAI and Data Science certified.</div>
+  </div>
+
+  <!-- CORE COMPETENCIES -->
+  <div class="section">
+    <div class="section-title">TECHNICAL SKILLS</div>
+    <div class="competencies-grid">
+      
+  <span class="competency-tag">Multi-Agent Orchestration</span>
+  <span class="competency-tag">ReAct Framework</span>
+  <span class="competency-tag">Retrieval-Augmented Generation (RAG)</span>
+  <span class="competency-tag">Large Language Models (LLaMA 3, GPT)</span>
+  <span class="competency-tag">Guardrails</span>
+  <span class="competency-tag">Prompt Engineering</span>
+  <span class="competency-tag">Python</span>
+  <span class="competency-tag">JavaScript</span>
+  <span class="competency-tag">SQL</span>
+  <span class="competency-tag">Bash</span>
+
+    </div>
+  </div>
+
+  <!-- WORK EXPERIENCE -->
+  <div class="section">
+    <div class="section-title">WORK EXPERIENCE</div>
+    
+  <div class="job">
+    <div class="job-header">
+      <span class="job-company">Software Incubator (AKGEC)</span>
+      <span class="job-period">Jan 2026 - Present</span>
+    </div>
+    <div class="job-role">Technical Member (Part-Time)</div>
+    <ul>
+      <li>Partnered with internal stakeholders to translate complex requirements into scalable evaluation frameworks and concrete technical specs.</li>
+      <li>Developed a stateful enterprise compliance agent with persistent memory and tool calling capabilities.</li>
+      <li>Built an LLM-as-a-Judge Evaluation Dashboard scoring agent responses across 5 compliance dimensions.</li>
+      <li>Implemented Dynamic Model Failover routing (70B to 8B) ensuring 99.9% uptime during stress testing.</li>
+      <li>Designed pre-execution Input Guardrails blocking 100% of adversarial prompt injection attempts.</li>
+    </ul>
+  </div>
+  <div class="job">
+    <div class="job-header">
+      <span class="job-company">Programming Club (AKGEC)</span>
+      <span class="job-period">Aug 2024 - Dec 2025</span>
+    </div>
+    <div class="job-role">Core Member (Part-Time)</div>
+    <ul>
+      <li>Architected a RAG pipeline ingesting large-scale PDFs with 94% retrieval accuracy via ChromaDB.</li>
+      <li>Reduced LLM hallucination by 78% using source-grounded generation and citation tracking.</li>
+      <li>Exposed 3 FastAPI REST endpoints (/upload, /search, /documents) for production use.</li>
+      <li>Mentored 15+ juniors on Python, Git workflows, and API development best practices.</li>
+    </ul>
+  </div>
+  <div class="job">
+    <div class="job-header">
+      <span class="job-company">Cloud Computing Club (AKGEC)</span>
+      <span class="job-period">Aug 2023 - Jul 2024</span>
+    </div>
+    <div class="job-role">Member (Part-Time)</div>
+    <ul>
+      <li>Deployed 5+ containerized AI microservices using Docker and Kubernetes on AWS and OCI.</li>
+      <li>Automated 3 CI/CD pipelines with GitHub Actions, reducing deployment time by 60%.</li>
+      <li>Completed 2 Oracle certifications (GenAI + Data Science) with 80%+ passing scores.</li>
+    </ul>
+  </div>
+
+  </div>
+
+  <!-- PROJECTS -->
+  <div class="section avoid-break">
+    <div class="section-title">PROJECTS</div>
+    
+  <div class="project">
+    <div class="project-title">Autonomous AI DevOps Swarm <span class="project-badge">ReAct</span></div>
+    <div class="project-desc">Built a 4-agent swarm using ReAct loops and LLaMA 3 for autonomous CI/CD failure remediation. Reduced mean-time-to-recovery by 90% and achieved 85% first-pass fix accuracy using sandboxed execution.</div>
+    <div class="project-tech">Python, LLaMA 3, Pytest, GitHub API, ReAct Framework</div>
+  </div>
+  <div class="project">
+    <div class="project-title">AI Code Reviewer <span class="project-badge">FastAPI</span></div>
+    <div class="project-desc">Analyzed 100+ GitHub PRs via LLM, detecting 3.2 issues per review missed by static analysis. Enforced strict JSON schema output for structured bug and vulnerability reporting.</div>
+    <div class="project-tech">Python, FastAPI, GitHub REST API, Groq</div>
+  </div>
+  <div class="project">
+    <div class="project-title">Meeting Intelligence System <span class="project-badge">LLM</span></div>
+    <div class="project-desc">Processed 60-minute transcripts in under 8 seconds with 96% extraction accuracy. Generated structured summaries, action items, and follow-up emails automatically.</div>
+    <div class="project-tech">Python, FastAPI, Groq</div>
+  </div>
+  <div class="project">
+    <div class="project-title">Document Risk Prediction <span class="project-badge">ML</span></div>
+    <div class="project-desc">Built a supervised ML pipeline classifying document risk with tuned hyperparameters. Compared 4 model architectures and serialized the best performer for production deployment.</div>
+    <div class="project-tech">scikit-learn, pandas, Random Forest</div>
+  </div>
+
+  </div>
+
+  <!-- EDUCATION -->
+  <div class="section avoid-break">
+    <div class="section-title">EDUCATION</div>
+    
+  <div class="edu-item">
+    <div class="edu-header">
+      <span class="edu-title">B. Tech in Electronics and Communication Engineering (CGPA: 7.9)</span>
+      <span class="edu-year">Aug 2022 - May 2026</span>
+    </div>
+    <div class="edu-org">Ajay Kumar Garg Engineering College (AKGEC)</div>
+  </div>
+
+  </div>
+
+  <!-- CERTIFICATIONS -->
+  <div class="section avoid-break">
+    <div class="section-title">CERTIFICATIONS</div>
+    
+  <div class="cert-item">
+    <div class="cert-title">Oracle GenAI Certified Professional</div>
+    <div class="cert-year">2025</div>
+  </div>
+  <div class="cert-item">
+    <div class="cert-title">Oracle Data Science Professional Certification</div>
+    <div class="cert-year">2025</div>
+  </div>
+  <div class="cert-item">
+    <div class="cert-title">IoT and Industrial Automation Certification</div>
+    <div class="cert-year">2025</div>
+  </div>
+
+  </div>
+
+  <!-- SKILLS -->
+  <div class="section avoid-break">
+    <div class="section-title">ADDITIONAL SKILLS</div>
+    
+  <div class="skills-grid">
+    <div class="skill-item"><span class="skill-category">Frameworks:</span> FastAPI, Pytest, ChromaDB (Vector Database), GSAP, Three.js, scikit-learn</div>
+    <div class="skill-item"><span class="skill-category">Cloud / DevOps:</span> Docker, Kubernetes, AWS (EC2, S3), Oracle Cloud (OCI), CI/CD Pipelines, GitHub Actions</div>
+    <div class="skill-item"><span class="skill-category">Tools:</span> Git, REST APIs, JSON Schema Validation, Server-Sent Events (SSE)</div>
+  </div>
+
+  </div>
+
+</div>
+</body>
+</html>
