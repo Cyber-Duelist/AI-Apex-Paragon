@@ -1,58 +1,62 @@
-ADARSH KUMAR SINGH
-Ghaziabad, Uttar Pradesh
-+91-94394-40544
-adarshentity098@gmail.com
-github.com/Cyber-Duelist/AI-Apex-Paragon
-linkedin.com/in/i-am-entity
+# ADARSH KUMAR SINGH
 
-SUMMARY
+- Location: Ghaziabad, Uttar Pradesh
+- Phone: +91-94394-40544
+- Email: adarshentity098@gmail.com
+- Links: [Email](mailto:adarshentity098@gmail.com) | [LinkedIn](https://www.linkedin.com/in/i-am-entity) | [GitHub](https://github.com/Cyber-Duelist/AI-Apex-Paragon) | [Portfolio](https://cyber-duelist.github.io/AI-Apex-Paragon/)
 
-Results-driven Backend Software Engineer specializing in Large Language Models (LLMs), Agentic Workflows, and scalable Python architectures. Proven ability to engineer autonomous multi-agent systems, implement Retrieval-Augmented Generation (RAG) pipelines, and build robust enterprise LLM guardrails. Seeking a role to leverage expertise in Python, FastAPI, and GenAI to build secure, highly automated applications.
+## Summary
+Applied AI Engineer and Solutions Architect specializing in enterprise-grade agentic workflows, real-time AI infrastructure, and deploying foundation models into production. Proven track record of building complex multi-agent systems, highly accurate RAG pipelines, and low-latency voice streaming architectures using Python, FastAPI, and Django. Adept at translating complex client requirements into scalable deployments on AWS and Kubernetes, while implementing robust LLM guardrails for strict enterprise compliance. Oracle GenAI and Data Science certified.
 
-SKILLS
+## Technical Skills
+- **Languages:** Python, JavaScript, SQL, Bash
+- **AI / ML:** Multi-Agent Orchestration, ReAct Framework, RAG, Voice AI (TTS, STT), LLMs (LLaMA 3, GPT-4o), Prompt Engineering, Real-Time Streaming
+- **Solutions & Architecture:** Enterprise Deployments, Client Integration, Technical Scoping, API Design, Scalable Architecture, Distributed Systems
+- **MLOps & DevOps:** LLM-as-a-Judge, Docker, Kubernetes, AWS (EC2, S3), Oracle Cloud (OCI), CI/CD, GitHub Actions
+- **Frameworks & Tools:** FastAPI, Django / Django REST Framework, WebSockets, Server-Sent Events (SSE), Pytest, ChromaDB, Git
 
-Programming Languages: Python, SQL, Bash
-Frameworks & Libraries: FastAPI, Pytest, Sentence-Transformers
-AI & Machine Learning: Large Language Models (LLaMA 3, GPT), Retrieval-Augmented Generation (RAG), Multi-Agent Orchestration (ReAct Loops), AI Guardrails, Prompt Engineering
-Databases & Cloud: ChromaDB (Vector Databases), Oracle Cloud Infrastructure (OCI), Oracle Database Design, Data Warehousing
-Developer Tools: Git, REST APIs, JSON validation, Server-Sent Events (SSE)
+## Professional Experience
 
-WORK EXPERIENCE
+### Technical Lead & AI Engineer — Software Incubator
+*Ajay Kumar Garg Engineering College (AKGEC) | Jan 2026 - Present*
+- Partnered with internal stakeholders to translate complex compliance requirements into scalable AI evaluation frameworks and concrete technical specifications.
+- Architected and deployed a stateful enterprise compliance agent with persistent memory, tool-calling capabilities, and dynamic routing (70B to 8B models), ensuring 99.9% uptime.
+- Built an LLM-as-a-Judge Evaluation Dashboard scoring agent responses across 5 dimensions, and implemented pre-execution Input Guardrails blocking 100% of adversarial injections.
 
-AI-Apex-Paragon Capstone
-Lead AI Engineer
-Mar 2026 - Present
-- Engineered a multi-agent orchestration framework from scratch to automatically intercept CI/CD pipeline failures and remediate broken codebase branches, reducing manual debugging time by 90%.
-- Implemented a continuous ReAct (Reason + Act) loop utilizing LLaMA 3 to diagnose raw error logs, inject Python patches via custom file operations, and verify fixes using local sandboxed testing.
-- Created dynamic agent personas (Diagnoser, Developer, Verifier, PR Reviewer) to successfully enforce zero-touch bug remediation across 100% of tested workflows.
+### Engineering Lead (RAG & AI Systems) — Programming Club
+*Ajay Kumar Garg Engineering College (AKGEC) | Aug 2024 - Dec 2025*
+- Architected a highly accurate RAG pipeline utilizing ChromaDB for large-scale PDF ingestion, reducing LLM hallucination by 78% via source-grounded generation and citation tracking.
+- Designed and exposed high-throughput FastAPI REST endpoints for production usage, implementing API rate limiting and structured JSON responses.
+- Led cross-functional collaboration and mentored a team of 15+ engineers on Python best practices, Git workflows, and robust API development.
 
-AI-Apex-Paragon Capstone
-Backend AI Developer
-Jan 2026 - Feb 2026
-- Developed a highly secure compliance AI agent equipped with persistent state memory and rigorous LLM security boundaries.
-- Designed pre-execution Input Guardrails to prevent adversarial prompt injection and post-execution Output Guardrails to guarantee strict domain-scope adherence.
-- Built an automated LLM-as-a-Judge Evaluation Dashboard with Dynamic Model Failover routing, guaranteeing 99.9% uptime during strict API rate-limit bottlenecks.
+### Cloud AI Deployment Engineer — Cloud Computing Club
+*Ajay Kumar Garg Engineering College (AKGEC) | Aug 2023 - Jul 2024*
+- Managed end-to-end deployment of 5+ containerized AI microservices utilizing Docker and Kubernetes across AWS and OCI environments.
+- Streamlined infrastructure operations by automating 3 CI/CD pipelines via GitHub Actions, accelerating deployment velocity by 60%.
 
-AI-Apex-Paragon Capstone
-AI Software Engineer
-Nov 2025 - Dec 2025
-- Architected a Retrieval-Augmented Generation (RAG) service capable of ingesting enterprise PDFs and generating cited, accurate answers to eliminate LLM hallucination.
-- Exposed the service via a FastAPI backend, utilizing robust semantic search and chunking strategies to retrieve the highest-context data dynamically.
+## Projects
 
-AI-Apex-Paragon Capstone
-Software Engineer
-Sep 2025 - Oct 2025
-- Built a microservice that connects directly to the GitHub API, fetches raw pull request diffs, and streams changes to a high-reasoning LLM for deep architectural review.
-- Forced strict JSON schema generation to programmatically flag bugs, security vulnerabilities, and logic flaws that standard static analysis tools fail to catch.
+### Real-Time Voice AI Agent & Workflow Orchestration
+*Python, FastAPI, WebSockets, TTS/STT, LLMs*
+- Developed a low-latency, bidirectional voice agent utilizing WebSockets and Server-Sent Events (SSE) for real-time speech-to-text (STT) and text-to-speech (TTS) streaming.
+- Optimized pipeline latency to achieve sub-500ms time-to-first-byte (TTFB), simulating enterprise-grade voice interactions for customer service scenarios.
 
-EDUCATION
+### Autonomous AI DevOps Swarm
+*Python, LLaMA 3, Pytest, ReAct Framework*
+- Engineered a 4-agent swarm using ReAct loops to autonomously detect, debug, and remediate CI/CD pipeline failures via sandboxed execution.
+- Reduced mean-time-to-recovery (MTTR) by 90% and achieved an 85% first-pass resolution rate for complex build errors.
 
-Dr. Abdul Kalam Technical University
-B. Tech in Electronics and Communication Engineering
-Aug 2022 - May 2026 | CGPA: 7.9
+### AI Code Review & Risk Assessment Platform
+*Django, REST Framework, Groq, Machine Learning*
+- Built a robust Django REST application processing 100+ GitHub PRs, leveraging LLMs to detect edge-case logic bugs and vulnerabilities missed by static analysis.
+- Integrated a supervised ML pipeline (Random Forest) to classify document risk, enforcing strict JSON schema output for client-ready reporting.
 
-CERTIFICATIONS
+## Education
 
-Oracle GenAI Certified Professional (2025)
-Oracle Data Science Professional Certification (2025)
-IoT and Industrial Automation Certification (2025)
+### Ajay Kumar Garg Engineering College (AKGEC)
+*B. Tech in Electronics and Communication Engineering | AKTU | Aug 2022 - May 2026 | CGPA: 7.9*
+
+## Certifications
+- Oracle GenAI Certified Professional (2025)
+- Oracle Data Science Professional Certification (2025)
+- IoT and Industrial Automation Certification (2025)
