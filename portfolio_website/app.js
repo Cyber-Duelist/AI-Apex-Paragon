@@ -2582,26 +2582,7 @@ RULES:
    ======================================== */
 (function() {
     // 1. Ambient Audio
-    const audioToggleBtn = document.getElementById('ambient-audio-toggle');
-    const audioIcon = document.getElementById('audio-icon');
-    let ambientAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/02/10/audio_5b34f7831f.mp3?filename=dark-ambient-drone-24076.mp3'); 
-    ambientAudio.loop = true;
-    ambientAudio.volume = 0.2;
-    let isAudioPlaying = false;
-
-    if (audioToggleBtn) {
-        audioToggleBtn.addEventListener('click', () => {
-            if (isAudioPlaying) {
-                ambientAudio.pause();
-                audioIcon.innerText = '🔇';
-                isAudioPlaying = false;
-            } else {
-                ambientAudio.play();
-                audioIcon.innerText = '🔊';
-                isAudioPlaying = true;
-            }
-        });
-    }
+    // Removed BGM toggle
 
     // 2. Konami Code Lockdown
     const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
