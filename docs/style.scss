@@ -28,29 +28,75 @@ $glass-hover: rgba(255, 255, 255, 0.05);
 // THEME: ENTITY (Default — Cyber/AI)
 // ==========================================
 :root, [data-theme="entity"] {
-    --accent-1: #00e5ff;
-    --accent-2: #b44dff;
-    --accent-3: #ff2d7b;
-    --accent-4: #3d5afe;
-    --accent-1-rgb: 0, 229, 255;
-    --accent-2-rgb: 180, 77, 255;
-    --accent-3-rgb: 255, 45, 123;
-    --gradient-main: linear-gradient(135deg, #00e5ff, #b44dff, #ff2d7b);
-    --bg-void: #030308;
-    --bg-deep: #08080f;
-    --text-white: #f0f0f8;
-    --text-silver: #a0a0b8;
-    --text-ghost: #55556e;
-    --glass-bg: rgba(255, 255, 255, 0.02);
-    --glass-border: rgba(255, 255, 255, 0.06);
-    --glass-hover: rgba(255, 255, 255, 0.05);
-    --aurora-1: #00e5ff;
-    --aurora-2: #b44dff;
-    --aurora-3: #ff2d7b;
-    --glow-primary: rgba(0, 229, 255, 0.5);
-    --glow-secondary: rgba(180, 77, 255, 0.5);
-    --dot-highlight: #ff2d7b;
-    --dot-highlight-rgb: 255, 45, 123;
+  --accent-1: #00ff66;
+  --accent-2: #00f0ff;
+  --accent-3: #8a2be2;
+  --accent-4: #3d5afe;
+  
+  --accent-1-rgb: 0, 255, 102;
+  --accent-2-rgb: 0, 240, 255;
+  --accent-3-rgb: 138, 43, 226;
+
+  --gradient-main: linear-gradient(135deg, #00ff66, #00f0ff, #8a2be2);
+  
+  --bg-void: #050505;
+  --bg-deep: #0a0a0a;
+  
+  --text-white: #f0f0f8;
+  --text-silver: #a0a0b8;
+  --text-ghost: #55556e;
+
+  --glass-bg: rgba(0, 255, 102, 0.02);
+  --glass-border: rgba(0, 255, 102, 0.3);
+  --glass-hover: rgba(0, 255, 102, 0.05);
+
+  --aurora-1: #00ff66;
+  --aurora-2: #00f0ff;
+  --aurora-3: #8a2be2;
+
+  --glow-primary: rgba(0, 255, 102, 0.5);
+  --glow-secondary: rgba(0, 240, 255, 0.5);
+
+  --dot-highlight: #00ff66;
+  --dot-highlight-rgb: 0, 255, 102;
+}
+
+// ==========================================
+// THEME: ULTRA-ALIEN (Ultraman / Land of Light)
+// ==========================================
+[data-theme="ultraman"] {
+  --accent-1: #e0e0e0;       // Ultra Silver
+  --accent-2: #ff2a2a;       // Plasma Red
+  --accent-3: #00f0ff;       // Color Timer Cyan
+  --accent-4: #ffd700;       // Solar Gold
+  
+  --accent-1-rgb: 224, 224, 224;
+  --accent-2-rgb: 255, 42, 42;
+  --accent-3-rgb: 0, 240, 255;
+
+  --gradient-main: linear-gradient(135deg, #e0e0e0, #ff2a2a, #00f0ff);
+  
+  --bg-void: #020513;        // Cosmic Deep Blue
+  --bg-deep: #060918;
+  
+  --text-white: #f8f9fc;
+  --text-silver: #a0a8b8;
+  --text-ghost: #555c6e;
+
+  // Frosted Glass / Brushed Metal
+  --glass-bg: rgba(224, 224, 224, 0.03);
+  --glass-border: rgba(224, 224, 224, 0.2);
+  --glass-hover: rgba(0, 240, 255, 0.08);
+
+  --aurora-1: #e0e0e0;
+  --aurora-2: #ff2a2a;
+  --aurora-3: #00f0ff;
+
+  --glow-primary: rgba(224, 224, 224, 0.4);
+  --glow-secondary: rgba(0, 240, 255, 0.6);
+
+  --dot-highlight: #ff2a2a;
+  --dot-highlight-rgb: 255, 42, 42;
 }
 
 // ==========================================
@@ -1761,7 +1807,7 @@ code {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 300;
+    z-index: 9999999;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
     transition: all 0.3s $ease-out;
 
@@ -1770,7 +1816,31 @@ code {
         box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
     }
 
+    &:hover .fab-label {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
     .fab-icon { font-size: 1.5rem; }
+
+    .fab-label {
+        position: absolute;
+        right: 70px;
+        background: rgba(10, 10, 15, 0.9);
+        border: 1px solid rgba(0, 229, 255, 0.3);
+        color: #fff;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        letter-spacing: 1px;
+        white-space: nowrap;
+        opacity: 0;
+        transform: translateX(10px);
+        pointer-events: none;
+        transition: all 0.3s $ease-out;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
 
     .fab-pulse {
         position: absolute;
@@ -1797,7 +1867,7 @@ code {
     border: 1px solid rgba(var(--accent-1-rgb), 0.15);
     backdrop-filter: blur(30px);
     -webkit-backdrop-filter: blur(30px);
-    z-index: 301;
+    z-index: 9999999;
     display: none;
     flex-direction: column;
     overflow: hidden;
@@ -2101,3 +2171,607 @@ code {
     }
 }
 
+/* --- PREMIUM GLASSMORPHISM & NEW UI ELEMENTS --- */
+.glass-dashboard {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 32px 48px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-dashboard::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -100%;
+  width: 50%; height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.05), transparent);
+  transform: skewX(-20deg);
+  animation: shine 6s infinite;
+}
+
+@keyframes shine {
+  0% { left: -100%; }
+  20% { left: 200%; }
+  100% { left: 200%; }
+}
+
+.glass-dashboard:hover {
+  border-color: rgba(0, 229, 255, 0.3);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 229, 255, 0.1);
+  transform: translateY(-5px);
+}
+
+.glass-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+
+.glass-stat:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  right: -36px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 60%;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.stat-suffix {
+  font-size: 2.5rem;
+  font-weight: 800;
+  font-family: "JetBrains Mono", monospace;
+  background: linear-gradient(135deg, #00e5ff, #b44dff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-left: 2px;
+}
+
+/* Containment Field Cards (Projects & About) */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 0px;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+}
+
+.glass-card:hover {
+  background: var(--glass-hover);
+  border-color: var(--accent-1);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(var(--accent-1-rgb), 0.15), inset 0 0 20px rgba(var(--accent-1-rgb), 0.05);
+}
+
+.glass-card::before {
+  content: "";
+  position: absolute;
+  top: -1px; left: -1px;
+  width: 20px; height: 20px;
+  border-top: 2px solid var(--accent-1);
+  border-left: 2px solid var(--accent-1);
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+.glass-card:hover::before { opacity: 1; }
+
+/* Infinite Marquee */
+.marquee-container {
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  width: 100%;
+  padding: 30px 0;
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.marquee-content {
+  display: inline-block;
+  animation: marquee-scroll 25s linear infinite;
+}
+
+.marquee-content:hover {
+  animation-play-state: paused;
+}
+
+.marquee-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  margin: 0 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 50px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 1rem;
+  color: #a0a0b8;
+  transition: all 0.3s ease;
+}
+
+.marquee-item:hover {
+  background: rgba(0, 229, 255, 0.1);
+  border-color: rgba(0, 229, 255, 0.5);
+  color: #fff;
+  transform: scale(1.05);
+}
+
+@keyframes marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@media (max-width: 768px) {
+  .hero-stats.glass-dashboard {
+    flex-direction: column;
+    gap: 32px;
+    padding: 24px;
+  }
+  .glass-stat:not(:last-child)::after {
+    display: none;
+  }
+}
+
+/* --- VANGUARD UI: FLASHLIGHT SPOTLIGHT EFFECT --- */
+.glass-card::after, .glass-dashboard::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+    rgba(255, 255, 255, 0.08),
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.glass-card:hover::after, .glass-dashboard:hover::after {
+  opacity: 1;
+}
+
+/* ========================================
+   ULTRA-ALIEN OVERHAUL: BETA CAPSULE & COLOR TIMER
+   ======================================== */
+
+/* Beta Capsule Flash Intro */
+#beta-capsule-flash {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: #ffffff;
+  z-index: 100000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 1.5s cubic-bezier(0.8, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+#beta-capsule-flash.hidden {
+  opacity: 0;
+}
+
+.capsule-core {
+  width: 100px;
+  height: 100px;
+  background: var(--accent-3);
+  border-radius: 50%;
+  box-shadow: 0 0 100px 50px var(--accent-3), 0 0 300px 150px #ffffff;
+  animation: pulseCore 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulseCore {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.5); opacity: 1; }
+}
+
+/* Color Timer Hover Effect (Cards) */
+.glass-card {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+  border-color: var(--accent-3);
+  box-shadow: 0 0 20px rgba(var(--accent-3-rgb), 0.4);
+  animation: colorTimerWarning 2s linear forwards;
+}
+
+@keyframes colorTimerWarning {
+  0% { border-color: var(--accent-3); box-shadow: 0 0 20px rgba(var(--accent-3-rgb), 0.4); }
+  50% { border-color: var(--accent-3); box-shadow: 0 0 20px rgba(var(--accent-3-rgb), 0.4); }
+  60% { border-color: var(--accent-2); box-shadow: 0 0 30px rgba(var(--accent-2-rgb), 0.6); }
+  65% { border-color: transparent; box-shadow: none; }
+  70% { border-color: var(--accent-2); box-shadow: 0 0 30px rgba(var(--accent-2-rgb), 0.6); }
+  75% { border-color: transparent; box-shadow: none; }
+  80% { border-color: var(--accent-2); box-shadow: 0 0 40px rgba(var(--accent-2-rgb), 0.8); }
+  85% { border-color: transparent; box-shadow: none; }
+  90% { border-color: var(--accent-2); box-shadow: 0 0 40px rgba(var(--accent-2-rgb), 0.8); }
+  95% { border-color: transparent; box-shadow: none; }
+  100% { border-color: var(--accent-2); box-shadow: 0 0 50px rgba(var(--accent-2-rgb), 1); }
+}
+
+/* Chromatic Glitch on images */
+.project-card:hover .project-image {
+  animation: chromaticGlitch 0.3s ease-in-out forwards;
+}
+
+@keyframes chromaticGlitch {
+  0% { filter: hue-rotate(0deg) contrast(100%); transform: scale(1.05); }
+  20% { filter: hue-rotate(90deg) contrast(200%) invert(20%); transform: scale(1.08) translateX(-5px); }
+  40% { filter: hue-rotate(-90deg) contrast(300%) invert(0%); transform: scale(1.02) translateX(5px); }
+  60% { filter: hue-rotate(180deg) contrast(150%) invert(10%); transform: scale(1.06) translateY(5px); }
+  100% { filter: hue-rotate(0deg) contrast(120%); transform: scale(1.05); }
+}
+
+/* Matrix Background Canvas */
+#matrix-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: -10; /* Behind everything */
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+/* Scanner Sweep Overlay */
+#scanner-sweep {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  /* Ultra-Alien Cyan Scanner */
+  background: linear-gradient(to bottom, transparent 0%, rgba(0, 240, 255, 0.05) 50%, rgba(0, 240, 255, 0.3) 100%);
+  height: 10px;
+  opacity: 0.6;
+  animation: scanSweep 6s linear infinite;
+}
+
+@keyframes scanSweep {
+  0% { transform: translateY(-10vh); }
+  100% { transform: translateY(110vh); }
+}
+
+/* ========================================
+   ALIEN COMPANION (ZORB)
+   ======================================== */
+#alien-companion {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 50px;
+  height: 60px;
+  pointer-events: none;
+  z-index: 999990; /* Just under UFO */
+}
+
+.alien-bubble {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 10px;
+  background: rgba(57, 255, 20, 0.1);
+  border: 1px solid rgba(57, 255, 20, 0.4);
+  border-radius: 50% 50% 40% 40%;
+  backdrop-filter: blur(2px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: alienHover 3s ease-in-out infinite alternate;
+  box-shadow: inset 0 0 10px rgba(57, 255, 20, 0.2), 0 0 15px rgba(57, 255, 20, 0.3);
+  transition: transform 0.2s; /* for flipping horizontally */
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.alien-body-svg {
+  width: 45px;
+  height: 65px;
+  filter: drop-shadow(0 0 5px #39ff14);
+  animation: alienFloat 4s ease-in-out infinite alternate;
+}
+
+.alien-body-svg svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes alienFloat {
+  0% { transform: translateY(-2px) rotate(-2deg); }
+  100% { transform: translateY(2px) rotate(2deg); }
+}
+
+.alien-shadow {
+  position: absolute;
+  bottom: 0;
+  left: 10px;
+  right: 10px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  filter: blur(2px);
+  animation: shadowPulse 3s ease-in-out infinite alternate;
+}
+
+@keyframes alienHover {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-10px); }
+}
+
+@keyframes shadowPulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(0.8); opacity: 0.2; }
+}
+
+@media (max-width: 768px) {
+  #alien-companion {
+    transform: scale(0.7) !important;
+    transform-origin: bottom right;
+  }
+}
+
+[data-theme="ultraman"] {
+  #alien-companion {
+    width: 100px;
+    height: 100px;
+    /* Adjust origin because of new size */
+    transform-origin: center center;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-image: url('ultraman.png');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.6));
+        pointer-events: none;
+    }
+
+    .alien-bubble, .alien-core, .alien-ring, .alien-eye {
+      display: none !important;
+    }
+    
+    .alien-speech-bubble {
+      border-color: rgba(0, 240, 255, 0.5);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+    }
+  }
+}
+
+/* ========================================
+   ZORB SPEECH BUBBLE & UFO CURSOR
+   ======================================== */
+.alien-speech-bubble {
+  position: absolute;
+  bottom: 80px;
+  right: -50px;
+  background: rgba(10, 10, 15, 0.8);
+  border: 1px solid rgba(57, 255, 20, 0.5);
+  box-shadow: 0 0 15px rgba(57, 255, 20, 0.2);
+  backdrop-filter: blur(8px);
+  color: var(--text-white);
+  padding: 10px 15px;
+  border-radius: 12px 12px 12px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  width: max-content;
+  max-width: 200px;
+  pointer-events: auto;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 10;
+}
+
+.alien-speech-bubble.hidden {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+.alien-text {
+  display: block;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.alien-mute {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(57, 255, 20, 0.5);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #39ff14;
+  cursor: pointer !important;
+  pointer-events: auto;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.alien-mute:hover {
+  background: rgba(57, 255, 20, 0.2);
+  transform: scale(1.1);
+}
+
+/* UFO Cursor */
+#ufo-cursor {
+  position: fixed;
+  top: 0; left: 0;
+  width: 40px; height: 40px;
+  pointer-events: none;
+  z-index: 999999;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  mix-blend-mode: screen;
+}
+
+.ufo-core {
+  width: 12px; height: 12px;
+  background: var(--accent-1);
+  border-radius: 50%;
+  box-shadow: 0 0 15px 5px var(--accent-1), 0 0 30px 10px rgba(0, 255, 102, 0.8);
+  position: relative;
+  z-index: 2;
+  animation: corePulse 2s infinite alternate;
+}
+
+.ufo-ring {
+  position: absolute;
+  width: 30px; height: 8px;
+  border: 2px solid var(--accent-1);
+  border-radius: 50%;
+  transform: perspective(100px) rotateX(60deg);
+  box-shadow: 0 0 10px var(--accent-1), inset 0 0 10px var(--accent-1);
+  animation: ringSpin 3s linear infinite;
+}
+
+.ufo-beam {
+  position: absolute;
+  top: 50%;
+  width: 16px; height: 0;
+  background: linear-gradient(to bottom, var(--glow-primary) 0%, transparent 100%);
+  transform-origin: top center;
+  transform: perspective(100px) rotateX(40deg);
+  transition: height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes ringSpin {
+  0% { transform: perspective(100px) rotateX(60deg) rotateZ(0deg); }
+  100% { transform: perspective(100px) rotateX(60deg) rotateZ(360deg); }
+}
+
+@keyframes corePulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.2); opacity: 1; }
+}
+
+#ufo-cursor.scanning .ufo-beam {
+  height: 200px;
+  animation: ufoScan 0.3s ease-in-out infinite alternate;
+}
+
+@keyframes ufoScan {
+  0% { transform: translate(-50%, 0) perspective(100px) rotateX(40deg) scaleX(1); }
+  100% { transform: translate(-50%, 0) perspective(100px) rotateX(40deg) scaleX(1.8); }
+}
+
+#ufo-particles {
+  position: fixed;
+  top: 0; left: 0;
+  pointer-events: none;
+  z-index: 999998;
+}
+
+.ufo-particle {
+  position: absolute;
+  width: 4px; height: 4px;
+  background: var(--accent-1);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+/* Hide UFO cursor on Ultraman mode if needed, or dynamically recolor it. Since we use var(--accent-1), it will automatically become Silver/Cyan in Ultraman mode and Green in Entity mode! */
+
+/* ========================================
+   IDLE FIGHT SCREENSAVER
+   ======================================== */
+#idle-fight-container {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 999900;
+}
+
+.idle-enemy, .enemy-ship {
+    position: absolute;
+    width: 40px; height: 30px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+
+    .enemy-ship-base {
+        position: absolute;
+        bottom: 0; width: 100%; height: 15px;
+        background: var(--enemy-color, #ff0055);
+        border-radius: 50% 50% 10% 10%;
+        box-shadow: 0 0 10px var(--enemy-color, #ff0055);
+    }
+    .enemy-ship-dome {
+        position: absolute;
+        top: 0; left: 10px; width: 20px; height: 15px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50% 50% 0 0;
+        backdrop-filter: blur(2px);
+    }
+}
+
+.idle-kaiju {
+    position: absolute;
+    width: 60px; height: 60px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    font-size: 50px;
+    filter: drop-shadow(0 0 15px var(--enemy-color, #ffcc00));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .kaiju-icon {
+        animation: kaijuRoar 1s infinite alternate;
+    }
+}
+
+@keyframes kaijuRoar {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.1); }
+}
+
+.laser-beam {
+    position: absolute;
+    width: 2px;
+    background: #fff;
+    box-shadow: 0 0 10px var(--accent-1);
+    transform-origin: top center;
+    z-index: 999901;
+    border-radius: 2px;
+}
+
+#hyperspace-canvas {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100vw; height: 100vh;
+    pointer-events: none;
+    z-index: 999800; /* Just below the fight container */
+    background: transparent;
+    opacity: 0;
+    animation: hyperspaceFadeIn 1s forwards;
+}
+
+@keyframes hyperspaceFadeIn {
+    to { opacity: 0.9; }
+}
