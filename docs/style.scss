@@ -1440,7 +1440,7 @@ code {
 .theme-switcher {
     position: fixed;
     bottom: 32px;
-    right: 32px;
+    left: 32px;
     z-index: 200;
     display: flex;
     align-items: center;
@@ -2182,7 +2182,8 @@ code {
 
     .theme-switcher {
         bottom: 16px;
-        right: 16px;
+        left: 16px;
+        right: auto;
         padding: 8px 14px;
     }
 
