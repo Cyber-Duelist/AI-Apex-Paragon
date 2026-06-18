@@ -2234,8 +2234,13 @@ RULES:
 
         const maxX = window.innerWidth - 100;
         const maxY = window.innerHeight - 100;
-        const targetX = Math.random() * maxX + 50;
-        const targetY = Math.random() * maxY + 50;
+        let targetX = Math.random() * maxX + 50;
+        let targetY = Math.random() * maxY + 50;
+
+        if (window.isIdleMode && window.idleTargetX !== undefined && window.idleTargetY !== undefined) {
+            targetX = window.idleTargetX;
+            targetY = window.idleTargetY;
+        }
 
         // Calculate distance and direction
         const currentX = gsap.getProperty(alien, "x") || 0;
@@ -2382,7 +2387,7 @@ RULES:
     }
 
     // --- ULTRAMAN POWERS: SPACIUM BEAM ---
-    function fireSpaciumBeam(x, y, tx, ty) {
+    window.fireSpaciumBeam = function(x, y, tx, ty) {
         if (abductionCooldown) return;
         abductionCooldown = true;
         setTimeout(() => abductionCooldown = false, 1000);
@@ -2452,7 +2457,7 @@ RULES:
             if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.chatbot-fab') || e.target.closest('.theme-switcher')) return;
             const ax = (typeof gsap !== 'undefined') ? gsap.getProperty(alien, "x") : window.innerWidth/2;
             const ay = (typeof gsap !== 'undefined') ? gsap.getProperty(alien, "y") : window.innerHeight/2;
-            fireSpaciumBeam(ax, ay, e.clientX, e.clientY);
+            window.fireSpaciumBeam(ax, ay, e.clientX, e.clientY);
         }
     });
 })();
@@ -2777,7 +2782,7 @@ RULES:
                 // Shoot
                 if (Math.random() > 0.4) {
                     if (isUltraman) {
-                        fireSpaciumBeam(ux, uy, ex, ey);
+                        window.fireSpaciumBeam(ux, uy, ex, ey);
                         // Instant hit detection for Spacium Beam
                         if (typeof playExplosionSound === 'function') playExplosionSound();
                         gsap.to(nearestEnemy, { scale: 0, rotationZ: 720, opacity: 0, duration: 0.5, onComplete: () => {
