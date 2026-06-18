@@ -3210,3 +3210,25 @@ RULES:
         });
     });
 })();
+
+/* ========================================
+   BOOT SCREEN LOGIC
+   ======================================== */
+window.addEventListener('load', () => {
+    const bootScreen = document.getElementById('boot-screen');
+    if (bootScreen) {
+        // Wait 2 seconds for cinematic effect, then fade out
+        setTimeout(() => {
+            if (typeof gsap !== 'undefined') {
+                gsap.to(bootScreen, {
+                    opacity: 0,
+                    duration: 0.8,
+                    ease: "power2.inOut",
+                    onComplete: () => bootScreen.remove()
+                });
+            } else {
+                bootScreen.remove();
+            }
+        }, 2000);
+    }
+});
