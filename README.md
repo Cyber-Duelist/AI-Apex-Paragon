@@ -1,11 +1,11 @@
 <div align="center">
-  <img src="https://cyber-duelist.github.io/AI-Apex-Paragon/portfolio_website/og-preview.png" alt="AI Apex Paragon" width="100%" />
+  <img src="https://cyber-duelist.github.io/AI-Apex-Paragon/og-preview.png" alt="AI Apex Paragon" width="100%" />
 
   <h1>AI Apex Paragon</h1>
   <p><strong>A 14-week intensive self-directed engineering sprint to build production-ready AI systems from 0 → 1.</strong></p>
 
   <p>
-    <a href="https://cyber-duelist.github.io/AI-Apex-Paragon/portfolio_website/"><strong>🌐 View Interactive Portfolio</strong></a> · 
+    <a href="https://cyber-duelist.github.io/AI-Apex-Paragon/"><strong>🌐 View Interactive Portfolio</strong></a> · 
     <a href="https://www.linkedin.com/in/i-am-entity/"><strong>💼 LinkedIn</strong></a> · 
     <a href="mailto:adarshentity098@gmail.com"><strong>✉️ Email</strong></a>
   </p>
