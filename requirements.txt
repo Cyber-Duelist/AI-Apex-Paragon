@@ -11,4 +11,5 @@ pandas
 numpy
 pytest
 httpx
-tenacity
+tenacityedge-tts
+websockets
