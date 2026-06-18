@@ -2657,9 +2657,10 @@ RULES:
 ======================================== */
 (function initIdleFightMode() {
     let idleTimer = null;
-    const IDLE_TIMEOUT = 10000; // 10 seconds timeout for testing
+    const IDLE_TIMEOUT = 30000; // 30 seconds timeout
     let isIdleMode = false;
     let fightInterval = null;
+    let hyperspaceReq = null;
     let enemies = [];
     const alien = document.getElementById('alien-companion');
     let fightAudioCtx = null;
@@ -2673,29 +2674,30 @@ RULES:
     }
 
     // Reset on various user interactions
-    // window.addEventListener('mousemove', resetIdleTimer);
-    // window.addEventListener('mousedown', resetIdleTimer);
-    // window.addEventListener('keydown', resetIdleTimer);
-    // window.addEventListener('touchstart', resetIdleTimer);
-    // window.addEventListener('scroll', resetIdleTimer);
+    window.addEventListener('mousemove', resetIdleTimer);
+    window.addEventListener('mousedown', resetIdleTimer);
+    window.addEventListener('keydown', resetIdleTimer);
+    window.addEventListener('touchstart', resetIdleTimer);
+    window.addEventListener('scroll', resetIdleTimer);
     
     // Start initial timer
-    // resetIdleTimer();
+    resetIdleTimer();
 
     function startIdleFightSequence() {
         if (isIdleMode) return;
         
-        const isUltraman = document.documentElement.getAttribute('data-theme') === 'ultraman';
-        if (isUltraman) return; // Feature disabled in Ultraman mode
-
         isIdleMode = true;
         window.isIdleMode = true;
 
-        // In entity mode, force Zorb into UFO
-        if (alien) {
-            const alienBubbleUI = alien.querySelector('.alien-bubble');
-            gsap.to(alienBubbleUI, { scale: 0, rotationZ: 1080, duration: 0.8, ease: "power3.in" });
+        const isUltraman = document.documentElement.getAttribute('data-theme') === 'ultraman';
+        if (!isUltraman) {
+            // Entity mode: run Hyperspace
+            startHyperspaceSequence();
+            return;
         }
+
+        // Ultraman Mode: Kaiju Patrol logic below
+        // (Ultraman remains fully visible to fight the Kaiju)
 
         // Initialize AudioContext to eliminate sound latency
         if (!fightAudioCtx) {
@@ -3029,11 +3031,68 @@ RULES:
         }
     }
 
+    function startHyperspaceSequence() {
+        if (!isIdleMode) return;
+        const canvas = document.createElement('canvas');
+        canvas.id = 'hyperspace-canvas';
+        document.body.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        // Force Zorb into UFO
+        if (alien) {
+            const alienBubbleUI = alien.querySelector('.alien-bubble');
+            gsap.to(alienBubbleUI, { scale: 0, rotationZ: 1080, duration: 0.8, ease: "power3.in" });
+        }
+
+        const stars = Array.from({length: 400}, () => ({
+            x: Math.random() * width - width / 2,
+            y: Math.random() * height - height / 2,
+            z: Math.random() * 1000
+        }));
+
+        function draw() {
+            if (!isIdleMode) return;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)'; // Hyperspace trail effect
+            ctx.fillRect(0, 0, width, height);
+
+            const cx = width / 2;
+            const cy = height / 2;
+
+            ctx.fillStyle = '#00ffcc'; // Entity Theme green/cyan
+            stars.forEach(s => {
+                s.z -= 15;
+                if (s.z <= 0) {
+                    s.x = Math.random() * width - width / 2;
+                    s.y = Math.random() * height - height / 2;
+                    s.z = 1000;
+                }
+                const sx = cx + (s.x / s.z) * 1000;
+                const sy = cy + (s.y / s.z) * 1000;
+                const r = Math.max(0.1, (1 - s.z / 1000) * 4);
+                
+                ctx.beginPath();
+                ctx.arc(sx, sy, r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            hyperspaceReq = requestAnimationFrame(draw);
+        }
+        draw();
+    }
+
     function stopIdleFightSequence() {
         if (!isIdleMode) return;
         isIdleMode = false;
         window.isIdleMode = false;
         clearInterval(fightInterval);
+        
+        if (hyperspaceReq) cancelAnimationFrame(hyperspaceReq);
+        const hyperCanvas = document.getElementById('hyperspace-canvas');
+        if (hyperCanvas) {
+            gsap.to(hyperCanvas, { opacity: 0, duration: 0.5, onComplete: () => hyperCanvas.remove() });
+        }
 
         // Return Zorb to normal
         if (alien) {

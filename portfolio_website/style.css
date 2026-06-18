@@ -2889,4 +2889,25 @@ code {
   border-radius: 2px;
 }
 
+#hyperspace-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 999800; /* Just below the fight container */
+  background: transparent;
+  opacity: 0;
+  animation: hyperspaceFadeIn 1s forwards;
+}
+
+@keyframes hyperspaceFadeIn {
+  to {
+    opacity: 0.9;
+  }
+}
+
 /*# sourceMappingURL=style.css.map */
