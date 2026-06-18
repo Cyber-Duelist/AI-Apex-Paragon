@@ -3182,33 +3182,46 @@ RULES:
         }
 
         el.addEventListener('mouseover', () => {
-            const currentTheme = document.documentElement.getAttribute('data-theme') || 'entity';
-            const chars = currentTheme === 'entity' ? charsEntity : charsUltra;
-            let iteration = 0;
-            const originalText = el.dataset.text;
-            
-            clearInterval(el.glitchInterval);
-            
-            el.glitchInterval = setInterval(() => {
-                el.innerText = originalText
-                    .split('')
-                    .map((char, index) => {
-                        if (index < iteration) {
-                            return originalText[index];
-                        }
-                        if (char === ' ') return ' ';
-                        return chars[Math.floor(Math.random() * chars.length)];
-                    })
-                    .join('');
-
-                if (iteration >= originalText.length) {
-                    clearInterval(el.glitchInterval);
-                }
-
-                iteration += 1 / 2; // Decrypts relatively quickly
-            }, 30);
+            triggerGlitch(el);
         });
     });
+
+    function triggerGlitch(el) {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'entity';
+        const chars = currentTheme === 'entity' ? charsEntity : charsUltra;
+        let iteration = 0;
+        const originalText = el.dataset.text;
+        
+        clearInterval(el.glitchInterval);
+        
+        el.glitchInterval = setInterval(() => {
+            el.innerText = originalText
+                .split('')
+                .map((char, index) => {
+                    if (index < iteration) {
+                        return originalText[index];
+                    }
+                    if (char === ' ') return ' ';
+                    return chars[Math.floor(Math.random() * chars.length)];
+                })
+                .join('');
+
+            if (iteration >= originalText.length) {
+                clearInterval(el.glitchInterval);
+                el.innerText = originalText; // Ensure exact match at the end
+            }
+
+            iteration += 1 / 2; // Decrypts relatively quickly
+        }, 30);
+    }
+
+    // Continuous Random Glitches
+    setInterval(() => {
+        if (targets.length > 0) {
+            const randomEl = targets[Math.floor(Math.random() * targets.length)];
+            triggerGlitch(randomEl);
+        }
+    }, 2500); // Trigger a glitch somewhere every 2.5 seconds
 })();
 
 /* ========================================
