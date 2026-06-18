@@ -165,34 +165,16 @@
         </button>
     </div>
 
-    <!-- ====== PORTAL LOADER ====== -->
-    <div id="portal-loader">
-        <div id="portal-gate">
-            <div class="gate-ring"></div>
-            <span class="gate-text">CLICK TO ENTER</span>
-        </div>
-        <canvas id="warp-canvas" style="display:none;"></canvas>
-        <div class="portal-ring" style="display:none;">
-            <div class="portal-ring-inner"></div>
-        </div>
-        <div class="portal-text" style="display:none;">
-            <span class="portal-label">INITIALIZING</span>
-            <span class="portal-name">ADARSH KUMAR SINGH</span>
-            <div class="portal-bar">
-                <div class="portal-bar-fill"></div>
-            </div>
-        </div>
-        <div class="portal-flash" style="display:none;"></div>
-        <button id="portal-skip" class="portal-skip">SKIP →</button>
-    </div>
+    <!-- Intro sequence is dynamically injected by app.js based on theme -->
+
+    <!-- Scanner Sweep Overlay -->
+    <div id="scanner-sweep"></div>
+
+    <!-- Matrix Data-Rain Canvas -->
+    <canvas id="matrix-canvas"></canvas>
 
     <!-- Surreal Layers -->
     <div class="noise-overlay"></div>
-    <div class="aurora">
-        <div class="aurora-blob"></div>
-        <div class="aurora-blob"></div>
-        <div class="aurora-blob"></div>
-    </div>
 
     <!-- Custom Cursor -->
     <div class="cursor">
@@ -274,18 +256,22 @@
                     </div>
                 </div>
             </div>
-            <div class="hero-stats">
-                <div class="stat">
+            <div class="hero-stats glass-dashboard">
+                <div class="stat glass-stat">
+                    <span class="stat-number" data-count="85">0</span><span class="stat-suffix">%</span>
+                    <span class="stat-label">First-Pass Fix Accuracy</span>
+                </div>
+                <div class="stat glass-stat">
+                    <span class="stat-number" data-count="100">0</span><span class="stat-suffix">%</span>
+                    <span class="stat-label">Prompt Injections Blocked</span>
+                </div>
+                <div class="stat glass-stat">
                     <span class="stat-number" data-count="14">0</span>
-                    <span class="stat-label">Weeks of Grind</span>
+                    <span class="stat-label">Weeks Relentless Building</span>
                 </div>
-                <div class="stat">
-                    <span class="stat-number" data-count="7">0</span>
-                    <span class="stat-label">Production Systems</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-number" data-count="4">0</span>
-                    <span class="stat-label">AI Agents Built</span>
+                <div class="stat glass-stat">
+                    <span class="stat-number" data-count="2">0</span>
+                    <span class="stat-label">Oracle Certifications</span>
                 </div>
             </div>
         </div>
@@ -296,6 +282,37 @@
             <span>Scroll to explore</span>
         </div>
     </section>
+
+    <!-- Tech Stack Marquee -->
+    <div class="marquee-container">
+        <div class="marquee-content">
+            <span class="marquee-item">Python</span>
+            <span class="marquee-item">FastAPI</span>
+            <span class="marquee-item">LLaMA 3</span>
+            <span class="marquee-item">Docker</span>
+            <span class="marquee-item">Kubernetes</span>
+            <span class="marquee-item">ChromaDB</span>
+            <span class="marquee-item">Pytest</span>
+            <span class="marquee-item">ReAct Agents</span>
+            <span class="marquee-item">RAG Pipelines</span>
+            <span class="marquee-item">Prompt Engineering</span>
+            <span class="marquee-item">AWS</span>
+            <span class="marquee-item">OCI</span>
+            <!-- Duplicate for infinite loop -->
+            <span class="marquee-item">Python</span>
+            <span class="marquee-item">FastAPI</span>
+            <span class="marquee-item">LLaMA 3</span>
+            <span class="marquee-item">Docker</span>
+            <span class="marquee-item">Kubernetes</span>
+            <span class="marquee-item">ChromaDB</span>
+            <span class="marquee-item">Pytest</span>
+            <span class="marquee-item">ReAct Agents</span>
+            <span class="marquee-item">RAG Pipelines</span>
+            <span class="marquee-item">Prompt Engineering</span>
+            <span class="marquee-item">AWS</span>
+            <span class="marquee-item">OCI</span>
+        </div>
+    </div>
 
     <!-- About Section -->
     <section id="about">
@@ -309,17 +326,17 @@
                     <p>The result? A production-grade portfolio that proves I can ship AI systems that solve real, painful engineering problems.</p>
                 </div>
                 <div class="about-highlights">
-                    <div class="highlight-card">
+                    <div class="highlight-card glass-card">
                         <span class="highlight-icon">🧠</span>
                         <h3>LLM Architecture</h3>
                         <p>ReAct Loops, Tool Calling, Guardrails, RAG Pipelines</p>
                     </div>
-                    <div class="highlight-card">
+                    <div class="highlight-card glass-card">
                         <span class="highlight-icon">⚡</span>
                         <h3>Backend Engineering</h3>
                         <p>FastAPI, SSE Streaming, REST APIs, Pytest</p>
                     </div>
-                    <div class="highlight-card">
+                    <div class="highlight-card glass-card">
                         <span class="highlight-icon">🛡️</span>
                         <h3>Production Security</h3>
                         <p>Prompt Injection Prevention, Scope Guardrails, Model Failover</p>
@@ -339,7 +356,7 @@
                 <div class="timeline-line"></div>
                 <div class="timeline-item" data-week="1-2">
                     <div class="timeline-dot"></div>
-                    <div class="timeline-card">
+                    <div class="timeline-card glass-card">
                         <span class="timeline-week">WEEK 1-2</span>
                         <h3>Python Foundations</h3>
                         <p>Mastered Python, NumPy, and Pandas. Built data processing pipelines from scratch.</p>
@@ -348,7 +365,7 @@
                 </div>
                 <div class="timeline-item" data-week="3-4">
                     <div class="timeline-dot"></div>
-                    <div class="timeline-card">
+                    <div class="timeline-card glass-card">
                         <span class="timeline-week">WEEK 3-4</span>
                         <h3>Machine Learning</h3>
                         <p>Built a Document Risk Prediction system. Feature engineering, hyperparameter tuning, model comparison.</p>
@@ -357,7 +374,7 @@
                 </div>
                 <div class="timeline-item" data-week="5-6">
                     <div class="timeline-dot"></div>
-                    <div class="timeline-card">
+                    <div class="timeline-card glass-card">
                         <span class="timeline-week">WEEK 5-6</span>
                         <h3>Production Python & APIs</h3>
                         <p>Built database-backed REST APIs using FastAPI. Pydantic validation and production deployment patterns.</p>
@@ -366,7 +383,7 @@
                 </div>
                 <div class="timeline-item" data-week="7">
                     <div class="timeline-dot"></div>
-                    <div class="timeline-card">
+                    <div class="timeline-card glass-card">
                         <span class="timeline-week">WEEK 7</span>
                         <h3>LLM APIs</h3>
                         <p>First contact with Large Language Models. Built an LLM Assistant with structured prompting and JSON output.</p>
@@ -375,7 +392,7 @@
                 </div>
                 <div class="timeline-item" data-week="8-9">
                     <div class="timeline-dot"></div>
-                    <div class="timeline-card">
+                    <div class="timeline-card glass-card">
                         <span class="timeline-week">WEEK 8-9</span>
                         <h3>RAG System: PersonaDoc</h3>
                         <p>Full Retrieval-Augmented Generation pipeline with ChromaDB, semantic chunking, reranking, and hallucination control.</p>
@@ -384,7 +401,7 @@
                 </div>
                 <div class="timeline-item" data-week="10">
                     <div class="timeline-dot"></div>
-                    <div class="timeline-card">
+                    <div class="timeline-card glass-card">
                         <span class="timeline-week">WEEK 10</span>
                         <h3>AI Agents & Tool Calling</h3>
                         <p>Built multimodal agents with Function Calling. Agents that read files, scrape websites, and execute code.</p>
@@ -393,7 +410,7 @@
                 </div>
                 <div class="timeline-item" data-week="11">
                     <div class="timeline-dot"></div>
-                    <div class="timeline-card">
+                    <div class="timeline-card glass-card">
                         <span class="timeline-week">WEEK 11</span>
                         <h3>LLMOps & Evaluations</h3>
                         <p>Real-time Eval Dashboard with SSE streaming, LLM-as-a-Judge, and automatic Model Failover (70B → 8B).</p>
@@ -402,7 +419,7 @@
                 </div>
                 <div class="timeline-item" data-week="12">
                     <div class="timeline-dot"></div>
-                    <div class="timeline-card">
+                    <div class="timeline-card glass-card">
                         <span class="timeline-week">WEEK 12</span>
                         <h3>Production Agent + Guardrails</h3>
                         <p>Hardened AI agent with Input/Output guardrails blocking prompt injection and out-of-scope queries.</p>
@@ -411,7 +428,7 @@
                 </div>
                 <div class="timeline-item" data-week="13">
                     <div class="timeline-dot"></div>
-                    <div class="timeline-card">
+                    <div class="timeline-card glass-card">
                         <span class="timeline-week">WEEK 13</span>
                         <h3>AI Code Reviewer & Meeting Intel</h3>
                         <p>Automated GitHub PR reviewer and a Meeting Intelligence pipeline extracting decisions and action items.</p>
@@ -420,7 +437,7 @@
                 </div>
                 <div class="timeline-item highlight" data-week="14">
                     <div class="timeline-dot"></div>
-                    <div class="timeline-card">
+                    <div class="timeline-card glass-card">
                         <span class="timeline-week">WEEK 14</span>
                         <h3>🚀 The Autonomous DevOps Swarm</h3>
                         <p>The capstone. A multi-agent system that intercepts CI/CD failures, diagnoses bugs, writes patches, runs tests, and opens Pull Requests — all without a human.</p>
@@ -450,7 +467,7 @@
                         <a href="https://github.com/Cyber-Duelist/AI-Apex-Paragon/tree/main/week_15_voice_agent" target="_blank">View on GitHub <i class="fab fa-github"></i></a>
                     </div>
                 </div>
-                <div class="project-card">
+                <div class="project-card glass-card">
                     <div class="project-glow"></div>
                     <span class="project-badge">CAPSTONE</span>
                     <h3>Autonomous Self-Healing DevOps Swarm</h3>
@@ -462,7 +479,7 @@
                         <a href="https://github.com/Cyber-Duelist/AI-Apex-Paragon/tree/main/week_14" target="_blank">View on GitHub →</a>
                     </div>
                 </div>
-                <div class="project-card">
+                <div class="project-card glass-card">
                     <h3>Enterprise Production Agent</h3>
                     <p>A hardened compliance AI agent with Input/Output Guardrails, persistent memory, structured logging, and an LLM-as-a-Judge Evaluation Dashboard with automatic Model Failover routing.</p>
                     <div class="project-tech">
@@ -472,7 +489,7 @@
                         <a href="https://github.com/Cyber-Duelist/AI-Apex-Paragon/tree/main/week_12" target="_blank">View on GitHub →</a>
                     </div>
                 </div>
-                <div class="project-card">
+                <div class="project-card glass-card">
                     <h3>PersonaDoc — Production RAG</h3>
                     <p>Upload any PDF. Ask questions. Get cited, accurate answers. Built with ChromaDB vector search, semantic chunking, reranking, and hallucination control.</p>
                     <div class="project-tech">
@@ -482,7 +499,7 @@
                         <a href="https://github.com/Cyber-Duelist/AI-Apex-Paragon/tree/main/week_09" target="_blank">View on GitHub →</a>
                     </div>
                 </div>
-                <div class="project-card">
+                <div class="project-card glass-card">
                     <h3>AI Code Review Service</h3>
                     <p>Submit any GitHub PR URL. Get a structured LLM-powered code review with bugs, security issues, severity ratings, and approval decisions. Connects to real GitHub diffs.</p>
                     <div class="project-tech">
