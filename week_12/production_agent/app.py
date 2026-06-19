@@ -17,17 +17,27 @@ st.markdown("An autonomous AI agent with **Input/Output Guardrails**, Tool Calli
 # Sidebar Configuration
 with st.sidebar:
     st.header("⚙️ Agent Configuration")
-    groq_api_key = st.text_input("Groq API Key", type="password", help="Required to run the agent. Get one for free at console.groq.com")
+    
+    # Check if API key is already in the environment (like Hugging Face Secrets)
+    env_api_key = os.environ.get("GROQ_API_KEY", "")
+    
+    groq_api_key = st.text_input(
+        "Groq API Key", 
+        value=env_api_key,
+        type="password", 
+        help="Required to run the agent. Get one for free at console.groq.com"
+    )
+    
+    if groq_api_key:
+        os.environ["GROQ_API_KEY"] = groq_api_key
+        
     st.markdown("---")
     st.markdown("**Tools Available:**")
     st.markdown("- 🔍 Knowledge Base Search\n- ⚖️ Risk Assessment\n- 📜 Compliance Policy Lookup\n- 🎫 Create Escalation Ticket\n- ✉️ Send Notification")
 
-if not groq_api_key:
+if not os.environ.get("GROQ_API_KEY"):
     st.warning("Please enter your Groq API Key in the sidebar to interact with the Agent.")
     st.stop()
-
-# Set env var so the agent can pick it up
-os.environ["GROQ_API_KEY"] = groq_api_key
 
 # Initialize Agent
 if "agent" not in st.session_state:

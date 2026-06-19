@@ -18,16 +18,28 @@ st.set_page_config(page_title="PersonaDoc - Production RAG", page_icon="📚", l
 st.title("📚 PersonaDoc")
 st.markdown("A Production Retrieval-Augmented Generation (RAG) system with **Semantic Chunking**, **ChromaDB Vector Search**, and **Hallucination Control**.")
 
-# Sidebar Configuration
+# Sidebar configuration
 with st.sidebar:
     st.header("⚙️ Configuration")
-    groq_api_key = st.text_input("Groq API Key", type="password", help="Required to run the agent. Get one for free at console.groq.com")
+    
+    # Check if API key is already in the environment (like Hugging Face Secrets)
+    env_api_key = os.environ.get("GROQ_API_KEY", "")
+    
+    groq_api_key = st.text_input(
+        "Groq API Key", 
+        value=env_api_key,
+        type="password", 
+        help="Required to run the agent. Get one for free at console.groq.com"
+    )
+    
+    if groq_api_key:
+        os.environ["GROQ_API_KEY"] = groq_api_key
+        
     st.markdown("---")
-    st.markdown("**Upload a Document**")
-    uploaded_file = st.file_uploader("Upload PDF or TXT", type=["pdf", "txt"])
+    st.markdown("### Upload a Document")
+    uploaded_file = st.file_uploader("Upload PDF or TXT", type=["pdf", "txt"], help="200MB per file • PDF, TXT")
     
     if uploaded_file and groq_api_key:
-        os.environ["GROQ_API_KEY"] = groq_api_key
         if st.button("Index Document"):
             with st.spinner("Extracting text and chunking..."):
                 try:
@@ -45,11 +57,9 @@ with st.sidebar:
                 except Exception as e:
                     st.error(f"Failed to index document: {e}")
 
-if not groq_api_key:
+if not os.environ.get("GROQ_API_KEY"):
     st.warning("Please enter your Groq API Key in the sidebar to interact with the RAG system.")
     st.stop()
-
-os.environ["GROQ_API_KEY"] = groq_api_key
 
 # Initialize Chat History
 if "rag_messages" not in st.session_state:

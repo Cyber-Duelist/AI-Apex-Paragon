@@ -12,13 +12,13 @@ sys.path.append(current_dir)
 from vector_store import get_collection, search, model
 
 load_dotenv()
-groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 def rag_with_guard(question: str, collection, source: str = None, model_name: str = "llama-3.3-70b-versatile") -> dict:
     """
     Retrieves documents and checks the semantic similarity. 
     If the match is too weak, it refuses to call the LLM.
     """
+    groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
     # 1. Search ChromaDB for top 3 chunks
     retrieved = search(question, collection, top_k=3, source_filter=source)
     
