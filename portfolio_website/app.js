@@ -2165,6 +2165,7 @@ RULES:
     let currentHoveredProject = null;
 
     const projectExplanations = {
+        "ComplianceAI Enterprise": "This is a full-scale corporate compliance product. It securely manages user accounts, reads dense legal documents, and uses AI to automatically flag compliance risks for GDPR, SOX, and HIPAA.",
         "Autonomous Self-Healing DevOps Swarm": "This project acts like a team of robot mechanics. If the website's code breaks, these robots automatically find the bug, write the fix, and repair it without any human help!",
         "Enterprise Production Agent": "Think of this like a digital security guard and manager combined. It strictly controls what AI models can say and automatically switches to backups if one breaks.",
         "PersonaDoc — Production RAG": "This is a smart document reader. You upload a massive PDF, and instead of reading it yourself, you can just ask it questions and it will instantly give you the exact answer.",
