@@ -3045,4 +3045,20 @@ code {
   }
 }
 
+/* Custom Tech Stack Tags */
+.project-tech span.tag-streamlit { background: rgba(255, 75, 75, 0.1); color: #FF4B4B; border-color: rgba(255, 75, 75, 0.2); }
+.project-tech span.tag-chroma { background: rgba(45, 122, 238, 0.1); color: #2D7AEE; border-color: rgba(45, 122, 238, 0.2); }
+.project-tech span.tag-groq { background: rgba(245, 80, 54, 0.1); color: #F55036; border-color: rgba(245, 80, 54, 0.2); }
+.project-tech span.tag-python { background: rgba(55, 118, 171, 0.1); color: #3776AB; border-color: rgba(55, 118, 171, 0.2); }
+.project-tech span.tag-docker { background: rgba(36, 150, 237, 0.1); color: #2496ED; border-color: rgba(36, 150, 237, 0.2); }
+
+/* Under Construction Demo Tags */
+.demo-building {
+  cursor: not-allowed !important;
+  opacity: 0.6;
+  text-decoration: none !important;
+  font-style: italic;
+  pointer-events: none;
+}
+
 /*# sourceMappingURL=style.css.map */
