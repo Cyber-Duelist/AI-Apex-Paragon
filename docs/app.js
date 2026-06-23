@@ -2131,9 +2131,9 @@ RULES:
             isSpeaking = false;
         }
         
-        if (currentHoveredProject && projectExplanations[currentHoveredProject]) {
+        if (currentHoveredProject && getProjectExplanation(currentHoveredProject)) {
             // Loudly speak the non-technical project explanation
-            speak(projectExplanations[currentHoveredProject], 8000, true);
+            speak(getProjectExplanation(currentHoveredProject), 8000, true);
         } else {
             // Normal random loud message
             const dlgs = getDialogues();
@@ -2164,13 +2164,22 @@ RULES:
     // --- CONTEXT-AWARE USER MANUAL SYSTEM ---
     let currentHoveredProject = null;
 
-    const projectExplanations = {
-        "ComplianceAI Enterprise": "This is a full-scale corporate compliance product. It securely manages user accounts, reads dense legal documents, and uses AI to automatically flag compliance risks for GDPR, SOX, and HIPAA.",
-        "Autonomous Self-Healing DevOps Swarm": "This project acts like a team of robot mechanics. If the website's code breaks, these robots automatically find the bug, write the fix, and repair it without any human help!",
-        "Enterprise Production Agent": "Think of this like a digital security guard and manager combined. It strictly controls what AI models can say and automatically switches to backups if one breaks.",
-        "PersonaDoc — Production RAG": "This is a smart document reader. You upload a massive PDF, and instead of reading it yourself, you can just ask it questions and it will instantly give you the exact answer.",
-        "AI Code Review Service": "This acts like a senior programmer. When someone writes new code, this AI scans it for bugs and security holes before it goes live.",
-        "Real-Time Voice AI Agent & Workflow Orchestration": "This is a voice-controlled assistant. Instead of typing, you talk to it in real-time, and it can execute workflows and retrieve data instantly based on your speech!"
+    const getProjectExplanation = (title) => {
+        const theme = document.documentElement.getAttribute('data-theme') || 'entity';
+        const expls = {
+            "ComplianceAI Enterprise": {
+                "entity": "This is a full-scale corporate compliance product. It securely manages user accounts, reads dense legal documents, and uses AI to automatically flag compliance risks for GDPR, SOX, and HIPAA.",
+                "ultraman": "Shuwatch! This system is an impenetrable barrier! It defends innocent data from the evil Kaiju of compliance violations!"
+            },
+            "Autonomous Self-Healing DevOps Swarm": "This project acts like a team of robot mechanics. If the website's code breaks, these robots automatically find the bug, write the fix, and repair it without any human help!",
+            "Enterprise Production Agent": "Think of this like a digital security guard and manager combined. It strictly controls what AI models can say and automatically switches to backups if one breaks.",
+            "PersonaDoc — Production RAG": "This is a smart document reader. You upload a massive PDF, and instead of reading it yourself, you can just ask it questions and it will instantly give you the exact answer.",
+            "AI Code Review Service": "This acts like a senior programmer. When someone writes new code, this AI scans it for bugs and security holes before it goes live.",
+            "Real-Time Voice AI Agent & Workflow Orchestration": "This is a voice-controlled assistant. Instead of typing, you talk to it in real-time, and it can execute workflows and retrieve data instantly based on your speech!"
+        };
+        const entry = expls[title];
+        if (!entry) return null;
+        return typeof entry === 'string' ? entry : (entry[theme] || entry["entity"]);
     };
 
     const getSectionExplanations = () => {
@@ -2213,8 +2222,9 @@ RULES:
 
         card.addEventListener('mouseenter', () => {
             currentHoveredProject = title;
-            if (projectExplanations[title]) {
-                speak(projectExplanations[title], 8000, true);
+            const expl = getProjectExplanation(title);
+            if (expl) {
+                speak(expl, 8000, true);
             }
         });
         
