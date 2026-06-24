@@ -2179,6 +2179,10 @@ RULES:
                 "entity": "This is a multiplayer game backend powered by AI. It manages player movements via WebSockets in real time, and uses Groq's LLM to control an intelligent Guard that tries to catch players based on their actions.",
                 "ultraman": "Shuwatch! A high-tech training simulation! Players must outsmart a synthetic Kaiju brain that constantly adapts to their strategy!"
             },
+            "SmartLedger AI": {
+                "entity": "This is a computer vision financial tool. It analyzes images of your receipts using Groq's Vision models, instantly categorizes every single purchase, and visualizes your spending habits.",
+                "ultraman": "Shuwatch! An ultra-precise vision scanner! It fires its Spacium Beam to read your receipts and helps you save money to rebuild the city!"
+            },
             "Autonomous Self-Healing DevOps Swarm": "This project acts like a team of robot mechanics. If the website's code breaks, these robots automatically find the bug, write the fix, and repair it without any human help!",
             "Enterprise Production Agent": "Think of this like a digital security guard and manager combined. It strictly controls what AI models can say and automatically switches to backups if one breaks.",
             "PersonaDoc — Production RAG": "This is a smart document reader. You upload a massive PDF, and instead of reading it yourself, you can just ask it questions and it will instantly give you the exact answer.",
