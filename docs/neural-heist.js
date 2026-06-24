@@ -1,4 +1,4 @@
-const API_URL = "https://huggingface.co/spaces/IamEntity/NeuralHeistAPI/api/chat";
+const API_URL = "https://iamentity-neuralheist.hf.space/api/chat";
 
 let currentLevel = 1;
 const maxLevel = 3;
