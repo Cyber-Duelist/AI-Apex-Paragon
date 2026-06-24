@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Heist: Vault Terminal</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="scanlines"></div>
+    <div class="terminal">
+        <header class="terminal-header">
+            <div class="sys-info">
+                <span>SYSTEM: MAINFRAME VAULT-AI</span>
+                <span class="status-blinker">STATUS: ONLINE</span>
+            </div>
+            <div class="level-selector">
+                <label for="security-level">SECURITY CLEARANCE:</label>
+                <select id="security-level">
+                    <option value="1">LEVEL 1 (Basic Defense)</option>
+                    <option value="2">LEVEL 2 (Output Filter)</option>
+                    <option value="3" selected>LEVEL 3 (Semantic Guardrail)</option>
+                </select>
+            </div>
+        </header>
+
+        <div class="terminal-body" id="chat-box">
+            <div class="message system">
+                [INITIATING SECURE CONNECTION...]<br>
+                [CONNECTION ESTABLISHED]<br>
+                WARNING: UNAUTHORIZED ACCESS DETECTED.<br>
+                YOU ARE ATTEMPTING TO BREACH THE MAINFRAME VAULT.<br>
+                THE SECRET CODE IS PROTECTED BY ADVANCED AI GUARDRAILS.<br>
+                DO NOT PROCEED.
+            </div>
+        </div>
+
+        <div class="terminal-input-area">
+            <span class="prompt">guest@vault:~$</span>
+            <input type="text" id="user-input" autocomplete="off" autofocus placeholder="Enter command or injection prompt...">
+            <button id="send-btn">[EXECUTE]</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

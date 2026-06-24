@@ -91,11 +91,11 @@ async def chat(request: Request, body: ChatRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+from fastapi.staticfiles import StaticFiles
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
-@app.get("/")
-def root():
-    from fastapi.responses import RedirectResponse
-    return RedirectResponse(url="/docs")
+# Mount the static frontend at root
+app.mount("/", StaticFiles(directory="public", html=True), name="public")
