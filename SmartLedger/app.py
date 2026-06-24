@@ -509,7 +509,11 @@ if st.session_state.receipts:
 
 else:
     # ── Empty State ───────────────────────────────────────────────────────────
-    st.markdown("""
+    chips_html = "".join([
+        f'<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:10px 18px;color:#475569;font-size:0.85rem;">{icon} {name}</div>'
+        for name, icon in [("Grocery","🛒"),("Restaurant","🍽️"),("Utility Bill","💡"),("Pharmacy","💊"),("Online Order","📦")]
+    ])
+    st.markdown(f"""
     <div style="text-align:center;padding:60px 40px;margin-top:20px;">
         <div style="width:80px;height:80px;border-radius:24px;
                     background:linear-gradient(135deg,rgba(14,165,233,0.1),rgba(16,185,129,0.1));
@@ -521,7 +525,7 @@ else:
             Supports grocery bills, restaurant receipts, utility invoices, online order summaries and more.
         </p>
         <div style="display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap;">
-            {"".join([f'<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:10px 18px;color:#475569;font-size:0.85rem;">{icon} {name}</div>' for name,icon in [("Grocery","🛒"),("Restaurant","🍽️"),("Utility Bill","💡"),("Pharmacy","💊"),("Online Order","📦")]])}
+            {chips_html}
         </div>
     </div>
     """, unsafe_allow_html=True)
