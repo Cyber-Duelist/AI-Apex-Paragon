@@ -6,6 +6,7 @@ Groq-powered intelligence pipelines for SEC filings and earnings calls.
 import json
 import re
 import os
+import time
 from groq import Groq
 from config import GROQ_API_KEY, GROQ_MODEL, SEC_ANALYSIS_PROMPT, EARNINGS_ANALYSIS_PROMPT, CONVICTION_PROMPT
 
@@ -66,15 +67,16 @@ def analyze_sec_filing(filing_text: str) -> dict:
         return _get_demo_sec_analysis(filing_text)
     
     try:
-        print(f"[LLM Engine] Sending {len(filing_text[:12000])} chars to Groq for SEC analysis...")
+        input_text = filing_text[:5000]
+        print(f"[LLM Engine] Sending {len(input_text)} chars to Groq for SEC analysis...")
         response = client.chat.completions.create(
             model=GROQ_MODEL,
             messages=[
                 {"role": "system", "content": SEC_ANALYSIS_PROMPT},
-                {"role": "user", "content": f"Analyze this SEC filing excerpt:\n\n{filing_text[:12000]}"}
+                {"role": "user", "content": f"Analyze this SEC filing excerpt:\n\n{input_text}"}
             ],
             temperature=0.1,
-            max_tokens=2000,
+            max_tokens=1024,
         )
         result = _parse_json_response(response.choices[0].message.content)
         result["_source"] = "LIVE_API"
@@ -101,15 +103,17 @@ def analyze_earnings_call(transcript: str) -> dict:
         return _get_demo_earnings_analysis(transcript)
     
     try:
-        print(f"[LLM Engine] Sending {len(transcript[:12000])} chars to Groq for earnings analysis...")
+        time.sleep(2)  # Rate limit spacing between API calls
+        input_text = transcript[:5000]
+        print(f"[LLM Engine] Sending {len(input_text)} chars to Groq for earnings analysis...")
         response = client.chat.completions.create(
             model=GROQ_MODEL,
             messages=[
                 {"role": "system", "content": EARNINGS_ANALYSIS_PROMPT},
-                {"role": "user", "content": f"Analyze this earnings call transcript:\n\n{transcript[:12000]}"}
+                {"role": "user", "content": f"Analyze this earnings call transcript:\n\n{input_text}"}
             ],
             temperature=0.1,
-            max_tokens=2000,
+            max_tokens=1024,
         )
         result = _parse_json_response(response.choices[0].message.content)
         result["_source"] = "LIVE_API"
@@ -141,6 +145,7 @@ COMPANY: {ticker}
 """
     
     try:
+        time.sleep(2)  # Rate limit spacing between API calls
         print(f"[LLM Engine] Generating conviction for {ticker}...")
         response = client.chat.completions.create(
             model=GROQ_MODEL,
@@ -149,7 +154,7 @@ COMPANY: {ticker}
                 {"role": "user", "content": combined_context}
             ],
             temperature=0.2,
-            max_tokens=1000,
+            max_tokens=512,
         )
         result = _parse_json_response(response.choices[0].message.content)
         result["_source"] = "LIVE_API"

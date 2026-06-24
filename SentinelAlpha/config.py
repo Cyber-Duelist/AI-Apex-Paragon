@@ -44,7 +44,7 @@ TICKER_CIK_MAP = {
 
 # ─── GROQ LLM ───────────────────────────────────────────────────────────────
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
-GROQ_MODEL = "llama-3.3-70b-versatile"
+GROQ_MODEL = "llama-3.1-8b-instant"  # 20K tokens/min (vs 6K for 70b) on free tier
 
 # ─── LLM SYSTEM PROMPTS ─────────────────────────────────────────────────────
 
