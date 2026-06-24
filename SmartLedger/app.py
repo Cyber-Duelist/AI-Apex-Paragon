@@ -351,6 +351,10 @@ with col_left:
                 st.markdown(f"""<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);
                             border-radius:12px;padding:16px;color:#fca5a5;">❌ {result['error']}</div>""",
                             unsafe_allow_html=True)
+            elif not result.get("items"):
+                st.markdown(f"""<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);
+                            border-radius:12px;padding:16px;color:#fca5a5;">❌ No line items found. Are you sure this is a receipt?</div>""",
+                            unsafe_allow_html=True)
             else:
                 result["_id"] = len(st.session_state.receipts)
                 st.session_state.receipts.append(result)
@@ -378,11 +382,18 @@ if st.session_state.receipts:
             })
 
     df = pd.DataFrame(all_items)
-    total_spend = df["price"].sum()
-    category_totals = df.groupby("category")["price"].sum().reset_index()
-    currency = st.session_state.receipts[0].get("currency", "$")
-    top_cat = category_totals.loc[category_totals["price"].idxmax(), "category"]
-    avg = total_spend / len(st.session_state.receipts)
+    if df.empty or "price" not in df.columns:
+        total_spend = 0
+        category_totals = pd.DataFrame({"category": ["Unknown"], "price": [0]})
+        currency = "$"
+        top_cat = "Unknown"
+        avg = 0
+    else:
+        total_spend = df["price"].sum()
+        category_totals = df.groupby("category")["price"].sum().reset_index()
+        currency = st.session_state.receipts[0].get("currency", "$")
+        top_cat = category_totals.loc[category_totals["price"].idxmax(), "category"]
+        avg = total_spend / len(st.session_state.receipts)
 
     st.markdown("<div style='height:32px'></div>", unsafe_allow_html=True)
 
