@@ -2175,6 +2175,10 @@ RULES:
                 "entity": "This is a full-scale corporate compliance product. It securely manages user accounts, reads dense legal documents, and uses AI to automatically flag compliance risks for GDPR, SOX, and HIPAA.",
                 "ultraman": "Shuwatch! This system is an impenetrable barrier! It defends innocent data from the evil Kaiju of compliance violations!"
             },
+            "NeuralHeist": {
+                "entity": "This is a multiplayer game backend powered by AI. It manages player movements via WebSockets in real time, and uses Groq's LLM to control an intelligent Guard that tries to catch players based on their actions.",
+                "ultraman": "Shuwatch! A high-tech training simulation! Players must outsmart a synthetic Kaiju brain that constantly adapts to their strategy!"
+            },
             "Autonomous Self-Healing DevOps Swarm": "This project acts like a team of robot mechanics. If the website's code breaks, these robots automatically find the bug, write the fix, and repair it without any human help!",
             "Enterprise Production Agent": "Think of this like a digital security guard and manager combined. It strictly controls what AI models can say and automatically switches to backups if one breaks.",
             "PersonaDoc — Production RAG": "This is a smart document reader. You upload a massive PDF, and instead of reading it yourself, you can just ask it questions and it will instantly give you the exact answer.",
