@@ -97,7 +97,5 @@ def health():
 
 @app.get("/")
 def root():
-    return {
-        "status": "online",
-        "message": "Neural Heist Backend is running. Access the API documentation at /docs"
-    }
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/docs")
