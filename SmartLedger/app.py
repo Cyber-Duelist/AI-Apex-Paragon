@@ -53,7 +53,7 @@ st.markdown("""
 [data-testid="stSidebar"] * { color: #e2e8f0 !important; }
 
 /* ── Buttons ── */
-.stButton > button {
+button[kind="primary"] {
     background: linear-gradient(135deg, #1a56db, #0ea5e9) !important;
     color: white !important;
     border: none !important;
@@ -64,34 +64,11 @@ st.markdown("""
     transition: all 0.3s ease !important;
     box-shadow: 0 4px 20px rgba(14,165,233,0.25) !important;
 }
-.stButton > button:hover {
+button[kind="primary"]:hover {
     transform: translateY(-2px) !important;
     box-shadow: 0 8px 30px rgba(14,165,233,0.4) !important;
     background: linear-gradient(135deg, #1d4ed8, #0ea5e9) !important;
 }
-
-/* ── File uploader ── */
-[data-testid="stFileUploadDropzone"] {
-    background: rgba(14, 165, 233, 0.04) !important;
-    border: 2px dashed rgba(14,165,233,0.3) !important;
-    border-radius: 16px !important;
-    transition: all 0.3s ease !important;
-}
-[data-testid="stFileUploadDropzone"]:hover {
-    border-color: rgba(14,165,233,0.6) !important;
-    background: rgba(14, 165, 233, 0.08) !important;
-}
-[data-testid="stFileUploadDropzone"] button {
-    background: rgba(14, 165, 233, 0.1) !important;
-    border: 1px solid rgba(14, 165, 233, 0.4) !important;
-    color: #38bdf8 !important;
-    box-shadow: none !important;
-    padding: 4px 12px !important;
-    font-size: 0.85rem !important;
-    min-width: 0 !important;
-    width: auto !important;
-}
-[data-testid="stFileUploader"] label { color: #94a3b8 !important; font-weight: 600; }
 
 /* ── Expanders ── */
 [data-testid="stExpander"] {
