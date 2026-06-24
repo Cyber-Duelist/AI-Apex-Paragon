@@ -248,12 +248,30 @@ if run_analysis and ticker:
         analysis_text = risk_text if risk_text else filing_text
         sec_analysis = analyze_sec_filing(analysis_text) if analysis_text else analyze_sec_filing("")
         
+        if sec_analysis.get("_source") == "LIVE_API":
+            st.write("✅ SEC analysis: **LIVE AI** response received")
+        else:
+            err = sec_analysis.get("_error", "No API key")
+            st.write(f"⚠️ SEC analysis: **DEMO fallback** — {err}")
+        
         st.write("🎙️ Running Earnings Call AI analysis...")
         earnings_text = mda_text if mda_text else filing_text
         earnings_analysis = analyze_earnings_call(earnings_text) if earnings_text else analyze_earnings_call("")
         
+        if earnings_analysis.get("_source") == "LIVE_API":
+            st.write("✅ Earnings analysis: **LIVE AI** response received")
+        else:
+            err = earnings_analysis.get("_error", "No API key")
+            st.write(f"⚠️ Earnings analysis: **DEMO fallback** — {err}")
+        
         st.write("📊 Generating Alpha Conviction Score...")
         conviction = generate_conviction(sec_analysis, earnings_analysis, ticker)
+        
+        if conviction.get("_source") == "LIVE_API":
+            st.write("✅ Conviction score: **LIVE AI** response received")
+        else:
+            err = conviction.get("_error", "No API key")
+            st.write(f"⚠️ Conviction score: **DEMO fallback** — {err}")
         
         status.update(label="✅ Intelligence scan complete!", state="complete")
     
