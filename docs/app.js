@@ -2167,6 +2167,10 @@ RULES:
     const getProjectExplanation = (title) => {
         const theme = document.documentElement.getAttribute('data-theme') || 'entity';
         const expls = {
+            "SentinelAlpha": {
+                "entity": "This is a hedge fund-grade intelligence platform. It pulls real SEC filings from EDGAR, runs them through AI to extract risk factors and management sentiment, then generates a conviction score — just like the tools Citadel and Two Sigma pay millions for.",
+                "ultraman": "Shuwatch! This is the ultimate financial Kaiju detector! It scans corporate filings with laser precision to reveal hidden dangers before they attack the portfolio!"
+            },
             "ComplianceAI Enterprise": {
                 "entity": "This is a full-scale corporate compliance product. It securely manages user accounts, reads dense legal documents, and uses AI to automatically flag compliance risks for GDPR, SOX, and HIPAA.",
                 "ultraman": "Shuwatch! This system is an impenetrable barrier! It defends innocent data from the evil Kaiju of compliance violations!"
