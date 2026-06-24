@@ -67,7 +67,7 @@ Return ONLY valid JSON with this exact structure:
   "red_flags": ["List of accounting or disclosure red flags, if any"],
   "key_metrics_mentioned": ["List of specific financial metrics or figures mentioned"],
   "overall_sentiment": "BULLISH|BEARISH|NEUTRAL",
-  "sentiment_score": -1.0 to 1.0,
+  "sentiment_score": "Float from -1.00 to 1.00 (use highly precise decimals like 0.34 or -0.12)",
   "executive_summary": "2-3 sentence summary for a portfolio manager"
 }"""
 
@@ -111,7 +111,7 @@ Given the SEC filing analysis and earnings call analysis below, produce a final 
 
 Return ONLY valid JSON:
 {
-  "conviction_score": -100 to 100,
+  "conviction_score": "Integer from -100 to 100 (be highly specific, e.g. 27 or -14, do not round to nearest 10)",
   "conviction_label": "STRONG_BUY|BUY|HOLD|SELL|STRONG_SELL",
   "bull_case": "2-sentence bull case",
   "bear_case": "2-sentence bear case",

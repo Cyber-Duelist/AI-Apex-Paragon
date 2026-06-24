@@ -229,7 +229,7 @@ if run_analysis and ticker:
         sec_analysis = analyze_sec_filing(analysis_text) if analysis_text else analyze_sec_filing("")
         
         st.write("🎙️ Running Earnings Call AI analysis...")
-        earnings_text = mda_text if mda_text else ""
+        earnings_text = mda_text if mda_text else filing_text
         earnings_analysis = analyze_earnings_call(earnings_text) if earnings_text else analyze_earnings_call("")
         
         st.write("📊 Generating Alpha Conviction Score...")
