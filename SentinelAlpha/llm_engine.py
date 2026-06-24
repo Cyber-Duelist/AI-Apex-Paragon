@@ -5,14 +5,23 @@ Groq-powered intelligence pipelines for SEC filings and earnings calls.
 
 import json
 import re
+import os
 from groq import Groq
 from config import GROQ_API_KEY, GROQ_MODEL, SEC_ANALYSIS_PROMPT, EARNINGS_ANALYSIS_PROMPT, CONVICTION_PROMPT
+
+
+def is_live_mode() -> bool:
+    """Check if the Groq API key is configured."""
+    return bool(GROQ_API_KEY)
 
 
 def _get_client() -> Groq | None:
     """Initialize and return the Groq client."""
     if not GROQ_API_KEY:
+        print("[LLM Engine] WARNING: GROQ_API_KEY is not set! Running in DEMO MODE.")
+        print(f"[LLM Engine] Environment check - GROQ_API_KEY length: {len(os.getenv('GROQ_API_KEY', ''))}")
         return None
+    print(f"[LLM Engine] LIVE MODE - API key detected (length: {len(GROQ_API_KEY)})")
     return Groq(api_key=GROQ_API_KEY)
 
 
@@ -50,9 +59,14 @@ def analyze_sec_filing(filing_text: str) -> dict:
     """
     client = _get_client()
     if not client:
-        return _get_demo_sec_analysis()
+        return _get_demo_sec_analysis(filing_text)
+    
+    if not filing_text or len(filing_text.strip()) < 100:
+        print("[LLM Engine] Filing text too short, using demo data")
+        return _get_demo_sec_analysis(filing_text)
     
     try:
+        print(f"[LLM Engine] Sending {len(filing_text[:12000])} chars to Groq for SEC analysis...")
         response = client.chat.completions.create(
             model=GROQ_MODEL,
             messages=[
@@ -62,10 +76,15 @@ def analyze_sec_filing(filing_text: str) -> dict:
             temperature=0.1,
             max_tokens=2000,
         )
-        return _parse_json_response(response.choices[0].message.content)
+        result = _parse_json_response(response.choices[0].message.content)
+        result["_source"] = "LIVE_API"
+        print(f"[LLM Engine] SEC analysis complete. Sentiment: {result.get('sentiment_score', 'N/A')}")
+        return result
     except Exception as e:
         print(f"[LLM Engine] SEC analysis error: {e}")
-        return _get_demo_sec_analysis()
+        demo = _get_demo_sec_analysis(filing_text)
+        demo["_error"] = str(e)
+        return demo
 
 
 def analyze_earnings_call(transcript: str) -> dict:
@@ -75,9 +94,14 @@ def analyze_earnings_call(transcript: str) -> dict:
     """
     client = _get_client()
     if not client:
-        return _get_demo_earnings_analysis()
+        return _get_demo_earnings_analysis(transcript)
+    
+    if not transcript or len(transcript.strip()) < 100:
+        print("[LLM Engine] Transcript text too short, using demo data")
+        return _get_demo_earnings_analysis(transcript)
     
     try:
+        print(f"[LLM Engine] Sending {len(transcript[:12000])} chars to Groq for earnings analysis...")
         response = client.chat.completions.create(
             model=GROQ_MODEL,
             messages=[
@@ -87,10 +111,15 @@ def analyze_earnings_call(transcript: str) -> dict:
             temperature=0.1,
             max_tokens=2000,
         )
-        return _parse_json_response(response.choices[0].message.content)
+        result = _parse_json_response(response.choices[0].message.content)
+        result["_source"] = "LIVE_API"
+        print(f"[LLM Engine] Earnings analysis complete. Signal: {result.get('overall_signal', 'N/A')}")
+        return result
     except Exception as e:
         print(f"[LLM Engine] Earnings analysis error: {e}")
-        return _get_demo_earnings_analysis()
+        demo = _get_demo_earnings_analysis(transcript)
+        demo["_error"] = str(e)
+        return demo
 
 
 def generate_conviction(sec_analysis: dict, earnings_analysis: dict, ticker: str) -> dict:
@@ -112,6 +141,7 @@ COMPANY: {ticker}
 """
     
     try:
+        print(f"[LLM Engine] Generating conviction for {ticker}...")
         response = client.chat.completions.create(
             model=GROQ_MODEL,
             messages=[
@@ -121,83 +151,160 @@ COMPANY: {ticker}
             temperature=0.2,
             max_tokens=1000,
         )
-        return _parse_json_response(response.choices[0].message.content)
+        result = _parse_json_response(response.choices[0].message.content)
+        result["_source"] = "LIVE_API"
+        print(f"[LLM Engine] Conviction complete: {result.get('conviction_score', 'N/A')} ({result.get('conviction_label', 'N/A')})")
+        return result
     except Exception as e:
         print(f"[LLM Engine] Conviction error: {e}")
-        return _get_demo_conviction()
+        demo = _get_demo_conviction()
+        demo["_error"] = str(e)
+        return demo
 
 
 # ─── DEMO / FALLBACK DATA ───────────────────────────────────────────────────
 # Used when Groq API key is not set or API fails
+# These now attempt basic text analysis to produce varied results
 
-def _get_demo_sec_analysis() -> dict:
+def _basic_text_sentiment(text: str) -> tuple:
+    """Simple keyword-based sentiment when LLM is unavailable."""
+    if not text:
+        return 0.0, "NEUTRAL"
+    
+    text_lower = text.lower()
+    
+    positive_words = ["growth", "strong", "exceeded", "record", "profit", "increase", 
+                      "expansion", "innovation", "improved", "outperformed", "momentum",
+                      "robust", "healthy", "milestone", "accelerat"]
+    negative_words = ["risk", "loss", "decline", "lawsuit", "litigation", "impairment",
+                      "uncertainty", "adverse", "challenging", "headwind", "weakness",
+                      "restructuring", "default", "violation", "penalty", "deficit"]
+    
+    pos_count = sum(1 for w in positive_words if w in text_lower)
+    neg_count = sum(1 for w in negative_words if w in text_lower)
+    
+    total = pos_count + neg_count
+    if total == 0:
+        return 0.0, "NEUTRAL"
+    
+    score = round((pos_count - neg_count) / max(total, 1) * 0.8, 2)
+    score = max(-1.0, min(1.0, score))
+    
+    if score > 0.2:
+        sentiment = "BULLISH"
+    elif score < -0.2:
+        sentiment = "BEARISH"
+    else:
+        sentiment = "NEUTRAL"
+    
+    return score, sentiment
+
+
+def _extract_risk_keywords(text: str) -> list:
+    """Extract basic risk indicators from text."""
+    if not text:
+        return [
+            {"risk": "Unable to parse filing - no text extracted", "severity": "HIGH", "category": "Operational"},
+        ]
+    
+    text_lower = text.lower()
+    risks = []
+    
+    risk_patterns = {
+        ("competition", "competitive"): ("Competitive pressures in core markets", "MEDIUM", "Market"),
+        ("regulation", "regulatory", "compliance"): ("Regulatory compliance requirements", "MEDIUM", "Regulatory"),
+        ("litigation", "lawsuit", "legal proceed"): ("Pending legal proceedings", "HIGH", "Legal"),
+        ("cybersecurity", "data breach", "security incident"): ("Cybersecurity and data protection risks", "MEDIUM", "Cybersecurity"),
+        ("supply chain", "supplier"): ("Supply chain concentration risk", "MEDIUM", "Operational"),
+        ("foreign currency", "exchange rate"): ("Foreign currency exchange exposure", "LOW", "Financial"),
+        ("interest rate",): ("Interest rate sensitivity", "MEDIUM", "Financial"),
+        ("climate", "environmental"): ("Environmental and climate-related risks", "LOW", "Regulatory"),
+        ("acquisition", "integration"): ("Acquisition integration risk", "MEDIUM", "Operational"),
+        ("impairment", "goodwill"): ("Asset impairment and goodwill risk", "HIGH", "Financial"),
+    }
+    
+    for keywords, (risk_desc, severity, category) in risk_patterns.items():
+        if any(kw in text_lower for kw in keywords):
+            risks.append({"risk": risk_desc, "severity": severity, "category": category})
+    
+    if not risks:
+        risks.append({"risk": "Standard business risks disclosed", "severity": "LOW", "category": "Market"})
+    
+    return risks[:6]
+
+
+def _get_demo_sec_analysis(filing_text: str = "") -> dict:
+    score, sentiment = _basic_text_sentiment(filing_text)
+    risks = _extract_risk_keywords(filing_text)
+    
+    if filing_text and len(filing_text) > 200:
+        preview = filing_text[:300].replace("\n", " ").strip()
+        summary = f"[DEMO MODE] Basic text analysis of filing. Preview: {preview}..."
+    else:
+        summary = "[DEMO MODE] No Groq API key configured. Set GROQ_API_KEY in Hugging Face Space secrets for real AI analysis."
+    
     return {
-        "risk_factors": [
-            {"risk": "Dependence on consumer discretionary spending in uncertain macro environment", "severity": "HIGH", "category": "Market"},
-            {"risk": "Ongoing antitrust investigations in EU and US markets", "severity": "HIGH", "category": "Regulatory"},
-            {"risk": "Supply chain concentration risk in semiconductor sourcing", "severity": "MEDIUM", "category": "Operational"},
-            {"risk": "Foreign currency exchange rate exposure across 40+ markets", "severity": "MEDIUM", "category": "Financial"},
-            {"risk": "Cybersecurity threats to customer data and intellectual property", "severity": "MEDIUM", "category": "Cybersecurity"},
-        ],
+        "risk_factors": risks,
         "revenue_guidance": {
-            "direction": "POSITIVE",
-            "summary": "Management projects mid-single-digit revenue growth driven by AI/cloud segment expansion.",
-            "confidence": 0.72
+            "direction": "POSITIVE" if score > 0 else ("NEGATIVE" if score < 0 else "NEUTRAL"),
+            "summary": "Demo mode - set GROQ_API_KEY for real guidance extraction.",
+            "confidence": 0.0
         },
-        "litigation_warnings": [
-            {"case": "Patent infringement lawsuit pending in District of Delaware", "severity": "MEDIUM"},
-            {"case": "EU Digital Markets Act compliance investigation", "severity": "HIGH"},
-        ],
-        "red_flags": ["Increase in stock-based compensation dilution", "Change in revenue recognition methodology noted in footnotes"],
-        "key_metrics_mentioned": ["$42.3B quarterly revenue", "32.1% gross margin", "$18.7B operating cash flow"],
-        "overall_sentiment": "NEUTRAL",
-        "sentiment_score": 0.15,
-        "executive_summary": "Filing reveals a company navigating regulatory headwinds while maintaining solid financial performance. AI-driven segments show strong momentum, but antitrust risks and SBC dilution warrant close monitoring."
+        "litigation_warnings": [],
+        "red_flags": ["Running in DEMO MODE - results are from basic keyword analysis, not AI"],
+        "key_metrics_mentioned": [],
+        "overall_sentiment": sentiment,
+        "sentiment_score": score,
+        "executive_summary": summary,
+        "_source": "DEMO_MODE"
     }
 
 
-def _get_demo_earnings_analysis() -> dict:
+def _get_demo_earnings_analysis(transcript: str = "") -> dict:
+    score, _ = _basic_text_sentiment(transcript)
+    
+    if score > 0.2:
+        label = "CONFIDENT"
+    elif score < -0.2:
+        label = "DEFENSIVE"
+    else:
+        label = "CAUTIOUS"
+    
     return {
         "management_sentiment": {
-            "score": 0.35,
-            "label": "CAUTIOUS",
-            "reasoning": "CEO used cautiously optimistic language while CFO provided detailed metrics, suggesting measured confidence with awareness of macro risks."
+            "score": score,
+            "label": label,
+            "reasoning": "Demo mode - basic keyword sentiment. Set GROQ_API_KEY for real analysis."
         },
         "hedge_words": {
-            "count": 14,
-            "density_label": "MEDIUM",
-            "examples": ["we believe", "approximately", "cautiously optimistic", "macro environment", "going forward", "challenges"]
+            "count": 0,
+            "density_label": "N/A",
+            "examples": ["Demo mode - hedge word detection requires Groq API"]
         },
         "forward_guidance": {
-            "specificity": "MODERATE",
-            "key_projections": [
-                "Revenue expected in range of $43-45B next quarter",
-                "Capex projected at $12B for AI infrastructure buildout",
-                "Targeting 200bps margin expansion by fiscal year end"
-            ],
-            "confidence_level": 0.65
+            "specificity": "N/A",
+            "key_projections": ["Demo mode - set GROQ_API_KEY for real guidance extraction"],
+            "confidence_level": 0.0
         },
         "analyst_tension": {
-            "score": 0.45,
-            "hot_topics": ["AI monetization timeline", "China market exposure", "Capital allocation vs buybacks"]
+            "score": 0.0,
+            "hot_topics": ["Demo mode"]
         },
-        "key_quotes": [
-            "We are in the early innings of the AI transformation and our infrastructure investments will position us for sustained long-term growth.",
-            "The macro environment remains fluid, but our diversified revenue streams provide resilience.",
-            "We expect to see meaningful margin expansion as our AI workloads scale."
-        ],
-        "overall_signal": "BUY",
-        "executive_summary": "Management is cautiously bullish on AI-driven growth while acknowledging macro uncertainties. Forward guidance is moderately specific with a clear focus on AI capex. Analyst pushback centers on monetization timelines."
+        "key_quotes": ["Demo mode - no AI analysis available without GROQ_API_KEY"],
+        "overall_signal": "HOLD",
+        "executive_summary": "[DEMO MODE] Set GROQ_API_KEY in Hugging Face Space secrets for real earnings analysis.",
+        "_source": "DEMO_MODE"
     }
 
 
 def _get_demo_conviction() -> dict:
     return {
-        "conviction_score": 38,
-        "conviction_label": "BUY",
-        "bull_case": "AI infrastructure investments are creating a durable competitive moat. Revenue growth in cloud/AI segments is accelerating and should drive meaningful margin expansion within 2-3 quarters.",
-        "bear_case": "Regulatory headwinds from EU antitrust probes could result in structural remedies. High capex burn rate for AI infrastructure may compress free cash flow in the near term.",
-        "key_catalyst": "Q3 earnings report expected to show first inflection in AI revenue monetization.",
-        "primary_risk": "EU Digital Markets Act enforcement action could force business model changes in key markets.",
-        "recommendation": "Initiate a moderate long position with a 12-month horizon. The AI infrastructure buildout creates asymmetric upside if monetization timelines compress. Set a stop-loss at -12% and reassess after Q3 earnings."
+        "conviction_score": 0,
+        "conviction_label": "HOLD",
+        "bull_case": "Demo mode - real AI bull case analysis requires GROQ_API_KEY.",
+        "bear_case": "Demo mode - real AI bear case analysis requires GROQ_API_KEY.",
+        "key_catalyst": "Set up GROQ_API_KEY to unlock real catalyst detection.",
+        "primary_risk": "No API key configured - all analysis is placeholder data.",
+        "recommendation": "DEMO MODE: This is NOT real analysis. Go to Settings > Secrets on your Hugging Face Space and add GROQ_API_KEY to enable live AI-powered intelligence.",
+        "_source": "DEMO_MODE"
     }

@@ -8,7 +8,7 @@ import json
 import time
 
 from sec_client import get_recent_filings, get_filing_document, extract_risk_factors, extract_mda, get_company_name
-from llm_engine import analyze_sec_filing, analyze_earnings_call, generate_conviction
+from llm_engine import analyze_sec_filing, analyze_earnings_call, generate_conviction, is_live_mode
 from scoring import (
     build_conviction_gauge, build_risk_radar, build_sentiment_bar,
     build_hedge_word_chart, count_hedge_words
@@ -146,6 +146,26 @@ st.markdown("""
     <p>AI-Powered Hedge Fund Intelligence Platform</p>
 </div>
 """, unsafe_allow_html=True)
+
+# ─── MODE BANNER ─────────────────────────────────────────────────────────────
+if is_live_mode():
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, rgba(0,204,102,0.15), rgba(0,229,255,0.1)); 
+                border: 1px solid rgba(0,204,102,0.4); border-radius: 8px; padding: 0.6rem 1rem; 
+                margin-bottom: 1rem; text-align: center;">
+        <span style="color: #00cc66; font-weight: 600;">🟢 LIVE MODE</span>
+        <span style="color: #888; margin-left: 0.5rem;">— Groq AI is analyzing real SEC filings</span>
+    </div>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, rgba(255,51,102,0.15), rgba(255,170,0,0.1)); 
+                border: 1px solid rgba(255,51,102,0.4); border-radius: 8px; padding: 0.6rem 1rem; 
+                margin-bottom: 1rem; text-align: center;">
+        <span style="color: #ff3366; font-weight: 600;">⚠️ DEMO MODE</span>
+        <span style="color: #888; margin-left: 0.5rem;">— Add <code>GROQ_API_KEY</code> in Settings → Secrets for real AI analysis</span>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ─── SIDEBAR ─────────────────────────────────────────────────────────────────
 with st.sidebar:
