@@ -1,7 +1,7 @@
 """
 SmartLedger AI — Receipt & Invoice Intelligence
 Upload any receipt image → AI extracts items, categorizes spending, and gives saving advice.
-Powered by Groq Vision (llama-3.2-11b-vision-preview)
+Powered by Groq Vision (llama-4-scout-17b)
 """
 
 import os
@@ -18,7 +18,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ── Page Config ──────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="SmartLedger AI",
     page_icon="🧾",
@@ -26,166 +25,182 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ── Custom CSS ────────────────────────────────────────────────────────────────
+# ── Premium CSS ───────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
+* { font-family: 'Inter', sans-serif !important; }
 
-.main { background: #0a0e1a; }
-.stApp { background: linear-gradient(135deg, #0a0e1a 0%, #0f1629 50%, #0a1628 100%); }
-
-/* Metric cards */
-.metric-card {
-    background: linear-gradient(135deg, rgba(16,24,48,0.9), rgba(10,18,36,0.95));
-    border: 1px solid rgba(99,179,237,0.2);
-    border-radius: 16px;
-    padding: 20px 24px;
-    text-align: center;
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
+/* Global background */
+.stApp {
+    background: linear-gradient(135deg, #060b18 0%, #0a1020 40%, #060e1a 100%) !important;
 }
-.metric-card:hover { border-color: rgba(99,179,237,0.5); transform: translateY(-2px); }
-.metric-value { font-size: 2rem; font-weight: 700; color: #63b3ed; margin: 0; }
-.metric-label { font-size: 0.8rem; color: #718096; text-transform: uppercase; letter-spacing: 1px; margin: 4px 0 0; }
-
-/* Item table */
-.item-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 16px;
-    border-bottom: 1px solid rgba(99,179,237,0.08);
-    border-radius: 8px;
-    transition: background 0.2s;
+.main .block-container {
+    padding-top: 2rem !important;
+    max-width: 1200px !important;
 }
-.item-row:hover { background: rgba(99,179,237,0.05); }
-.item-name { color: #e2e8f0; font-size: 0.95rem; }
-.item-price { color: #68d391; font-weight: 600; }
-.item-cat { font-size: 0.75rem; color: #805ad5; background: rgba(128,90,213,0.1); padding: 2px 8px; border-radius: 20px; }
 
-/* Advice card */
-.advice-card {
-    background: linear-gradient(135deg, rgba(72,187,120,0.08), rgba(49,130,206,0.08));
-    border: 1px solid rgba(72,187,120,0.2);
-    border-radius: 16px;
-    padding: 24px;
-    margin-top: 16px;
+/* Hide default streamlit elements */
+#MainMenu, footer, header { visibility: hidden; }
+.stDeployButton { display: none; }
+
+/* ── Sidebar ── */
+[data-testid="stSidebar"] {
+    background: rgba(6, 11, 24, 0.95) !important;
+    border-right: 1px solid rgba(99,179,237,0.1) !important;
 }
-.advice-title { color: #68d391; font-size: 1rem; font-weight: 600; margin-bottom: 12px; }
+[data-testid="stSidebar"] * { color: #e2e8f0 !important; }
 
-/* Hero */
-.hero { text-align: center; padding: 40px 0 20px; }
-.hero h1 { font-size: 3rem; font-weight: 700; background: linear-gradient(135deg, #63b3ed, #68d391); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.hero p { color: #718096; font-size: 1.1rem; margin-top: 8px; }
+/* ── Buttons ── */
+.stButton > button {
+    background: linear-gradient(135deg, #1a56db, #0ea5e9) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 0.6rem 1.5rem !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 20px rgba(14,165,233,0.25) !important;
+    width: 100% !important;
+}
+.stButton > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 30px rgba(14,165,233,0.4) !important;
+    background: linear-gradient(135deg, #1d4ed8, #0ea5e9) !important;
+}
 
-/* Upload zone */
-.upload-zone { background: rgba(16,24,48,0.6); border: 2px dashed rgba(99,179,237,0.3); border-radius: 16px; padding: 40px; text-align: center; }
+/* ── File uploader ── */
+[data-testid="stFileUploader"] {
+    background: rgba(14, 165, 233, 0.04) !important;
+    border: 2px dashed rgba(14,165,233,0.3) !important;
+    border-radius: 16px !important;
+    padding: 20px !important;
+    transition: all 0.3s ease !important;
+}
+[data-testid="stFileUploader"]:hover {
+    border-color: rgba(14,165,233,0.6) !important;
+    background: rgba(14, 165, 233, 0.08) !important;
+}
+[data-testid="stFileUploader"] label { color: #94a3b8 !important; }
 
-/* Category badge colors */
-.cat-food { color: #f6ad55; background: rgba(246,173,85,0.1); }
-.cat-transport { color: #63b3ed; background: rgba(99,179,237,0.1); }
-.cat-utilities { color: #fc8181; background: rgba(252,129,129,0.1); }
-.cat-shopping { color: #b794f4; background: rgba(183,148,244,0.1); }
-.cat-health { color: #68d391; background: rgba(104,211,145,0.1); }
-.cat-other { color: #a0aec0; background: rgba(160,174,192,0.1); }
+/* ── Expanders ── */
+[data-testid="stExpander"] {
+    background: rgba(255,255,255,0.02) !important;
+    border: 1px solid rgba(99,179,237,0.1) !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+}
+[data-testid="stExpander"] summary {
+    color: #e2e8f0 !important;
+    font-weight: 600 !important;
+    padding: 16px !important;
+}
 
-div[data-testid="stSidebarContent"] { background: rgba(10, 14, 26, 0.95); }
+/* ── Dataframe ── */
+[data-testid="stDataFrame"] {
+    background: transparent !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+}
+iframe { background: transparent !important; }
+
+/* ── Metric widget ── */
+[data-testid="metric-container"] {
+    background: rgba(255,255,255,0.03) !important;
+    border: 1px solid rgba(99,179,237,0.12) !important;
+    border-radius: 16px !important;
+    padding: 20px !important;
+}
+[data-testid="stMetricValue"] { color: #38bdf8 !important; font-weight: 700 !important; }
+[data-testid="stMetricLabel"] { color: #64748b !important; }
+
+/* ── Spinner ── */
+.stSpinner > div { border-color: #0ea5e9 transparent transparent !important; }
+
+/* ── Alert / Info boxes ── */
+.stAlert {
+    background: rgba(14,165,233,0.08) !important;
+    border: 1px solid rgba(14,165,233,0.2) !important;
+    border-radius: 12px !important;
+    color: #94a3b8 !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
-# ── Groq Setup ────────────────────────────────────────────────────────────────
+# ── Config ────────────────────────────────────────────────────────────────────
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
-
 VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
 TEXT_MODEL = "llama-3.1-8b-instant"
 
 CATEGORY_COLORS = {
-    "Food & Dining": "#f6ad55",
-    "Transport": "#63b3ed",
-    "Utilities & Bills": "#fc8181",
-    "Shopping": "#b794f4",
-    "Health & Medical": "#68d391",
-    "Entertainment": "#f687b3",
-    "Education": "#76e4f7",
-    "Other": "#a0aec0"
+    "Food & Dining":      "#f59e0b",
+    "Transport":          "#0ea5e9",
+    "Utilities & Bills":  "#ef4444",
+    "Shopping":           "#a855f7",
+    "Health & Medical":   "#10b981",
+    "Entertainment":      "#ec4899",
+    "Education":          "#06b6d4",
+    "Other":              "#64748b"
+}
+
+CATEGORY_ICONS = {
+    "Food & Dining": "🍽️", "Transport": "🚗", "Utilities & Bills": "💡",
+    "Shopping": "🛍️", "Health & Medical": "💊", "Entertainment": "🎬",
+    "Education": "📚", "Other": "📦"
 }
 
 # ── Session State ─────────────────────────────────────────────────────────────
 if "receipts" not in st.session_state:
-    st.session_state.receipts = []  # list of parsed receipt dicts
+    st.session_state.receipts = []
 if "advice" not in st.session_state:
     st.session_state.advice = ""
 
-# ── Helper: encode image ──────────────────────────────────────────────────────
+# ── Helpers ───────────────────────────────────────────────────────────────────
 def encode_image(image: Image.Image) -> str:
     buffer = io.BytesIO()
     image.save(buffer, format="JPEG", quality=85)
     return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
-# ── Core: Analyze Receipt ─────────────────────────────────────────────────────
 def analyze_receipt(image: Image.Image) -> dict:
     if not client:
         return {"error": "No API key configured."}
-
     b64 = encode_image(image)
-    prompt = """Analyze this receipt/invoice image. Extract ALL items and return a JSON object with this exact structure:
+    prompt = """Analyze this receipt/invoice image. Extract ALL items and return ONLY a JSON object:
 {
-  "store": "Store/vendor name",
-  "date": "Date if visible, else null",
-  "currency": "Currency symbol (e.g. $, ₹, £)",
-  "items": [
-    {
-      "name": "Item name",
-      "quantity": 1,
-      "price": 9.99,
-      "category": "One of: Food & Dining, Transport, Utilities & Bills, Shopping, Health & Medical, Entertainment, Education, Other"
-    }
-  ],
+  "store": "Store name",
+  "date": "Date if visible else null",
+  "currency": "Currency symbol",
+  "items": [{"name": "Item", "quantity": 1, "price": 9.99, "category": "Food & Dining"}],
   "subtotal": 0.00,
   "tax": 0.00,
   "total": 0.00
 }
-
-Rules:
-- If a field is not visible, use null
-- price must be a number (not string)
-- Extract EVERY line item visible
-- Be accurate with amounts
-- Return ONLY the JSON, no explanation"""
-
+Categories: Food & Dining, Transport, Utilities & Bills, Shopping, Health & Medical, Entertainment, Education, Other.
+Return ONLY valid JSON."""
     try:
         response = client.chat.completions.create(
             model=VISION_MODEL,
-            messages=[{
-                "role": "user",
-                "content": [
-                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}},
-                    {"type": "text", "text": prompt}
-                ]
-            }],
-            temperature=0.1,
-            max_tokens=1500
+            messages=[{"role": "user", "content": [
+                {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}},
+                {"type": "text", "text": prompt}
+            ]}],
+            temperature=0.1, max_tokens=1500
         )
         raw = response.choices[0].message.content.strip()
-        # Strip markdown code fences if present
-        if raw.startswith("```"):
+        if "```" in raw:
             raw = raw.split("```")[1]
-            if raw.startswith("json"):
-                raw = raw[4:]
+            if raw.startswith("json"): raw = raw[4:]
         return json.loads(raw.strip())
     except json.JSONDecodeError:
-        return {"error": "Could not parse receipt. Please try a clearer image."}
+        return {"error": "Could not parse receipt. Try a clearer image."}
     except Exception as e:
         return {"error": str(e)}
 
-# ── Core: Generate Saving Advice ──────────────────────────────────────────────
 def generate_advice(all_receipts: list) -> str:
-    if not client or not all_receipts:
-        return ""
-
-    # Build spending summary
+    if not client or not all_receipts: return ""
     category_totals = {}
     total_spend = 0
     for receipt in all_receipts:
@@ -194,118 +209,165 @@ def generate_advice(all_receipts: list) -> str:
             price = item.get("price", 0) or 0
             category_totals[cat] = category_totals.get(cat, 0) + price
             total_spend += price
-
-    summary = f"Total spending: {total_spend:.2f}\n"
-    for cat, amt in sorted(category_totals.items(), key=lambda x: -x[1]):
-        pct = (amt / total_spend * 100) if total_spend > 0 else 0
-        summary += f"- {cat}: {amt:.2f} ({pct:.1f}%)\n"
-
+    summary = f"Total: {total_spend:.2f}\n" + "\n".join(
+        f"- {c}: {a:.2f} ({a/total_spend*100:.1f}%)" for c, a in sorted(category_totals.items(), key=lambda x: -x[1])
+    )
     try:
         response = client.chat.completions.create(
             model=TEXT_MODEL,
-            messages=[{
-                "role": "system",
-                "content": "You are a sharp, friendly personal finance advisor. Be specific, actionable, and honest. Use emojis sparingly."
-            }, {
-                "role": "user",
-                "content": f"""Based on this spending breakdown, give 4-5 specific, personalized money-saving tips. Be direct and practical.
-
-{summary}
-
-Format each tip as a bullet point. Reference actual categories and amounts from the data."""
-            }],
-            temperature=0.7,
-            max_tokens=600
+            messages=[
+                {"role": "system", "content": "You are a sharp, direct personal finance advisor. Be specific and actionable."},
+                {"role": "user", "content": f"Give 5 specific money-saving tips based on this spending. Reference actual amounts.\n\n{summary}"}
+            ],
+            temperature=0.7, max_tokens=700
         )
         return response.choices[0].message.content
     except Exception as e:
         return f"Could not generate advice: {e}"
 
-# ── UI: Sidebar ───────────────────────────────────────────────────────────────
+# ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("### 🧾 SmartLedger AI")
-    st.markdown("---")
+    st.markdown("""
+    <div style="padding: 8px 0 24px;">
+        <div style="font-size:1.6rem; font-weight:800; background:linear-gradient(135deg,#38bdf8,#10b981);
+                    -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:4px;">
+            SmartLedger AI
+        </div>
+        <div style="font-size:0.8rem; color:#475569; letter-spacing:2px; text-transform:uppercase;">
+            Receipt Intelligence
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     if not GROQ_API_KEY:
-        st.error("⚠️ No API key found. Set `GROQ_API_KEY` in your environment.")
+        st.markdown("""<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);
+                    border-radius:12px;padding:14px;color:#fca5a5;font-size:0.85rem;">
+                    ⚠️ <b>GROQ_API_KEY</b> not found.<br>Add it in your environment.
+                    </div>""", unsafe_allow_html=True)
     else:
-        st.success("✅ AI Engine Connected")
+        st.markdown("""<div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);
+                    border-radius:12px;padding:14px;color:#6ee7b7;font-size:0.85rem;">
+                    ✅ <b>AI Engine Online</b></div>""", unsafe_allow_html=True)
 
-    st.markdown("### 📊 Session Summary")
+    st.markdown("<div style='margin:24px 0 12px;font-size:0.75rem;color:#475569;text-transform:uppercase;letter-spacing:2px;'>Session</div>", unsafe_allow_html=True)
+
     if st.session_state.receipts:
-        total = sum(r.get("total") or sum(i.get("price", 0) for i in r.get("items", [])) for r in st.session_state.receipts)
-        st.metric("Receipts Scanned", len(st.session_state.receipts))
-        st.metric("Total Tracked", f"${total:.2f}")
-
-        if st.button("🗑️ Clear All Receipts", use_container_width=True):
+        total = sum(
+            r.get("total") or sum(i.get("price", 0) for i in r.get("items", []))
+            for r in st.session_state.receipts
+        )
+        r1, r2 = st.columns(2)
+        with r1:
+            st.metric("Receipts", len(st.session_state.receipts))
+        with r2:
+            st.metric("Tracked", f"${total:.0f}")
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("🗑️ Clear All", use_container_width=True):
             st.session_state.receipts = []
             st.session_state.advice = ""
             st.rerun()
     else:
-        st.info("No receipts scanned yet.")
+        st.markdown("<div style='color:#334155;font-size:0.9rem;padding:12px 0;'>No receipts yet.</div>", unsafe_allow_html=True)
 
-    st.markdown("---")
     st.markdown("""
-**How it works:**
-1. Upload a receipt photo
-2. AI extracts every item + category
-3. See your spending breakdown
-4. Get personalized saving tips
+    <div style="margin-top:32px; padding:20px; background:rgba(255,255,255,0.02);
+                border:1px solid rgba(255,255,255,0.06); border-radius:16px;">
+        <div style="font-size:0.75rem;color:#475569;text-transform:uppercase;letter-spacing:2px;margin-bottom:14px;">How It Works</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div style="width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#1a56db,#0ea5e9);
+                    display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:white;flex-shrink:0;">1</div>
+                <div style="color:#94a3b8;font-size:0.85rem;padding-top:4px;">Upload any receipt photo</div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div style="width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#7c3aed,#a855f7);
+                    display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:white;flex-shrink:0;">2</div>
+                <div style="color:#94a3b8;font-size:0.85rem;padding-top:4px;">Groq Vision AI extracts every item & category</div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div style="width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#059669,#10b981);
+                    display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:white;flex-shrink:0;">3</div>
+                <div style="color:#94a3b8;font-size:0.85rem;padding-top:4px;">See charts & get AI saving tips</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-**Supported:** Grocery, restaurant, pharmacy, utility, shopping receipts
-""")
-
-# ── UI: Main ──────────────────────────────────────────────────────────────────
+# ── HERO HEADER ───────────────────────────────────────────────────────────────
 st.markdown("""
-<div class="hero">
-    <h1>🧾 SmartLedger AI</h1>
-    <p>Upload receipts → AI extracts items → Understand your spending → Save more money</p>
+<div style="text-align:center; padding: 20px 0 40px;">
+    <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(14,165,233,0.08);
+                border:1px solid rgba(14,165,233,0.2);border-radius:100px;padding:6px 18px;
+                margin-bottom:20px;">
+        <div style="width:8px;height:8px;border-radius:50%;background:#10b981;
+                    box-shadow:0 0 8px #10b981;animation:pulse 2s infinite;"></div>
+        <span style="color:#38bdf8;font-size:0.8rem;font-weight:600;letter-spacing:1px;">AI ENGINE ONLINE</span>
+    </div>
+    <h1 style="font-size:3.2rem;font-weight:800;margin:0;
+               background:linear-gradient(135deg,#f8fafc 0%,#38bdf8 50%,#10b981 100%);
+               -webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1;">
+        SmartLedger AI
+    </h1>
+    <p style="color:#475569;font-size:1.1rem;margin-top:12px;font-weight:400;">
+        Point. Scan. Understand. Save.
+    </p>
 </div>
+<style>
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+</style>
 """, unsafe_allow_html=True)
 
-# Upload section
-col_upload, col_preview = st.columns([1, 1], gap="large")
+# ── UPLOAD SECTION ────────────────────────────────────────────────────────────
+col_left, col_right = st.columns([1, 1], gap="large")
 
-with col_upload:
-    st.markdown("#### 📤 Upload Receipt or Invoice")
+with col_left:
+    st.markdown("""
+    <div style="font-size:0.75rem;color:#475569;text-transform:uppercase;
+                letter-spacing:2px;margin-bottom:12px;">Upload Receipt</div>
+    """, unsafe_allow_html=True)
     uploaded = st.file_uploader(
-        "Drop your receipt image here",
+        "Drop your receipt or invoice image here",
         type=["jpg", "jpeg", "png", "webp"],
-        label_visibility="collapsed"
+        label_visibility="visible"
     )
-
     if uploaded:
         image = Image.open(uploaded).convert("RGB")
-
-        with col_preview:
-            st.markdown("#### 🔍 Receipt Preview")
+        with col_right:
+            st.markdown("""
+            <div style="font-size:0.75rem;color:#475569;text-transform:uppercase;
+                        letter-spacing:2px;margin-bottom:12px;">Preview</div>
+            """, unsafe_allow_html=True)
             st.image(image, use_container_width=True)
 
-        st.markdown("---")
-        if st.button("🤖 Analyze with AI", use_container_width=True, type="primary"):
-            with st.spinner("AI is reading your receipt... 🔍"):
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("⚡ Analyze with AI Vision", use_container_width=True, type="primary"):
+            with st.spinner("Reading your receipt with Groq Vision..."):
                 result = analyze_receipt(image)
-
             if "error" in result:
-                st.error(f"❌ {result['error']}")
+                st.markdown(f"""<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);
+                            border-radius:12px;padding:16px;color:#fca5a5;">❌ {result['error']}</div>""",
+                            unsafe_allow_html=True)
             else:
                 result["_id"] = len(st.session_state.receipts)
                 st.session_state.receipts.append(result)
-                st.session_state.advice = ""  # reset advice
-                st.success(f"✅ Receipt from **{result.get('store', 'Unknown Store')}** analyzed successfully!")
+                st.session_state.advice = ""
+                store = result.get("store", "Unknown Store")
+                total = result.get("total") or sum(i.get("price", 0) for i in result.get("items", []))
+                curr = result.get("currency", "$")
+                st.markdown(f"""<div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);
+                            border-radius:12px;padding:16px;color:#6ee7b7;margin-top:8px;">
+                            ✅ <b>{store}</b> — {curr}{total:.2f} extracted successfully!</div>""",
+                            unsafe_allow_html=True)
                 st.rerun()
 
-# ── Display Results ───────────────────────────────────────────────────────────
+# ── RESULTS ───────────────────────────────────────────────────────────────────
 if st.session_state.receipts:
-    st.markdown("---")
-
-    # ── Aggregate All Data ────────────────────────────────────────────────────
     all_items = []
     for r in st.session_state.receipts:
         for item in r.get("items", []):
             all_items.append({
                 "name": item.get("name", "Unknown"),
-                "price": item.get("price") or 0,
+                "price": float(item.get("price") or 0),
                 "category": item.get("category", "Other"),
                 "store": r.get("store", "Unknown"),
                 "currency": r.get("currency", "$")
@@ -315,129 +377,151 @@ if st.session_state.receipts:
     total_spend = df["price"].sum()
     category_totals = df.groupby("category")["price"].sum().reset_index()
     currency = st.session_state.receipts[0].get("currency", "$")
+    top_cat = category_totals.loc[category_totals["price"].idxmax(), "category"]
+    avg = total_spend / len(st.session_state.receipts)
 
-    # ── KPI Metrics ───────────────────────────────────────────────────────────
-    st.markdown("#### 📊 Spending Overview")
-    m1, m2, m3, m4 = st.columns(4)
+    st.markdown("<div style='height:32px'></div>", unsafe_allow_html=True)
 
-    with m1:
-        st.markdown(f"""<div class="metric-card">
-            <p class="metric-value">{currency}{total_spend:.2f}</p>
-            <p class="metric-label">Total Spent</p>
-        </div>""", unsafe_allow_html=True)
+    # ── KPI Cards ─────────────────────────────────────────────────────────────
+    st.markdown("""<div style="font-size:0.75rem;color:#475569;text-transform:uppercase;
+                letter-spacing:2px;margin-bottom:16px;">Overview</div>""", unsafe_allow_html=True)
 
-    with m2:
-        top_cat = category_totals.loc[category_totals["price"].idxmax(), "category"] if not category_totals.empty else "N/A"
-        st.markdown(f"""<div class="metric-card">
-            <p class="metric-value" style="font-size:1.2rem">{top_cat}</p>
-            <p class="metric-label">Top Category</p>
-        </div>""", unsafe_allow_html=True)
+    k1, k2, k3, k4 = st.columns(4)
+    cards = [
+        (k1, "Total Spent", f"{currency}{total_spend:.2f}", "#38bdf8", "💳"),
+        (k2, "Top Category", f"{CATEGORY_ICONS.get(top_cat,'📦')} {top_cat}", "#a78bfa", "📊"),
+        (k3, "Items Tracked", str(len(all_items)), "#34d399", "📋"),
+        (k4, "Avg per Receipt", f"{currency}{avg:.2f}", "#fb923c", "🧮"),
+    ]
+    for col, label, val, color, icon in cards:
+        with col:
+            st.markdown(f"""
+            <div style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.07);
+                        border-radius:20px;padding:24px 20px;text-align:center;
+                        transition:all 0.3s;position:relative;overflow:hidden;">
+                <div style="position:absolute;top:-20px;right:-10px;font-size:3.5rem;opacity:0.07;">{icon}</div>
+                <div style="font-size:0.7rem;color:#475569;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;">{label}</div>
+                <div style="font-size:1.6rem;font-weight:800;color:{color};line-height:1.2;">{val}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-    with m3:
-        st.markdown(f"""<div class="metric-card">
-            <p class="metric-value">{len(all_items)}</p>
-            <p class="metric-label">Items Tracked</p>
-        </div>""", unsafe_allow_html=True)
-
-    with m4:
-        avg = total_spend / len(st.session_state.receipts) if st.session_state.receipts else 0
-        st.markdown(f"""<div class="metric-card">
-            <p class="metric-value">{currency}{avg:.2f}</p>
-            <p class="metric-label">Avg per Receipt</p>
-        </div>""", unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<div style='height:32px'></div>", unsafe_allow_html=True)
 
     # ── Charts ────────────────────────────────────────────────────────────────
-    chart_col1, chart_col2 = st.columns(2, gap="large")
+    st.markdown("""<div style="font-size:0.75rem;color:#475569;text-transform:uppercase;
+                letter-spacing:2px;margin-bottom:16px;">Spending Breakdown</div>""", unsafe_allow_html=True)
 
-    with chart_col1:
-        st.markdown("#### 🍩 Spending by Category")
-        colors = [CATEGORY_COLORS.get(c, "#a0aec0") for c in category_totals["category"]]
+    c1, c2 = st.columns(2, gap="large")
+    colors = [CATEGORY_COLORS.get(c, "#64748b") for c in category_totals["category"]]
+
+    with c1:
         fig_pie = px.pie(
-            category_totals,
-            values="price",
-            names="category",
-            color_discrete_sequence=colors,
-            hole=0.5
+            category_totals, values="price", names="category",
+            color_discrete_sequence=colors, hole=0.6
+        )
+        fig_pie.update_traces(
+            textfont_color="white", textfont_size=12,
+            marker=dict(line=dict(color="#060b18", width=3))
         )
         fig_pie.update_layout(
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="#e2e8f0", family="Inter"),
-            legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#a0aec0")),
-            margin=dict(t=20, b=20, l=0, r=0)
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="#94a3b8", family="Inter"),
+            legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#94a3b8", size=12)),
+            margin=dict(t=10, b=10, l=0, r=0),
+            annotations=[dict(text=f"<b>{currency}{total_spend:.0f}</b>", x=0.5, y=0.5,
+                              font=dict(size=22, color="#f8fafc", family="Inter"),
+                              showarrow=False)]
         )
-        fig_pie.update_traces(textfont_color="#e2e8f0")
-        st.plotly_chart(fig_pie, use_container_width=True)
+        st.plotly_chart(fig_pie, use_container_width=True, config={"displayModeBar": False})
 
-    with chart_col2:
-        st.markdown("#### 📊 Amount by Category")
-        cat_sorted = category_totals.sort_values("price", ascending=True)
-        colors_bar = [CATEGORY_COLORS.get(c, "#a0aec0") for c in cat_sorted["category"]]
+    with c2:
+        cat_s = category_totals.sort_values("price", ascending=True)
+        colors_bar = [CATEGORY_COLORS.get(c, "#64748b") for c in cat_s["category"]]
         fig_bar = go.Figure(go.Bar(
-            x=cat_sorted["price"],
-            y=cat_sorted["category"],
-            orientation="h",
-            marker_color=colors_bar,
-            text=[f"{currency}{v:.2f}" for v in cat_sorted["price"]],
-            textposition="outside",
-            textfont=dict(color="#e2e8f0")
+            x=cat_s["price"], y=cat_s["category"], orientation="h",
+            marker=dict(color=colors_bar, line=dict(width=0)),
+            text=[f"{currency}{v:.2f}" for v in cat_s["price"]],
+            textposition="outside", textfont=dict(color="#94a3b8", size=12),
+            hovertemplate="<b>%{y}</b><br>%{x:.2f}<extra></extra>"
         ))
         fig_bar.update_layout(
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="#e2e8f0", family="Inter"),
-            xaxis=dict(showgrid=False, showticklabels=False, color="#718096"),
-            yaxis=dict(color="#a0aec0"),
-            margin=dict(t=20, b=20, l=0, r=60)
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="#94a3b8", family="Inter"),
+            xaxis=dict(showgrid=False, showticklabels=False, zeroline=False),
+            yaxis=dict(color="#94a3b8", gridcolor="rgba(255,255,255,0.04)"),
+            margin=dict(t=10, b=10, l=0, r=60), bargap=0.3
         )
-        st.plotly_chart(fig_bar, use_container_width=True)
+        st.plotly_chart(fig_bar, use_container_width=True, config={"displayModeBar": False})
 
-    # ── Item Breakdown ────────────────────────────────────────────────────────
-    st.markdown("#### 🧾 All Extracted Items")
+    # ── Item Tables ───────────────────────────────────────────────────────────
+    st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+    st.markdown("""<div style="font-size:0.75rem;color:#475569;text-transform:uppercase;
+                letter-spacing:2px;margin-bottom:16px;">Extracted Items</div>""", unsafe_allow_html=True)
 
     for receipt in st.session_state.receipts:
-        with st.expander(f"📄 {receipt.get('store', 'Receipt')} — {receipt.get('date', 'No date')} | Total: {receipt.get('currency','$')}{receipt.get('total', 0):.2f}", expanded=True):
+        store = receipt.get("store", "Receipt")
+        date = receipt.get("date", "")
+        curr = receipt.get("currency", "$")
+        total = receipt.get("total") or sum(i.get("price", 0) for i in receipt.get("items", []))
+        label = f"📄 {store}" + (f" · {date}" if date else "") + f" · **{curr}{total:.2f}**"
+
+        with st.expander(label, expanded=len(st.session_state.receipts) == 1):
             items = receipt.get("items", [])
             if items:
-                items_df = pd.DataFrame(items)[["name", "category", "price", "quantity"]]
-                items_df.columns = ["Item", "Category", "Price", "Qty"]
-                items_df["Price"] = items_df["Price"].apply(lambda x: f"{receipt.get('currency','$')}{x:.2f}")
+                items_df = pd.DataFrame(items)
+                items_df["price_fmt"] = items_df["price"].apply(lambda x: f"{curr}{float(x or 0):.2f}")
+                display = items_df[["name", "category", "price_fmt", "quantity"]].copy()
+                display.columns = ["Item", "Category", "Price", "Qty"]
                 st.dataframe(
-                    items_df,
-                    use_container_width=True,
-                    hide_index=True,
+                    display, use_container_width=True, hide_index=True,
                     column_config={
                         "Item": st.column_config.TextColumn(width="large"),
                         "Category": st.column_config.TextColumn(width="medium"),
                         "Price": st.column_config.TextColumn(width="small"),
-                        "Qty": st.column_config.NumberColumn(width="small")
+                        "Qty": st.column_config.NumberColumn(width="small"),
                     }
                 )
-            else:
-                st.info("No items extracted from this receipt.")
 
-    # ── AI Saving Advice ──────────────────────────────────────────────────────
-    st.markdown("---")
-    st.markdown("#### 💡 AI Financial Advisor")
+    # ── AI Advice ─────────────────────────────────────────────────────────────
+    st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+    st.markdown("""<div style="font-size:0.75rem;color:#475569;text-transform:uppercase;
+                letter-spacing:2px;margin-bottom:16px;">AI Financial Advisor</div>""", unsafe_allow_html=True)
 
-    if st.button("🤖 Generate Personalized Saving Tips", use_container_width=True):
-        with st.spinner("Analyzing your spending habits... 💰"):
+    if st.button("💡 Generate Personalized Saving Tips", use_container_width=True):
+        with st.spinner("Analyzing your spending patterns..."):
             st.session_state.advice = generate_advice(st.session_state.receipts)
 
     if st.session_state.advice:
-        st.markdown(f"""<div class="advice-card">
-            <p class="advice-title">💡 Your Personalized Money-Saving Advice</p>
-            {st.session_state.advice.replace(chr(10), '<br>')}
-        </div>""", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div style="background:linear-gradient(135deg,rgba(16,185,129,0.06),rgba(14,165,233,0.06));
+                    border:1px solid rgba(16,185,129,0.2);border-radius:20px;padding:28px;margin-top:8px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+                <div style="width:36px;height:36px;border-radius:10px;
+                            background:linear-gradient(135deg,#059669,#0ea5e9);
+                            display:flex;align-items:center;justify-content:center;font-size:1.1rem;">💡</div>
+                <div style="font-size:1rem;font-weight:700;color:#f0fdf4;">Your Personalized Money-Saving Tips</div>
+            </div>
+            <div style="color:#94a3b8;line-height:1.8;font-size:0.95rem;">
+                {st.session_state.advice.replace(chr(10), '<br>')}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 else:
-    # Empty state
+    # ── Empty State ───────────────────────────────────────────────────────────
     st.markdown("""
-    <div style="text-align:center; padding: 60px 20px; color: #4a5568;">
-        <div style="font-size: 4rem; margin-bottom: 16px;">🧾</div>
-        <h3 style="color: #718096;">Upload your first receipt to get started</h3>
-        <p style="color: #4a5568;">Supports grocery bills, restaurant receipts, invoices, utility bills, and more.</p>
+    <div style="text-align:center;padding:60px 40px;margin-top:20px;">
+        <div style="width:80px;height:80px;border-radius:24px;
+                    background:linear-gradient(135deg,rgba(14,165,233,0.1),rgba(16,185,129,0.1));
+                    border:1px solid rgba(14,165,233,0.2);
+                    display:flex;align-items:center;justify-content:center;
+                    font-size:2.5rem;margin:0 auto 24px;">🧾</div>
+        <h3 style="color:#475569;font-weight:600;margin-bottom:8px;">Upload your first receipt</h3>
+        <p style="color:#334155;font-size:0.95rem;max-width:400px;margin:0 auto;">
+            Supports grocery bills, restaurant receipts, utility invoices, online order summaries and more.
+        </p>
+        <div style="display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap;">
+            {"".join([f'<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:10px 18px;color:#475569;font-size:0.85rem;">{icon} {name}</div>' for name,icon in [("Grocery","🛒"),("Restaurant","🍽️"),("Utility Bill","💡"),("Pharmacy","💊"),("Online Order","📦")]])}
+        </div>
     </div>
     """, unsafe_allow_html=True)
