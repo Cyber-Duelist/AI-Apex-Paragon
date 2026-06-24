@@ -240,7 +240,7 @@ with st.sidebar:
 
     if st.session_state.receipts:
         total = sum(
-            r.get("total") or sum(i.get("price", 0) for i in r.get("items", []))
+            r.get("total") or sum((float(i.get("price") or 0)) * (float(i.get("quantity") or 1)) for i in r.get("items", []))
             for r in st.session_state.receipts
         )
         sidebar_curr = st.session_state.receipts[0].get("currency", "$") if st.session_state.receipts else "$"
@@ -349,7 +349,7 @@ with col_left:
                 st.session_state.receipts.append(result)
                 st.session_state.advice = ""
                 store = result.get("store", "Unknown Store")
-                total = result.get("total") or sum(i.get("price", 0) for i in result.get("items", []))
+                total = result.get("total") or sum((float(i.get("price") or 0)) * (float(i.get("quantity") or 1)) for i in result.get("items", []))
                 curr = result.get("currency", "$")
                 st.markdown(f"""<div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);
                             border-radius:12px;padding:16px;color:#6ee7b7;margin-top:8px;">
@@ -368,12 +368,16 @@ if st.session_state.receipts:
     all_items = []
     for r in st.session_state.receipts:
         for item in r.get("items", []):
+            qty = float(item.get("quantity") or 1)
+            unit_price = float(item.get("price") or 0)
             all_items.append({
                 "name": item.get("name", "Unknown"),
-                "price": float(item.get("price") or 0),
+                "price": unit_price * qty,
                 "category": item.get("category", "Other"),
                 "store": r.get("store", "Unknown"),
-                "currency": r.get("currency", "$")
+                "currency": r.get("currency", "$"),
+                "qty": qty,
+                "unit_price": unit_price
             })
 
     df = pd.DataFrame(all_items)
@@ -472,7 +476,7 @@ if st.session_state.receipts:
         store = receipt.get("store", "Receipt")
         date = receipt.get("date", "")
         curr = receipt.get("currency", "$")
-        total = receipt.get("total") or sum(i.get("price", 0) for i in receipt.get("items", []))
+        total = receipt.get("total") or sum((float(i.get("price") or 0)) * (float(i.get("quantity") or 1)) for i in receipt.get("items", []))
         label = f"📄 {store}" + (f" · {date}" if date else "") + f" · **{curr}{total:.2f}**"
 
         with st.expander(label, expanded=len(st.session_state.receipts) == 1):
