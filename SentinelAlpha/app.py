@@ -154,20 +154,20 @@ with st.sidebar:
     ticker = st.text_input(
         "Stock Ticker",
         value="NVDA",
-        max_chars=5,
-        help="Enter a US stock ticker (e.g., AAPL, TSLA, NVDA, MSFT)"
+        max_chars=6,
+        help="Enter a US stock or Global ADR ticker (e.g., AAPL, NVDA, ASML, INFY)"
     ).upper().strip()
     
     filing_type = st.selectbox(
         "Filing Type",
-        ["10-K (Annual)", "10-Q (Quarterly)"],
+        ["Annual Report (10-K / 20-F)", "Quarterly Report (10-Q / 6-K)"],
         help="Select the SEC filing type to analyze"
     )
-    form_type = "10-K" if "10-K" in filing_type else "10-Q"
+    form_type = ["10-K", "20-F"] if "Annual" in filing_type else ["10-Q", "6-K"]
     
     st.markdown("---")
     st.markdown("### 📊 Quick Tickers")
-    quick_tickers = ["NVDA", "AAPL", "TSLA", "MSFT", "GOOGL", "META", "AMZN", "JPM"]
+    quick_tickers = ["NVDA", "AAPL", "MSFT", "ASML", "TSLA", "INFY", "BABA", "JPM"]
     cols = st.columns(4)
     for i, t in enumerate(quick_tickers):
         with cols[i % 4]:

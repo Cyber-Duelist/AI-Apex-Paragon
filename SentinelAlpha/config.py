@@ -33,6 +33,13 @@ TICKER_CIK_MAP = {
     "NFLX": "0001065280",
     "CRM": "0001108524",
     "AMD": "0000002488",
+    # Global ADRs
+    "INFY": "0001067491", # Infosys (India)
+    "HDB": "0001144967",  # HDFC Bank (India)
+    "ASML": "0000937966", # ASML (Europe)
+    "TSM": "0001046179",  # TSMC (Asia)
+    "BABA": "0001577552", # Alibaba (Asia)
+    "SONY": "0000313838", # Sony (Asia)
 }
 
 # ─── GROQ LLM ───────────────────────────────────────────────────────────────

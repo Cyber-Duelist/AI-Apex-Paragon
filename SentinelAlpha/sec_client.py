@@ -33,7 +33,7 @@ def get_cik(ticker: str) -> str | None:
     return None
 
 
-def get_recent_filings(ticker: str, form_type: str = "10-K", count: int = 5) -> list[dict]:
+def get_recent_filings(ticker: str, form_type: str | list[str] = "10-K", count: int = 5) -> list[dict]:
     """
     Get a list of recent SEC filings for a given ticker.
     Returns list of dicts with keys: accessionNumber, filingDate, form, primaryDocument.
@@ -58,9 +58,11 @@ def get_recent_filings(ticker: str, form_type: str = "10-K", count: int = 5) -> 
         accessions = recent.get("accessionNumber", [])
         primary_docs = recent.get("primaryDocument", [])
         
+        target_forms = form_type if isinstance(form_type, list) else [form_type]
+        
         filings = []
         for i, form in enumerate(forms):
-            if form == form_type and len(filings) < count:
+            if form in target_forms and len(filings) < count:
                 filings.append({
                     "accessionNumber": accessions[i],
                     "filingDate": dates[i],
