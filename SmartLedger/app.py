@@ -72,18 +72,17 @@ st.markdown("""
 }
 
 /* ── File uploader ── */
-[data-testid="stFileUploader"] {
+[data-testid="stFileUploadDropzone"] {
     background: rgba(14, 165, 233, 0.04) !important;
     border: 2px dashed rgba(14,165,233,0.3) !important;
     border-radius: 16px !important;
-    padding: 20px !important;
     transition: all 0.3s ease !important;
 }
-[data-testid="stFileUploader"]:hover {
+[data-testid="stFileUploadDropzone"]:hover {
     border-color: rgba(14,165,233,0.6) !important;
     background: rgba(14, 165, 233, 0.08) !important;
 }
-[data-testid="stFileUploader"] label { color: #94a3b8 !important; }
+[data-testid="stFileUploader"] label { color: #94a3b8 !important; font-weight: 600; }
 
 /* ── Expanders ── */
 [data-testid="stExpander"] {
@@ -327,11 +326,11 @@ with col_left:
         uploaded = st.file_uploader(
             "Drop your receipt or invoice image here",
             type=["jpg", "jpeg", "png", "webp"],
-            label_visibility="collapsed"
+            label_visibility="visible"
         )
         
     with tab2:
-        camera_photo = st.camera_input("Take a picture of a receipt", label_visibility="collapsed")
+        camera_photo = st.camera_input("Take a picture of a receipt", label_visibility="visible")
         
     source = uploaded or camera_photo
 
