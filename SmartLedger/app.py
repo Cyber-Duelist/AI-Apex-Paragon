@@ -321,17 +321,22 @@ st.markdown("""
 col_left, col_right = st.columns([1, 1], gap="large")
 
 with col_left:
-    st.markdown("""
-    <div style="font-size:0.75rem;color:#475569;text-transform:uppercase;
-                letter-spacing:2px;margin-bottom:12px;">Upload Receipt</div>
-    """, unsafe_allow_html=True)
-    uploaded = st.file_uploader(
-        "Drop your receipt or invoice image here",
-        type=["jpg", "jpeg", "png", "webp"],
-        label_visibility="visible"
-    )
-    if uploaded:
-        image = Image.open(uploaded).convert("RGB")
+    tab1, tab2 = st.tabs(["📁 Upload Image", "📸 Take Photo"])
+    
+    with tab1:
+        uploaded = st.file_uploader(
+            "Drop your receipt or invoice image here",
+            type=["jpg", "jpeg", "png", "webp"],
+            label_visibility="collapsed"
+        )
+        
+    with tab2:
+        camera_photo = st.camera_input("Take a picture of a receipt", label_visibility="collapsed")
+        
+    source = uploaded or camera_photo
+
+    if source:
+        image = Image.open(source).convert("RGB")
         with col_right:
             st.markdown("""
             <div style="font-size:0.75rem;color:#475569;text-transform:uppercase;
