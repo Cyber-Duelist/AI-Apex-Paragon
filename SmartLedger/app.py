@@ -370,6 +370,12 @@ with col_left:
 
 # ── RESULTS ───────────────────────────────────────────────────────────────────
 if st.session_state.receipts:
+    # Self-healing: remove any receipts that got saved with 0 items
+    valid_receipts = [r for r in st.session_state.receipts if r.get("items")]
+    if len(valid_receipts) != len(st.session_state.receipts):
+        st.session_state.receipts = valid_receipts
+        st.rerun()
+        
     all_items = []
     for r in st.session_state.receipts:
         for item in r.get("items", []):
