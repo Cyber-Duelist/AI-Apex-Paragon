@@ -241,11 +241,12 @@ with st.sidebar:
             r.get("total") or sum(i.get("price", 0) for i in r.get("items", []))
             for r in st.session_state.receipts
         )
+        sidebar_curr = st.session_state.receipts[0].get("currency", "$") if st.session_state.receipts else "$"
         r1, r2 = st.columns(2)
         with r1:
             st.metric("Receipts", len(st.session_state.receipts))
         with r2:
-            st.metric("Tracked", f"${total:.0f}")
+            st.metric("Tracked", f"{sidebar_curr}{total:.0f}")
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("🗑️ Clear All", use_container_width=True):
             st.session_state.receipts = []
