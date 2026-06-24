@@ -63,7 +63,6 @@ st.markdown("""
     font-size: 0.95rem !important;
     transition: all 0.3s ease !important;
     box-shadow: 0 4px 20px rgba(14,165,233,0.25) !important;
-    width: 100% !important;
 }
 .stButton > button:hover {
     transform: translateY(-2px) !important;
@@ -81,6 +80,16 @@ st.markdown("""
 [data-testid="stFileUploadDropzone"]:hover {
     border-color: rgba(14,165,233,0.6) !important;
     background: rgba(14, 165, 233, 0.08) !important;
+}
+[data-testid="stFileUploadDropzone"] button {
+    background: rgba(14, 165, 233, 0.1) !important;
+    border: 1px solid rgba(14, 165, 233, 0.4) !important;
+    color: #38bdf8 !important;
+    box-shadow: none !important;
+    padding: 4px 12px !important;
+    font-size: 0.85rem !important;
+    min-width: 0 !important;
+    width: auto !important;
 }
 [data-testid="stFileUploader"] label { color: #94a3b8 !important; font-weight: 600; }
 
