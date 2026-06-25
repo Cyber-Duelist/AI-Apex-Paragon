@@ -75,7 +75,7 @@
 
 /* Stats row */
 .statsRow {
-  display: grid; grid-template-columns: repeat(4, 1fr);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 1px; background: rgba(255,255,255,0.04);
 }
 
@@ -344,4 +344,31 @@
   .pharmacyBanner { background: #dcfce7 !important; color: #166534 !important; border: 1px solid #86efac !important; }
   .redFlagList li { background: #fee2e2 !important; color: #991b1b !important; border: 1px solid #fca5a5 !important; }
   .triagePill { background: #fff !important; border: 1px solid #ccc !important; }
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .body {
+    grid-template-columns: 1fr;
+    grid-template-rows: 40vh 1fr;
+  }
+  .queue {
+    border-right: none;
+    border-bottom: 2px solid rgba(255,255,255,0.1);
+  }
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .headerRight {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .twoCol {
+    grid-template-columns: 1fr;
+  }
+  .actionButtons {
+    flex-direction: column;
+  }
 }
