@@ -187,6 +187,7 @@
 /* Chat */
 .chat {
   flex: 1;
+  min-height: 0; /* CRITICAL: Forces flexbox to allow scrolling instead of blowing out parent height */
   overflow-y: auto;
   padding: 20px;
   display: flex;
