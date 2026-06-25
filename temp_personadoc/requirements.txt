@@ -1,0 +1,7 @@
+streamlit>=1.35.0
+chromadb
+sentence-transformers
+groq
+PyMuPDF
+charset-normalizer
+python-dotenv
