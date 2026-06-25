@@ -297,8 +297,8 @@
 }
 
 /* EMIS & PDF buttons */
-.emisBtn, .pdfBtn {
-  flex: 1;
+.emisBtn, .pdfBtn, .deleteBtn {
+  flex: 1; display: flex; justify-content: center; align-items: center; gap: 8px;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.1);
   color: #94a3b8; padding: 12px 20px; border-radius: 12px;
@@ -307,6 +307,13 @@
 }
 .emisBtn:hover, .pdfBtn:hover {
   background: rgba(255,255,255,0.08); color: #e2e8f0;
+}
+.deleteBtn {
+  color: #f87171;
+  border-color: rgba(248,113,113,0.3);
+}
+.deleteBtn:hover {
+  background: rgba(248,113,113,0.1); color: #fca5a5;
 }
 
 @keyframes fadeIn {

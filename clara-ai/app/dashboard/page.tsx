@@ -521,6 +521,19 @@ export default function DashboardPage() {
                 >
                   📄 Download PDF
                 </button>
+                <button
+                  className={styles.deleteBtn}
+                  onClick={() => {
+                    if (confirm("Are you sure you want to permanently delete this record?")) {
+                      const updated = patients.filter(p => p.sessionId !== selected.sessionId);
+                      setPatients(updated);
+                      localStorage.setItem("clara_patients", JSON.stringify(updated));
+                      setSelected(null);
+                    }
+                  }}
+                >
+                  🗑️ Delete
+                </button>
               </div>
             </div>
           ) : (
