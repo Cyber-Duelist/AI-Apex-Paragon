@@ -16,10 +16,11 @@ interface TriagePatient {
   red_flags: string[];
   severity: number;
   visionAnalysis?: {
-    image_type: string;
+    finding: string;
     clinical_observations: string[];
     risk_indicators: string[];
     urgency_signal: "LOW" | "MODERATE" | "HIGH";
+    estimated_severity_out_of_10: number;
     recommended_action: string;
     disclaimer: string;
   };
@@ -62,10 +63,11 @@ const DEMO_PATIENTS: TriagePatient[] = [
     clinical_summary:
       "32-year-old male with 3-day sore throat, mild odynophagia, no systemic symptoms. No fever. Centor score 1. Pharmacy First eligible. Self-care advice provided.",
     visionAnalysis: {
-      image_type: "Oropharyngeal photograph — posterior pharynx",
+      finding: "Oropharyngeal photograph — posterior pharynx",
       clinical_observations: ["Mild erythema of posterior pharyngeal wall", "No tonsillar exudate", "Uvula midline"],
       risk_indicators: ["none identified"],
       urgency_signal: "LOW",
+      estimated_severity_out_of_10: 4,
       recommended_action: "Pharmacy First referral appropriate. No urgent clinical review required.",
       disclaimer: "AI pre-screening only. Clinical assessment required by a qualified practitioner.",
     },

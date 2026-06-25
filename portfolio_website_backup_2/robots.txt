@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://cyber-duelist.github.io/AI-Apex-Paragon/portfolio/sitemap.xml
