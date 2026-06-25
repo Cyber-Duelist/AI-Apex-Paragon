@@ -53,9 +53,11 @@ export default function PatientPage() {
   const [isMuted, setIsMuted] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [sessionId] = useState(() => `session_${Date.now()}`);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const speakText = (text: string) => {
     if (isMuted || !window.speechSynthesis) return;
@@ -368,23 +370,31 @@ export default function PatientPage() {
 
         <div ref={messagesEndRef} />
       </div>
-
       {/* Input area */}
       <div className={styles.inputArea}>
-        {needsImage && (
-          <button
-            id="upload-image-btn"
-            className={styles.imageBtn}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            📷 Upload Photo
-          </button>
+        {needsImage && !imagePreview && (
+          <div className={styles.uploadOptions}>
+            <button className={styles.uploadBtn} onClick={() => fileInputRef.current?.click()}>
+              🖼️ Choose Photo
+            </button>
+            <button className={styles.uploadBtn} onClick={() => cameraInputRef.current?.click()}>
+              📸 Take Photo
+            </button>
+          </div>
         )}
         <input
           type="file"
           ref={fileInputRef}
           onChange={handleImageUpload}
           accept="image/*"
+          style={{ display: "none" }}
+        />
+        <input
+          type="file"
+          ref={cameraInputRef}
+          onChange={handleImageUpload}
+          accept="image/*"
+          capture="environment"
           style={{ display: "none" }}
         />
         <div className={styles.inputRow}>
