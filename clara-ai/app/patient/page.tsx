@@ -385,7 +385,6 @@ export default function PatientPage() {
           ref={fileInputRef}
           onChange={handleImageUpload}
           accept="image/*"
-          capture="environment"
           style={{ display: "none" }}
         />
         <div className={styles.inputRow}>
