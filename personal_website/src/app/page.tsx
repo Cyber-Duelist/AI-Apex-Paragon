@@ -139,7 +139,7 @@ function EntityHub() {
         className="flex flex-col md:flex-row gap-6 w-full max-w-2xl justify-center z-10"
       >
         <PortalButton 
-          href="/AI-Apex-Paragon/portfolio/"
+          href="/AI-Apex-Paragon/"
           icon={<Zap className="w-5 h-5 group-hover:text-[#00e5ff] transition-colors duration-500" />}
           title="ENTER PORTFOLIO"
           subtitle="Explore highly detailed architectural case studies, the 3D Neural Swarm, and speak with my AI assistant."
