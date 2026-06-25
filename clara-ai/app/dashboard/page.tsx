@@ -159,10 +159,10 @@ export default function DashboardPage() {
 
           <div class="box">
             <h3>Clinical Summary (SOAP)</h3>
-            <p style="margin: 0; padding-bottom: 5px;"><strong>S:</strong> ${patient.soap_note.subjective}</p>
-            <p style="margin: 0; padding-bottom: 5px;"><strong>O:</strong> ${patient.soap_note.objective}</p>
-            <p style="margin: 0; padding-bottom: 5px;"><strong>A:</strong> ${patient.soap_note.assessment}</p>
-            <p style="margin: 0;"><strong>P:</strong> ${patient.soap_note.plan}</p>
+            <p style="margin: 0; padding-bottom: 5px;"><strong>S:</strong> ${patient.soap_note?.subjective || patient.clinical_summary || 'N/A'}</p>
+            <p style="margin: 0; padding-bottom: 5px;"><strong>O:</strong> ${patient.soap_note?.objective || 'N/A'}</p>
+            <p style="margin: 0; padding-bottom: 5px;"><strong>A:</strong> ${patient.soap_note?.assessment || 'N/A'}</p>
+            <p style="margin: 0;"><strong>P:</strong> ${patient.soap_note?.plan || 'N/A'}</p>
           </div>
 
           <div class="box" style="background: ${patient.red_flags.length > 0 ? '#fef2f2' : '#f8fafc'}; border-color: ${patient.red_flags.length > 0 ? '#fecaca' : '#e2e8f0'};">
@@ -403,10 +403,10 @@ export default function DashboardPage() {
               <div className={styles.section}>
                 <h3 className={styles.sectionTitle}>📄 Clinical Summary (SOAP)</h3>
                 <div className={styles.soapGrid}>
-                  <div className={styles.soapBlock}><strong>S:</strong> {selected.soap_note.subjective}</div>
-                  <div className={styles.soapBlock}><strong>O:</strong> {selected.soap_note.objective}</div>
-                  <div className={styles.soapBlock}><strong>A:</strong> {selected.soap_note.assessment}</div>
-                  <div className={styles.soapBlock}><strong>P:</strong> {selected.soap_note.plan}</div>
+                  <div className={styles.soapBlock}><strong>S:</strong> {selected.soap_note?.subjective || (selected as any).clinical_summary || 'N/A'}</div>
+                  <div className={styles.soapBlock}><strong>O:</strong> {selected.soap_note?.objective || 'N/A'}</div>
+                  <div className={styles.soapBlock}><strong>A:</strong> {selected.soap_note?.assessment || 'N/A'}</div>
+                  <div className={styles.soapBlock}><strong>P:</strong> {selected.soap_note?.plan || 'N/A'}</div>
                 </div>
               </div>
 
@@ -497,8 +497,19 @@ export default function DashboardPage() {
                   id="copy-emis-btn"
                   className={styles.emisBtn}
                   onClick={() => {
-                    const text = `CLARA Clinical Summary\n\nPatient: ${selected.patient_name} | DOB: ${selected.dob}\nUrgency: ${selected.urgency}\nAction: ${selected.action}\n\nS: ${selected.soap_note.subjective}\nO: ${selected.soap_note.objective}\nA: ${selected.soap_note.assessment}\nP: ${selected.soap_note.plan}\n\nRed Flags: ${selected.red_flags.join(", ") || "None"}\nSeverity: ${selected.severity}/10`;
-                    navigator.clipboard.writeText(text);
+                    const soap = selected.soap_note || { subjective: (selected as any).clinical_summary || "N/A", objective: "N/A", assessment: "N/A", plan: "N/A" };
+                    const text = `CLARA Clinical Summary\n\nPatient: ${selected.patient_name} | DOB: ${selected.dob}\nUrgency: ${selected.urgency}\nAction: ${selected.action}\n\nS: ${soap.subjective}\nO: ${soap.objective}\nA: ${soap.assessment}\nP: ${soap.plan}\n\nRed Flags: ${selected.red_flags?.join(", ") || "None"}\nSeverity: ${selected.severity}/10`;
+                    
+                    if (navigator.clipboard) {
+                      navigator.clipboard.writeText(text).then(() => {
+                        alert("Copied to clipboard!");
+                      }).catch((err) => {
+                        alert("Failed to copy. Your browser might block clipboard access.");
+                        console.error(err);
+                      });
+                    } else {
+                      alert("Clipboard API not available. Please copy manually.");
+                    }
                   }}
                 >
                   📋 Copy to EMIS
