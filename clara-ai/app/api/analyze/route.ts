@@ -3,9 +3,10 @@ import Groq from "groq-sdk";
 
 export const maxDuration = 60; // Allow up to 60 seconds for Vercel Hobby tier
 
-// Fix Vercel environment variable concatenation bug
+// Fix Vercel environment variable concatenation bug aggressively
 const rawKey = process.env.GROQ_API_KEY || "";
-const cleanKey = rawKey.includes(" ") ? rawKey.split(" ")[0] : rawKey;
+const match = rawKey.match(/gsk_[a-zA-Z0-9]+/);
+const cleanKey = match ? match[0] : rawKey;
 const groq = new Groq({ apiKey: cleanKey });
 
 const VISION_PROMPT = `You are a clinical AI assistant helping to pre-screen patient-submitted images for an NHS GP surgery. 
