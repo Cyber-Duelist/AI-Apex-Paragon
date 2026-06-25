@@ -1,5 +1,5 @@
 .page {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -101,6 +101,7 @@
   border-right: 1px solid rgba(255,255,255,0.06);
   display: flex; flex-direction: column;
   overflow: hidden;
+  min-height: 0;
 }
 
 .filterTabs {
@@ -168,6 +169,7 @@
 .detail {
   overflow-y: auto; padding: 28px;
   display: flex; flex-direction: column;
+  min-height: 0;
 }
 
 .emptyDetail {
