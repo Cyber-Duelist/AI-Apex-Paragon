@@ -128,10 +128,16 @@ export default function PatientPage() {
         body: JSON.stringify({
           messages: isInit
             ? [{ role: "user", content: "Hello" }]
-            : newMessages.map((m) => ({ 
-                role: m.role, 
-                content: m.hiddenContext ? `${m.content}\n\n[SYSTEM KNOWLEDGE INJECTION]: ${m.hiddenContext}` : m.content 
-              })),
+            : newMessages.flatMap((m) => {
+                const msgs: any[] = [{ role: m.role, content: m.content }];
+                if (m.hiddenContext) {
+                  msgs.push({ 
+                    role: "user", 
+                    content: `[SYSTEM ALERT - DO NOT REPLY TO THIS]: ${m.hiddenContext}` 
+                  });
+                }
+                return msgs;
+              }),
           sessionId,
         }),
       });
@@ -209,7 +215,10 @@ export default function PatientPage() {
       const analysisMsg: Message = {
         role: "assistant",
         content: `Thank you for the image. I've completed a preliminary visual assessment. The analysis has been added to your case file. I'll continue with a couple more questions to complete your triage.`,
-        hiddenContext: `The user just uploaded an image. Vision AI Analysis: Finding: ${data.analysis.finding}. Estimated Severity: ${data.analysis.estimated_severity_out_of_10}/10. CRITICAL INSTRUCTION: DO NOT ask the user to rate their severity out of 10. You ALREADY have the severity score from the Vision AI (${data.analysis.estimated_severity_out_of_10}/10). Use this severity score to complete the triage JSON now without asking the patient to rate it.`,
+        hiddenContext: `The Vision AI has successfully analyzed the image. 
+Finding: ${data.analysis.finding}. 
+Estimated Severity: ${data.analysis.estimated_severity_out_of_10}/10. 
+CRITICAL RULE: You MUST NOT ask the patient to rate their severity out of 10 anymore. You already have the score. Use the Vision AI's severity score and immediately complete the <TRIAGE> block if you have enough other information.`,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, analysisMsg]);
