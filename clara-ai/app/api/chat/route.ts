@@ -100,10 +100,14 @@ export async function POST(req: NextRequest) {
     // Check if CLARA is requesting an image using the robust token
     const needsImage = content.includes("[REQUEST_IMAGE]");
 
-    const cleanContent = content
+    let cleanContent = content
       .replace(/<TRIAGE>[\s\S]*?<\/TRIAGE>/, "")
       .replace(/\[REQUEST_IMAGE\]/g, "")
       .trim();
+
+    if (triageData && !cleanContent) {
+      cleanContent = "Thank you. I have collected all the necessary information. Your triage is complete and has been sent to the clinical team.";
+    }
 
     return NextResponse.json({
       message: cleanContent,
