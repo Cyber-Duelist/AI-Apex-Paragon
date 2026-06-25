@@ -3,7 +3,10 @@ import Groq from "groq-sdk";
 
 export const maxDuration = 60; // Allow up to 60 seconds for Vercel Hobby tier
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+// Fix Vercel environment variable concatenation bug
+const rawKey = process.env.GROQ_API_KEY || "";
+const cleanKey = rawKey.includes(" ") ? rawKey.split(" ")[0] : rawKey;
+const groq = new Groq({ apiKey: cleanKey });
 
 const CLARA_SYSTEM_PROMPT = `You are CLARA (Clinical Language & Adaptive Routing Assistant), an intelligent AI triage receptionist for an NHS GP surgery in the UK.
 
