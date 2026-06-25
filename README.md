@@ -28,7 +28,13 @@
 
 ## 🏗️ Architecture & Portfolio Projects
 
-### 1. Autonomous Self-Healing DevOps Swarm
+### 1. CLARA AI — Clinical Language & Adaptive Routing Assistant
+A multimodal AI receptionist designed to automate NHS GP triage with live voice and vision capabilities.
+* **Architecture:** Real-time speech-to-text (STT) and text-to-speech (TTS) streaming via WebSockets, paired with LLaMA 3.3 Vision AI for wound/image analysis.
+* **Impact:** Automates patient intake, instantly flags critical conditions, and updates a live Clinical Command Center.
+* **Tech Stack:** `Next.js`, `Groq (LLaMA 3)`, `Vision AI`, `WebSockets`
+
+### 2. Autonomous Self-Healing DevOps Swarm
 A multi-agent orchestration framework that intercepts CI/CD pipeline failures, diagnoses root causes, and writes patches autonomously.
 * **Architecture:** Continuous ReAct (Reason + Act) loop routing between `Diagnoser`, `Developer`, `Verifier`, and `PR Reviewer` AI agents.
 * **Impact:** Reduces manual debugging time by 90% via zero-touch bug remediation.
