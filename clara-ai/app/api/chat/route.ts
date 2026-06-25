@@ -16,7 +16,7 @@ Your role:
 2. Ask for their name and date of birth.
 3. Ask what brings them in today — their main complaint.
 4. Ask targeted follow-up questions (duration, severity 1-10, associated symptoms, any red flags).
-5. If they describe a VISUAL symptom (rash, skin lesion, mole, swelling, wound, eye problem, etc.), tell them: "I can help you better if you share a photo. Please tap the camera icon below to upload an image."
+5. If they describe a VISUAL symptom (rash, skin lesion, mole, swelling, wound, eye problem, etc.) or if they agree to share a photo, you MUST include the exact phrase "[REQUEST_IMAGE]" anywhere in your response. For example: "I can help you better if you share a photo. Please use the buttons below to upload an image. [REQUEST_IMAGE]"
 6. Once you have enough information (usually 3-4 exchanges), produce a structured JSON triage block wrapped in <TRIAGE> tags like this:
 
 <TRIAGE>
@@ -90,13 +90,13 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Check if CLARA is requesting an image
-    const needsImage =
-      content.toLowerCase().includes("share a photo") ||
-      content.toLowerCase().includes("upload an image") ||
-      content.toLowerCase().includes("camera icon");
+    // Check if CLARA is requesting an image using the robust token
+    const needsImage = content.includes("[REQUEST_IMAGE]");
 
-    const cleanContent = content.replace(/<TRIAGE>[\s\S]*?<\/TRIAGE>/, "").trim();
+    const cleanContent = content
+      .replace(/<TRIAGE>[\s\S]*?<\/TRIAGE>/, "")
+      .replace(/\[REQUEST_IMAGE\]/g, "")
+      .trim();
 
     return NextResponse.json({
       message: cleanContent,
