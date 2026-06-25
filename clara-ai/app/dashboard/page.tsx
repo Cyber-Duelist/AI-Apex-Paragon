@@ -430,17 +430,17 @@ export default function DashboardPage() {
                     <div
                       className={styles.severityFill}
                       style={{
-                        width: `${(selected.severity / 10) * 100}%`,
+                        width: `${(parseInt(selected.severity as any) || 0) / 10 * 100}%`,
                         background:
-                          selected.severity >= 8
+                          (parseInt(selected.severity as any) || 0) >= 8
                             ? "#ef4444"
-                            : selected.severity >= 5
+                            : (parseInt(selected.severity as any) || 0) >= 5
                             ? "#f97316"
                             : "#22c55e",
                       }}
                     />
                   </div>
-                  <p className={styles.severityNum}>{selected.severity}/10</p>
+                  <p className={styles.severityNum}>{parseInt(selected.severity as any) || "N/A"}/10</p>
                 </div>
               </div>
 
