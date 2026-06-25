@@ -159,7 +159,7 @@ export default function DashboardPage() {
 
           <div class="box">
             <h3>Clinical Summary (SOAP)</h3>
-            <p style="margin: 0; padding-bottom: 5px;"><strong>S:</strong> ${patient.soap_note?.subjective || patient.clinical_summary || 'N/A'}</p>
+            <p style="margin: 0; padding-bottom: 5px;"><strong>S:</strong> ${patient.soap_note?.subjective || (patient as any).clinical_summary || 'N/A'}</p>
             <p style="margin: 0; padding-bottom: 5px;"><strong>O:</strong> ${patient.soap_note?.objective || 'N/A'}</p>
             <p style="margin: 0; padding-bottom: 5px;"><strong>A:</strong> ${patient.soap_note?.assessment || 'N/A'}</p>
             <p style="margin: 0;"><strong>P:</strong> ${patient.soap_note?.plan || 'N/A'}</p>
