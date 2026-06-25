@@ -312,7 +312,7 @@ export default function PatientPage() {
               {visionAnalysis.urgency_signal} SIGNAL
             </span>
           </div>
-          <p className={styles.visionType}>{visionAnalysis.image_type}</p>
+          <p className={styles.visionType}>{visionAnalysis.finding}</p>
           <ul className={styles.visionList}>
             {visionAnalysis.clinical_observations.map((o, i) => (
               <li key={i}>{o}</li>
