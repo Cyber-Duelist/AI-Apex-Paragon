@@ -100,10 +100,10 @@ export async function POST(req: NextRequest) {
       needsImage,
       sessionId,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Chat API error:", error);
     return NextResponse.json(
-      { error: "CLARA is temporarily unavailable. Please try again." },
+      { error: error.message || String(error) },
       { status: 500 }
     );
   }

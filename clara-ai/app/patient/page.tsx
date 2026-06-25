@@ -163,12 +163,12 @@ export default function PatientPage() {
       }
 
       if (data.needsImage) setNeedsImage(true);
-    } catch {
+    } catch (err: any) {
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: "I'm sorry, I'm having trouble connecting. Please try again.",
+          content: `ERROR: ${err.message}`,
           timestamp: new Date(),
         },
       ]);
