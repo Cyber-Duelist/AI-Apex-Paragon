@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import Groq from "groq-sdk";
 
+export const maxDuration = 60; // Allow up to 60 seconds for Vercel Hobby tier
+
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const CLARA_SYSTEM_PROMPT = `You are CLARA (Clinical Language & Adaptive Routing Assistant), an intelligent AI triage receptionist for an NHS GP surgery in the UK.
