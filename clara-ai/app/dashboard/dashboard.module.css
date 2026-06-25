@@ -210,6 +210,30 @@
   border-radius: 12px; padding: 16px;
 }
 
+.soapGrid {
+  display: flex; flex-direction: column; gap: 8px;
+  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px; padding: 16px;
+}
+
+.soapBlock {
+  font-size: 0.85rem; color: #cbd5e1; line-height: 1.6;
+}
+.soapBlock strong {
+  color: #94a3b8; margin-right: 4px;
+}
+
+@keyframes emergencyPulse {
+  0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
+  100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+}
+
+.emergencyPulse {
+  animation: emergencyPulse 2s infinite;
+  border-color: rgba(239,68,68,0.5) !important;
+}
+
 .twoCol { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
 .redFlagList { list-style: none; display: flex; flex-direction: column; gap: 6px; }

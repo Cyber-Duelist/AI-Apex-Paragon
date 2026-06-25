@@ -12,7 +12,12 @@ interface TriagePatient {
   urgency: "EMERGENCY" | "URGENT" | "ROUTINE" | "ADMIN";
   action: string;
   pharmacy_first: boolean;
-  clinical_summary: string;
+  soap_note: {
+    subjective: string;
+    objective: string;
+    assessment: string;
+    plan: string;
+  };
   red_flags: string[];
   severity: number;
   visionAnalysis?: {
@@ -46,8 +51,12 @@ const DEMO_PATIENTS: TriagePatient[] = [
     pharmacy_first: false,
     severity: 7,
     red_flags: ["chest tightness", "shortness of breath"],
-    clinical_summary:
-      "48-year-old female presenting with 2-day history of chest tightness radiating to left arm, rated 7/10. Associated dyspnoea on exertion. No fever. ECG advised. Same-day clinical review required.",
+    soap_note: {
+      subjective: "48-year-old female presenting with 2-day history of chest tightness radiating to left arm, rated 7/10. Associated dyspnoea on exertion.",
+      objective: "AI Triage. No visual data.",
+      assessment: "Query Acute Coronary Syndrome. High clinical concern.",
+      plan: "ECG advised. Same-day clinical review required."
+    },
   },
   {
     sessionId: "demo_2",
@@ -60,8 +69,12 @@ const DEMO_PATIENTS: TriagePatient[] = [
     pharmacy_first: true,
     severity: 4,
     red_flags: [],
-    clinical_summary:
-      "32-year-old male with 3-day sore throat, mild odynophagia, no systemic symptoms. No fever. Centor score 1. Pharmacy First eligible. Self-care advice provided.",
+    soap_note: {
+      subjective: "32-year-old male with 3-day sore throat, mild odynophagia, no systemic symptoms. No fever.",
+      objective: "AI Triage. Vision AI confirmed mild erythema, no tonsillar exudate.",
+      assessment: "Centor score 1. Likely viral pharyngitis.",
+      plan: "Pharmacy First referral appropriate. Self-care advice provided."
+    },
     visionAnalysis: {
       finding: "Oropharyngeal photograph — posterior pharynx",
       clinical_observations: ["Mild erythema of posterior pharyngeal wall", "No tonsillar exudate", "Uvula midline"],
@@ -83,8 +96,12 @@ const DEMO_PATIENTS: TriagePatient[] = [
     pharmacy_first: false,
     severity: 10,
     red_flags: ["thunderclap headache", "worst headache of life", "sudden onset"],
-    clinical_summary:
-      "75-year-old female reporting sudden onset severe headache described as 'worst of life', 10/10. Onset during exertion. No trauma. Neck stiffness reported. Subarachnoid haemorrhage cannot be excluded. 999 activated.",
+    soap_note: {
+      subjective: "75-year-old female reporting sudden onset severe headache described as 'worst of life', 10/10. Onset during exertion. No trauma. Neck stiffness reported.",
+      objective: "AI Triage. No visual data.",
+      assessment: "Subarachnoid haemorrhage cannot be excluded. Emergency.",
+      plan: "999 activated immediately."
+    },
   },
 ];
 
@@ -141,8 +158,11 @@ export default function DashboardPage() {
           </div>
 
           <div class="box">
-            <h3>Clinical Summary (HPC)</h3>
-            <p style="margin: 0;">${patient.clinical_summary}</p>
+            <h3>Clinical Summary (SOAP)</h3>
+            <p style="margin: 0; padding-bottom: 5px;"><strong>S:</strong> ${patient.soap_note.subjective}</p>
+            <p style="margin: 0; padding-bottom: 5px;"><strong>O:</strong> ${patient.soap_note.objective}</p>
+            <p style="margin: 0; padding-bottom: 5px;"><strong>A:</strong> ${patient.soap_note.assessment}</p>
+            <p style="margin: 0;"><strong>P:</strong> ${patient.soap_note.plan}</p>
           </div>
 
           <div class="box" style="background: ${patient.red_flags.length > 0 ? '#fef2f2' : '#f8fafc'}; border-color: ${patient.red_flags.length > 0 ? '#fecaca' : '#e2e8f0'};">
@@ -264,6 +284,21 @@ export default function DashboardPage() {
             <span className={styles.statLabel}>{key}</span>
           </div>
         ))}
+        {/* Quick Analytics Panel */}
+        <div className={styles.statCard} style={{ borderColor: "#8b5cf630" }}>
+          <span className={styles.statIcon}>⏱️</span>
+          <span className={styles.statNum} style={{ color: "#8b5cf6" }}>
+            {patients.length * 5}m
+          </span>
+          <span className={styles.statLabel}>GP TIME SAVED</span>
+        </div>
+        <div className={styles.statCard} style={{ borderColor: "#10b98130" }}>
+          <span className={styles.statIcon}>👥</span>
+          <span className={styles.statNum} style={{ color: "#10b981" }}>
+            {patients.length}
+          </span>
+          <span className={styles.statLabel}>TOTAL TRIAGED</span>
+        </div>
       </div>
 
       <div className={styles.body}>
@@ -301,7 +336,7 @@ export default function DashboardPage() {
                 <button
                   key={p.sessionId}
                   id={`patient-${p.sessionId}`}
-                  className={`${styles.patientCard} ${selected?.sessionId === p.sessionId ? styles.selectedCard : ""}`}
+                  className={`${styles.patientCard} ${selected?.sessionId === p.sessionId ? styles.selectedCard : ""} ${p.urgency === "EMERGENCY" ? styles.emergencyPulse : ""}`}
                   onClick={() => setSelected(p)}
                   style={
                     selected?.sessionId === p.sessionId
@@ -364,10 +399,15 @@ export default function DashboardPage() {
                 <span className={styles.actionValue}>{selected.action}</span>
               </div>
 
-              {/* Clinical summary */}
+              {/* Clinical summary (SOAP) */}
               <div className={styles.section}>
-                <h3 className={styles.sectionTitle}>📄 Clinical Summary (HPC)</h3>
-                <p className={styles.summaryText}>{selected.clinical_summary}</p>
+                <h3 className={styles.sectionTitle}>📄 Clinical Summary (SOAP)</h3>
+                <div className={styles.soapGrid}>
+                  <div className={styles.soapBlock}><strong>S:</strong> {selected.soap_note.subjective}</div>
+                  <div className={styles.soapBlock}><strong>O:</strong> {selected.soap_note.objective}</div>
+                  <div className={styles.soapBlock}><strong>A:</strong> {selected.soap_note.assessment}</div>
+                  <div className={styles.soapBlock}><strong>P:</strong> {selected.soap_note.plan}</div>
+                </div>
               </div>
 
               {/* Severity + red flags */}
@@ -457,7 +497,7 @@ export default function DashboardPage() {
                   id="copy-emis-btn"
                   className={styles.emisBtn}
                   onClick={() => {
-                    const text = `CLARA Clinical Summary\n\nPatient: ${selected.patient_name} | DOB: ${selected.dob}\nUrgency: ${selected.urgency}\nAction: ${selected.action}\n\nHPC: ${selected.clinical_summary}\n\nRed Flags: ${selected.red_flags.join(", ") || "None"}\nSeverity: ${selected.severity}/10`;
+                    const text = `CLARA Clinical Summary\n\nPatient: ${selected.patient_name} | DOB: ${selected.dob}\nUrgency: ${selected.urgency}\nAction: ${selected.action}\n\nS: ${selected.soap_note.subjective}\nO: ${selected.soap_note.objective}\nA: ${selected.soap_note.assessment}\nP: ${selected.soap_note.plan}\n\nRed Flags: ${selected.red_flags.join(", ") || "None"}\nSeverity: ${selected.severity}/10`;
                     navigator.clipboard.writeText(text);
                   }}
                 >
