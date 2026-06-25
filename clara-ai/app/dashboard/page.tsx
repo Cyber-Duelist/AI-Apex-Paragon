@@ -417,7 +417,7 @@ export default function DashboardPage() {
                   <h3 className={styles.sectionTitle}>🔬 Vision AI Analysis</h3>
                   <div className={styles.visionCard}>
                     <div className={styles.visionMeta}>
-                      <span>{selected.visionAnalysis.image_type}</span>
+                      <span>{selected.visionAnalysis.finding}</span>
                       <span
                         className={styles.visionSignal}
                         style={{
