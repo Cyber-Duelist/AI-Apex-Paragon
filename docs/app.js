@@ -2183,6 +2183,10 @@ RULES:
                 "entity": "This is a computer vision financial tool. It analyzes images of your receipts using Groq's Vision models, instantly categorizes every single purchase, and visualizes your spending habits.",
                 "ultraman": "Shuwatch! An ultra-precise vision scanner! It fires its Spacium Beam to read your receipts and helps you save money to rebuild the city!"
             },
+            "CLARA AI — Clinical Language & Adaptive Routing Assistant": {
+                "entity": "This is a cutting-edge multimodal AI receptionist for healthcare. It combines real-time voice chat with computer vision to let patients describe symptoms and show wounds, automatically triaging them for doctors.",
+                "ultraman": "Shuwatch! The ultimate medical support unit! It uses ultra-speed voice and vision AI to assess injured citizens, ensuring they get life-saving treatment instantly!"
+            },
             "Autonomous Self-Healing DevOps Swarm": "This project acts like a team of robot mechanics. If the website's code breaks, these robots automatically find the bug, write the fix, and repair it without any human help!",
             "Enterprise Production Agent": "Think of this like a digital security guard and manager combined. It strictly controls what AI models can say and automatically switches to backups if one breaks.",
             "PersonaDoc — Production RAG": "This is a smart document reader. You upload a massive PDF, and instead of reading it yourself, you can just ask it questions and it will instantly give you the exact answer.",
