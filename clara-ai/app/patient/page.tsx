@@ -135,6 +135,7 @@ export default function PatientPage() {
       });
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "API returned an error");
 
       const assistantMessage: Message = {
         role: "assistant",
