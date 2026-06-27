@@ -10,47 +10,6 @@ from bs4 import BeautifulSoup
 from config import SEC_BASE_URL, SEC_USER_AGENT, TICKER_CIK_MAP
 
 
-
-import random
-
-def _get_free_proxy() -> str | None:
-    try:
-        url = 'https://api.proxyscrape.com/v2/?request=displayproxies&protocol=http&timeout=5000&country=US&ssl=yes&anonymity=elite'
-        # We must use requests directly here to avoid infinite recursion
-        import requests as _req
-        resp = _req.get(url, timeout=5)
-        proxies = [p for p in resp.text.strip().split('\r\n') if p]
-        if proxies:
-            return random.choice(proxies)
-    except Exception:
-        pass
-    return None
-
-def _robust_get(url: str, headers: dict, timeout: int = 15):
-    import requests as _req
-    try:
-        resp = _req.get(url, headers=headers, timeout=timeout)
-        if resp.status_code == 403:
-            raise PermissionError("403 Forbidden")
-        return resp
-    except Exception as e:
-        print(f"[SEC Client] Direct connection failed ({e}). Attempting proxy rotation...")
-        for i in range(3):
-            proxy = _get_free_proxy()
-            if not proxy:
-                continue
-            print(f"[SEC Client] Trying proxy: {proxy}")
-            try:
-                proxies = {"http": f"http://{proxy}", "https": f"http://{proxy}"}
-                resp = _req.get(url, headers=headers, proxies=proxies, timeout=timeout)
-                if resp.status_code == 200:
-                    print("[SEC Client] Proxy request successful.")
-                    return resp
-            except Exception:
-                continue
-        # Fallback to a final direct request that will raise the actual HTTP error
-        return _req.get(url, headers=headers, timeout=timeout)
-
 def get_cik(ticker: str) -> str | None:
     """Resolve a stock ticker to its SEC CIK number."""
     ticker = ticker.upper().strip()
@@ -60,7 +19,7 @@ def get_cik(ticker: str) -> str | None:
     # Fallback: query SEC company tickers JSON
     try:
         headers = {"User-Agent": SEC_USER_AGENT}
-        resp = _robust_get(
+        resp = requests.get(
             "https://www.sec.gov/files/company_tickers.json",
             headers=headers, timeout=10
         )
@@ -91,7 +50,7 @@ def get_recent_filings(ticker: str, form_type: str | list[str] = "10-K", count: 
     url = f"{SEC_BASE_URL}/submissions/CIK{cik}.json"
     
     try:
-        resp = _robust_get(url, headers=headers, timeout=15)
+        resp = requests.get(url, headers=headers, timeout=15)
         if resp.status_code == 403:
             raise PermissionError("SEC EDGAR blocked this IP (HTTP 403).")
         if resp.status_code != 200:
@@ -134,7 +93,7 @@ def _find_htm_filing(cik: str, accession_no: str) -> str:
     
     try:
         time.sleep(0.12)
-        resp = _robust_get(index_url, headers=headers, timeout=15)
+        resp = requests.get(index_url, headers=headers, timeout=15)
         if resp.status_code != 200:
             return ""
         
@@ -270,7 +229,7 @@ def get_filing_document(filing: dict, max_chars: int = 15000) -> str:
     try:
         time.sleep(0.15)  # Respect SEC rate limits
         print(f"[SEC Client] Downloading filing: {url}")
-        resp = _robust_get(url, headers=headers, timeout=30)
+        resp = requests.get(url, headers=headers, timeout=30)
         if resp.status_code != 200:
             print(f"[SEC Client] HTTP {resp.status_code} for primary doc")
             return ""
@@ -287,7 +246,7 @@ def get_filing_document(filing: dict, max_chars: int = 15000) -> str:
                 alt_url = f"https://www.sec.gov/Archives/edgar/data/{cik}/{accession_clean}/{alt_doc}"
                 time.sleep(0.15)
                 print(f"[SEC Client] Trying alternative doc: {alt_url}")
-                alt_resp = _robust_get(alt_url, headers=headers, timeout=30)
+                alt_resp = requests.get(alt_url, headers=headers, timeout=30)
                 if alt_resp.status_code == 200:
                     alt_text = _clean_ixbrl_text(alt_resp.text)
                     if len(alt_text) > len(text):
@@ -362,7 +321,7 @@ def get_company_name(ticker: str) -> str:
     url = f"{SEC_BASE_URL}/submissions/CIK{cik}.json"
     
     try:
-        resp = _robust_get(url, headers=headers, timeout=10)
+        resp = requests.get(url, headers=headers, timeout=10)
         if resp.status_code == 200:
             return resp.json().get("name", ticker)
     except Exception:
