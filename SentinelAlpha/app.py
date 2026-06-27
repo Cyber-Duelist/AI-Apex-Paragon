@@ -220,7 +220,12 @@ if run_analysis and ticker:
         st.write(f"Company: **{company_name}**")
         
         st.write(f"Fetching recent {form_type} filings from SEC EDGAR...")
-        filings = get_recent_filings(ticker, form_type=form_type, count=3)
+        try:
+            filings = get_recent_filings(ticker, form_type=form_type, count=3)
+        except Exception as e:
+            filings = []
+            st.error(f"⚠️ **SEC API Error:** {e}")
+            st.warning("ℹ️ **Note:** The SEC often blocks requests from cloud IPs like Hugging Face Spaces. If you are seeing this error, please run the app locally.")
         
         filing_text = ""
         risk_text = ""

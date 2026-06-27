@@ -42,13 +42,19 @@ def get_recent_filings(ticker: str, form_type: str | list[str] = "10-K", count: 
     if not cik:
         return []
     
-    headers = {"User-Agent": SEC_USER_AGENT}
+    headers = {
+        "User-Agent": SEC_USER_AGENT,
+        "Accept-Encoding": "gzip, deflate",
+        "Host": "data.sec.gov"
+    }
     url = f"{SEC_BASE_URL}/submissions/CIK{cik}.json"
     
     try:
         resp = requests.get(url, headers=headers, timeout=15)
+        if resp.status_code == 403:
+            raise PermissionError("SEC EDGAR blocked this IP (HTTP 403).")
         if resp.status_code != 200:
-            return []
+            raise ValueError(f"SEC EDGAR returned HTTP {resp.status_code}.")
         
         data = resp.json()
         recent = data.get("filings", {}).get("recent", {})
@@ -73,7 +79,7 @@ def get_recent_filings(ticker: str, form_type: str | list[str] = "10-K", count: 
         return filings
     except Exception as e:
         print(f"[SEC Client] Error fetching filings: {e}")
-        return []
+        raise e
 
 
 def _find_htm_filing(cik: str, accession_no: str) -> str:
