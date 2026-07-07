@@ -1,4 +1,4 @@
-const API_URL = "https://iamentity-neuralheist.hf.space/api/chat";
+const API_URL = "/api/chat";
 
 let currentLevel = 1;
 const maxLevel = 3;
