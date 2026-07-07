@@ -8,53 +8,173 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Modern Tools -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js" defer></script>
+    
     <style>
-        /* Article specific styling */
-        body { background-color: var(--bg-color); color: var(--text-color); }
-        .article-container {
-            max-width: 800px;
-            margin: 120px auto 60px auto;
-            padding: 40px;
-            background: rgba(10, 10, 15, 0.7);
-            border: 1px solid rgba(0, 229, 255, 0.1);
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        /* 3D Canvas Background */
+        #article-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: #040406;
         }
-        .article-content h1 { font-size: 2.5rem; color: var(--primary-color); margin-bottom: 20px; }
-        .article-content h2 { font-size: 1.8rem; color: #fff; margin-top: 40px; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
-        .article-content h3 { font-size: 1.4rem; color: var(--secondary-color); margin-top: 30px; margin-bottom: 10px; }
-        .article-content p { font-size: 1.1rem; line-height: 1.8; color: #b3b3b3; margin-bottom: 20px; }
-        .article-content a { color: var(--accent-color); text-decoration: none; }
-        .article-content a:hover { text-decoration: underline; }
-        .article-content code { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.9em; color: #ff79c6; }
-        .article-content pre { background: #1e1e1e; padding: 20px; border-radius: 8px; overflow-x: auto; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
-        .article-content pre code { background: none; color: #f8f8f2; padding: 0; border-radius: 0; font-size: 0.95em; }
-        .article-content ul, .article-content ol { margin-bottom: 20px; padding-left: 20px; color: #b3b3b3; font-size: 1.1rem; line-height: 1.8; }
-        .article-content li { margin-bottom: 10px; }
-        .article-content blockquote { border-left: 4px solid var(--accent-color); margin: 0 0 20px 0; padding: 10px 20px; background: rgba(255, 0, 110, 0.05); color: #e0e0e0; font-style: italic; }
+
+        /* Base Typography & Layout */
+        body { color: var(--text-color); margin: 0; overflow-x: hidden; }
         
+        .article-container {
+            max-width: 850px;
+            margin: 120px auto 80px auto;
+            padding: 50px;
+            background: rgba(10, 10, 15, 0.65);
+            border: 1px solid rgba(0, 229, 255, 0.15);
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+            position: relative;
+        }
+
+        /* Read Time Badge */
+        .article-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+        }
+        .read-time-badge {
+            background: rgba(0, 229, 255, 0.1);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            padding: 4px 12px;
+            border-radius: 20px;
+            color: #00e5ff;
+        }
+
+        /* Article Content Styling */
+        .article-content h1 { font-size: 2.8rem; color: var(--primary-color); margin-bottom: 25px; line-height: 1.2; letter-spacing: -0.5px; }
+        .article-content h2 { font-size: 1.9rem; color: #fff; margin-top: 50px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .article-content h3 { font-size: 1.5rem; color: var(--secondary-color); margin-top: 40px; margin-bottom: 15px; }
+        .article-content p { font-size: 1.15rem; line-height: 1.85; color: #c4c4c4; margin-bottom: 25px; }
+        .article-content a { color: var(--accent-color); text-decoration: none; border-bottom: 1px dotted var(--accent-color); transition: 0.2s; }
+        .article-content a:hover { color: #fff; border-bottom-style: solid; text-shadow: 0 0 8px var(--accent-color); }
+        
+        .article-content code { background: rgba(255,255,255,0.08); padding: 3px 6px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.9em; color: #ff79c6; }
+        .article-content pre { 
+            background: #111116; 
+            padding: 25px; 
+            border-radius: 12px; 
+            overflow-x: auto; 
+            margin-bottom: 30px; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            transform-style: preserve-3d; /* For VanillaTilt */
+        }
+        .article-content pre code { background: none; color: #f8f8f2; padding: 0; font-size: 0.95em; }
+        
+        .article-content ul, .article-content ol { margin-bottom: 25px; padding-left: 25px; color: #c4c4c4; font-size: 1.15rem; line-height: 1.8; }
+        .article-content li { margin-bottom: 10px; }
+        
+        .article-content blockquote { 
+            border-left: 4px solid var(--accent-color); 
+            margin: 30px 0; 
+            padding: 15px 25px; 
+            background: linear-gradient(90deg, rgba(255, 0, 110, 0.08) 0%, rgba(255, 0, 110, 0) 100%); 
+            color: #e0e0e0; 
+            font-style: italic; 
+            border-radius: 0 8px 8px 0;
+        }
+
         .back-btn {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             margin-bottom: 30px;
             color: var(--primary-color);
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
             transition: 0.3s;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
         }
-        .back-btn:hover { color: #fff; text-shadow: 0 0 8px var(--primary-color); }
-        .loading-text { text-align: center; color: var(--primary-color); font-family: 'JetBrains Mono', monospace; padding: 50px; }
-        
+        .back-btn:hover { color: #fff; text-shadow: 0 0 12px var(--primary-color); transform: translateX(-5px); }
+        .loading-text { text-align: center; color: var(--primary-color); font-family: 'JetBrains Mono', monospace; padding: 50px; font-size: 1.2rem; }
+
+        /* Author Bio Box */
+        .author-bio {
+            margin-top: 60px;
+            padding: 30px;
+            background: rgba(0, 229, 255, 0.05);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            border-radius: 16px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            transform-style: preserve-3d;
+        }
+        .author-bio img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+            object-fit: cover;
+            transform: translateZ(20px);
+        }
+        .author-info h4 { margin: 0 0 5px 0; color: #fff; font-size: 1.2rem; }
+        .author-info p { margin: 0; color: #a0a0a0; font-size: 0.95rem; line-height: 1.5; }
+
+        /* Interactive Star Rating */
+        .rating-container {
+            margin-top: 40px;
+            text-align: center;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .rating-container h4 { color: #fff; margin-bottom: 15px; font-size: 1.1rem; font-weight: 500; }
+        .stars {
+            display: inline-flex;
+            flex-direction: row-reverse;
+            gap: 8px;
+        }
+        .stars input { display: none; }
+        .stars label {
+            color: rgba(255,255,255,0.2);
+            font-size: 2rem;
+            cursor: pointer;
+            transition: 0.2s, transform 0.2s;
+        }
+        .stars label:hover, .stars label:hover ~ label, .stars input:checked ~ label {
+            color: #ffd700;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+        .stars label:hover { transform: scale(1.2); }
+        .rating-msg { margin-top: 15px; font-size: 0.9rem; color: var(--secondary-color); font-family: 'JetBrains Mono', monospace; height: 20px; opacity: 0; transition: opacity 0.3s; }
+
         @media (max-width: 768px) {
-            .article-container { margin: 100px 20px 40px 20px; padding: 20px; }
-            .article-content h1 { font-size: 2rem; }
+            .article-container { margin: 100px 15px 40px 15px; padding: 25px 20px; }
+            .article-content h1 { font-size: 2.2rem; }
+            .author-bio { flex-direction: column; text-align: center; }
+            .author-bio img { transform: translateZ(0); }
         }
     </style>
 </head>
 <body>
-    <!-- Simple Navigation (just logo and back) -->
-    <nav id="navbar" style="background: rgba(4, 4, 6, 0.9);">
+    <!-- 3D Canvas -->
+    <canvas id="article-canvas"></canvas>
+
+    <!-- Navigation -->
+    <nav id="navbar" style="background: rgba(4, 4, 6, 0.7); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05);">
         <a href="index.html" class="nav-logo glitch" data-text="AKS." style="text-decoration: none;">AKS<span class="accent">.</span></a>
         <div class="nav-links">
             <a href="index.html#articles">← Back to Portfolio</a>
@@ -62,11 +182,39 @@
     </nav>
 
     <div class="article-container">
-        <a href="index.html#articles" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Articles</a>
+        <a href="index.html#articles" class="back-btn"><i class="fas fa-chevron-left"></i> Back to Articles</a>
+        
+        <div class="article-meta" id="article-meta" style="display: none;">
+            <span class="read-time-badge" id="read-time">🕒 Calculating...</span>
+            <span id="article-date">📅 2026</span>
+        </div>
+
         <div id="article-content" class="article-content">
             <div class="loading-text">
-                <i class="fas fa-circle-notch fa-spin"></i> Loading system logs...
+                <i class="fas fa-circle-notch fa-spin"></i> Initializing Markdown Engine...
             </div>
+        </div>
+
+        <!-- Author Box -->
+        <div class="author-bio" id="author-box" style="display: none;">
+            <img src="ultraman.png" alt="Adarsh K.S.">
+            <div class="author-info">
+                <h4>Written by Adarsh K.S.</h4>
+                <p>AI, ML & Data Engineer specializing in Multi-Agent Swarms, Production RAG, and classical predictive modeling. Building autonomous systems that solve real enterprise problems.</p>
+            </div>
+        </div>
+
+        <!-- Rating System -->
+        <div class="rating-container" id="rating-box" style="display: none;">
+            <h4>Enjoyed this article? Rate it:</h4>
+            <div class="stars">
+                <input type="radio" id="star5" name="rating" value="5"><label for="star5" class="fas fa-star"></label>
+                <input type="radio" id="star4" name="rating" value="4"><label for="star4" class="fas fa-star"></label>
+                <input type="radio" id="star3" name="rating" value="3"><label for="star3" class="fas fa-star"></label>
+                <input type="radio" id="star2" name="rating" value="2"><label for="star2" class="fas fa-star"></label>
+                <input type="radio" id="star1" name="rating" value="1"><label for="star1" class="fas fa-star"></label>
+            </div>
+            <div class="rating-msg" id="rating-msg">Rating saved to local databank. Thank you!</div>
         </div>
     </div>
 
