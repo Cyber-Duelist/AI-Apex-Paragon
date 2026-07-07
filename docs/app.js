@@ -1273,7 +1273,7 @@ LANGUAGE SUPPORT (CRITICAL - STRICT COMPLIANCE):
 - If the user asks in Hindi or Hinglish, you MUST reply ONLY in pure Hindi (using Devanagari script). NEVER use Roman script for Hindi words.
 
 ABOUT ADARSH KUMAR SINGH:
-- B.Tech student in Computer Science (AI & ML specialization)
+- B.Tech student in Computer Science (AI & ML specialization). Highly skilled in Generative AI, Classical Machine Learning, and Data Science.
 - Completed a grueling 14-week self-taught AI engineering journey ("The Grind") — from Python basics to production multi-agent systems in 98 days
 - Certifications: Oracle Generative AI Professional, Oracle Data Science Professional, IoT & Industrial Automation
 - Contact: adarshentity098@gmail.com, LinkedIn: linkedin.com/in/i-am-entity, GitHub: github.com/Cyber-Duelist, Phone: +91-94394-40544
@@ -1281,7 +1281,8 @@ ABOUT ADARSH KUMAR SINGH:
 
 TECHNICAL SKILLS:
 - Core: Python, JavaScript, SQL, Bash
-- AI/ML: LangChain, LlamaIndex, HuggingFace, OpenAI API, Groq, LLaMA 3
+- Generative AI: LangChain, LlamaIndex, HuggingFace, OpenAI API, Groq, LLaMA 3
+- Machine Learning & Data Science: scikit-learn, XGBoost, Pandas, NumPy, Predictive Modeling, Kaggle
 - Frameworks: FastAPI, Flask, Streamlit
 - Databases: PostgreSQL, ChromaDB, Pinecone, FAISS
 - DevOps: Docker, CI/CD, GitHub Actions
