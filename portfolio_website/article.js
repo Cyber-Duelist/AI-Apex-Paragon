@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initThreeJS();
 
     const urlParams = new URLSearchParams(window.location.search);
-    const articleId = urlParams.get('id');
+    const articleId = window.location.hash ? window.location.hash.substring(1) : urlParams.get('id');
     const contentDiv = document.getElementById('article-content');
     const metaDiv = document.getElementById('article-meta');
     const readTimeSpan = document.getElementById('read-time');
