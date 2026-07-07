@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article | Adarsh K.S.</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
+    <style>
+        /* Article specific styling */
+        body { background-color: var(--bg-color); color: var(--text-color); }
+        .article-container {
+            max-width: 800px;
+            margin: 120px auto 60px auto;
+            padding: 40px;
+            background: rgba(10, 10, 15, 0.7);
+            border: 1px solid rgba(0, 229, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .article-content h1 { font-size: 2.5rem; color: var(--primary-color); margin-bottom: 20px; }
+        .article-content h2 { font-size: 1.8rem; color: #fff; margin-top: 40px; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .article-content h3 { font-size: 1.4rem; color: var(--secondary-color); margin-top: 30px; margin-bottom: 10px; }
+        .article-content p { font-size: 1.1rem; line-height: 1.8; color: #b3b3b3; margin-bottom: 20px; }
+        .article-content a { color: var(--accent-color); text-decoration: none; }
+        .article-content a:hover { text-decoration: underline; }
+        .article-content code { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.9em; color: #ff79c6; }
+        .article-content pre { background: #1e1e1e; padding: 20px; border-radius: 8px; overflow-x: auto; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        .article-content pre code { background: none; color: #f8f8f2; padding: 0; border-radius: 0; font-size: 0.95em; }
+        .article-content ul, .article-content ol { margin-bottom: 20px; padding-left: 20px; color: #b3b3b3; font-size: 1.1rem; line-height: 1.8; }
+        .article-content li { margin-bottom: 10px; }
+        .article-content blockquote { border-left: 4px solid var(--accent-color); margin: 0 0 20px 0; padding: 10px 20px; background: rgba(255, 0, 110, 0.05); color: #e0e0e0; font-style: italic; }
+        
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+        .back-btn:hover { color: #fff; text-shadow: 0 0 8px var(--primary-color); }
+        .loading-text { text-align: center; color: var(--primary-color); font-family: 'JetBrains Mono', monospace; padding: 50px; }
+        
+        @media (max-width: 768px) {
+            .article-container { margin: 100px 20px 40px 20px; padding: 20px; }
+            .article-content h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Simple Navigation (just logo and back) -->
+    <nav id="navbar" style="background: rgba(4, 4, 6, 0.9);">
+        <a href="index.html" class="nav-logo glitch" data-text="AKS." style="text-decoration: none;">AKS<span class="accent">.</span></a>
+        <div class="nav-links">
+            <a href="index.html#articles">← Back to Portfolio</a>
+        </div>
+    </nav>
+
+    <div class="article-container">
+        <a href="index.html#articles" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Articles</a>
+        <div id="article-content" class="article-content">
+            <div class="loading-text">
+                <i class="fas fa-circle-notch fa-spin"></i> Loading system logs...
+            </div>
+        </div>
+    </div>
+
+    <script src="article.js"></script>
+</body>
+</html>
