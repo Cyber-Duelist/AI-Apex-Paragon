@@ -1402,9 +1402,8 @@ RULES:
         if (el) el.remove();
     }
 
-    // ── Call Free LLM API — Groq via Cloudflare Worker Proxy ──
-    // IMPORTANT: Replace this URL with your actual Cloudflare Worker URL
-    const GROQ_WORKER_URL = "https://entropy-groq-proxy.ultraman5115.workers.dev";
+    // ── Call AI API — OpenAI via Vercel Serverless Function ──
+    const ENTROPY_API_URL = "/api/entropy";
 
     async function getAIReply() {
         isSending = true;
@@ -1428,8 +1427,8 @@ RULES:
             } catch(e) { console.log('Chrome AI unavailable:', e.message); }
         }
 
-        // Strategy 2: Groq API via Cloudflare Worker
-        if (!reply && GROQ_WORKER_URL !== "https://your-worker-name.your-username.workers.dev") {
+        // Strategy 2: OpenAI via Vercel Serverless Function
+        if (!reply) {
             try {
                 const msgs = [
                     { role: 'system', content: SYSTEM_PROMPT },
@@ -1439,7 +1438,7 @@ RULES:
                 const controller = new AbortController();
                 const timeout = setTimeout(() => controller.abort(), 15000);
                 
-                const resp = await fetch(GROQ_WORKER_URL, {
+                const resp = await fetch(ENTROPY_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     signal: controller.signal,
@@ -1455,9 +1454,9 @@ RULES:
                         reply = data.choices[0].message.content.trim();
                     }
                 } else {
-                    console.log('Worker API Error:', await resp.text());
+                    console.log('Entropy API Error:', await resp.text());
                 }
-            } catch(e) { console.log('Worker fetch failed:', e.message); }
+            } catch(e) { console.log('Entropy API fetch failed:', e.message); }
         }
 
         removeTyping();
