@@ -1,10 +1,10 @@
 import os
 import json
 from http.server import BaseHTTPRequestHandler
-from openai import OpenAI
+from groq import Groq
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
 class handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
@@ -19,7 +19,7 @@ class handler(BaseHTTPRequestHandler):
             self.send_response(500)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps({"error": "OpenAI API key not configured."}).encode())
+            self.wfile.write(json.dumps({"error": "Groq API key not configured."}).encode())
             return
 
         content_length = int(self.headers.get('Content-Length', 0))
@@ -37,7 +37,7 @@ class handler(BaseHTTPRequestHandler):
                 return
 
             response = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="llama-3.1-8b-instant",
                 messages=messages,
                 temperature=0.7,
                 max_tokens=500
