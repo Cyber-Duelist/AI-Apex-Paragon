@@ -23,22 +23,22 @@
             width: 100vw;
             height: 100vh;
             z-index: -1;
-            background: #040406;
+            background: var(--bg-void, #050505);
         }
 
         /* Base Typography & Layout */
-        body { color: var(--text-color); margin: 0; overflow-x: hidden; }
+        body { color: var(--text-white, #f0f0f8); margin: 0; overflow-x: hidden; font-family: 'Inter', sans-serif; }
         
         .article-container {
             max-width: 850px;
             margin: 120px auto 80px auto;
-            padding: 50px;
+            padding: 50px 60px;
             background: rgba(10, 10, 15, 0.65);
-            border: 1px solid rgba(0, 229, 255, 0.15);
+            border: 1px solid var(--glass-border, rgba(0, 240, 255, 0.2));
             border-radius: 16px;
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255,255,255,0.05);
             position: relative;
         }
 
@@ -50,48 +50,63 @@
             margin-bottom: 30px;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.9rem;
-            color: var(--secondary-color);
+            color: var(--text-silver, #a0a0b8);
         }
         .read-time-badge {
-            background: rgba(0, 229, 255, 0.1);
-            border: 1px solid rgba(0, 229, 255, 0.3);
-            padding: 4px 12px;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            padding: 6px 14px;
             border-radius: 20px;
-            color: #00e5ff;
+            color: var(--accent-2, #00f0ff);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.8rem;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
         }
 
         /* Article Content Styling */
-        .article-content h1 { font-size: 2.8rem; color: var(--primary-color); margin-bottom: 25px; line-height: 1.2; letter-spacing: -0.5px; }
-        .article-content h2 { font-size: 1.9rem; color: #fff; margin-top: 50px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
-        .article-content h3 { font-size: 1.5rem; color: var(--secondary-color); margin-top: 40px; margin-bottom: 15px; }
-        .article-content p { font-size: 1.15rem; line-height: 1.85; color: #c4c4c4; margin-bottom: 25px; }
-        .article-content a { color: var(--accent-color); text-decoration: none; border-bottom: 1px dotted var(--accent-color); transition: 0.2s; }
-        .article-content a:hover { color: #fff; border-bottom-style: solid; text-shadow: 0 0 8px var(--accent-color); }
+        .article-content h1 { 
+            font-size: 3rem; 
+            color: var(--text-white, #fff); 
+            margin-bottom: 25px; 
+            line-height: 1.2; 
+            letter-spacing: -1px; 
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+        }
+        .article-content h2 { font-size: 2rem; color: var(--accent-2, #00f0ff); margin-top: 50px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .article-content h3 { font-size: 1.6rem; color: var(--accent-1, #00ff66); margin-top: 40px; margin-bottom: 15px; }
+        .article-content p { font-size: 1.15rem; line-height: 1.85; color: var(--text-silver, #a0a0b8); margin-bottom: 25px; }
+        .article-content a { color: var(--accent-2, #00f0ff); text-decoration: none; border-bottom: 1px dotted var(--accent-2); transition: 0.2s; }
+        .article-content a:hover { color: #fff; border-bottom-style: solid; text-shadow: 0 0 8px var(--accent-2); }
         
-        .article-content code { background: rgba(255,255,255,0.08); padding: 3px 6px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.9em; color: #ff79c6; }
+        .article-content strong { color: var(--text-white, #fff); font-weight: 600; }
+        
+        .article-content code { background: rgba(255,255,255,0.08); padding: 3px 6px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.9em; color: var(--accent-3, #8a2be2); }
         .article-content pre { 
-            background: #111116; 
+            background: var(--bg-deep, #0a0a0a); 
             padding: 25px; 
             border-radius: 12px; 
             overflow-x: auto; 
             margin-bottom: 30px; 
-            border: 1px solid rgba(255,255,255,0.1); 
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-            transform-style: preserve-3d; /* For VanillaTilt */
+            border: 1px solid rgba(0, 240, 255, 0.15); 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            transform-style: preserve-3d;
         }
         .article-content pre code { background: none; color: #f8f8f2; padding: 0; font-size: 0.95em; }
         
-        .article-content ul, .article-content ol { margin-bottom: 25px; padding-left: 25px; color: #c4c4c4; font-size: 1.15rem; line-height: 1.8; }
+        .article-content ul, .article-content ol { margin-bottom: 25px; padding-left: 25px; color: var(--text-silver, #a0a0b8); font-size: 1.15rem; line-height: 1.8; }
         .article-content li { margin-bottom: 10px; }
         
         .article-content blockquote { 
-            border-left: 4px solid var(--accent-color); 
+            border-left: 4px solid var(--accent-1, #00ff66); 
             margin: 30px 0; 
-            padding: 15px 25px; 
-            background: linear-gradient(90deg, rgba(255, 0, 110, 0.08) 0%, rgba(255, 0, 110, 0) 100%); 
-            color: #e0e0e0; 
+            padding: 20px 25px; 
+            background: linear-gradient(90deg, rgba(0, 255, 102, 0.05) 0%, rgba(0, 255, 102, 0) 100%); 
+            color: var(--text-white, #f0f0f8); 
             font-style: italic; 
             border-radius: 0 8px 8px 0;
+            font-size: 1.25rem;
+            line-height: 1.6;
         }
 
         .back-btn {
@@ -99,7 +114,7 @@
             align-items: center;
             gap: 8px;
             margin-bottom: 30px;
-            color: var(--primary-color);
+            color: var(--accent-2, #00f0ff);
             text-decoration: none;
             font-weight: 600;
             transition: 0.3s;
@@ -107,32 +122,33 @@
             font-size: 0.85rem;
             letter-spacing: 1px;
         }
-        .back-btn:hover { color: #fff; text-shadow: 0 0 12px var(--primary-color); transform: translateX(-5px); }
-        .loading-text { text-align: center; color: var(--primary-color); font-family: 'JetBrains Mono', monospace; padding: 50px; font-size: 1.2rem; }
+        .back-btn:hover { color: #fff; text-shadow: 0 0 12px var(--accent-2); transform: translateX(-5px); }
+        .loading-text { text-align: center; color: var(--accent-1, #00ff66); font-family: 'JetBrains Mono', monospace; padding: 50px; font-size: 1.2rem; }
 
         /* Author Bio Box */
         .author-bio {
             margin-top: 60px;
             padding: 30px;
-            background: rgba(0, 229, 255, 0.05);
-            border: 1px solid rgba(0, 229, 255, 0.2);
+            background: rgba(0, 240, 255, 0.05);
+            border: 1px solid rgba(0, 240, 255, 0.2);
             border-radius: 16px;
             display: flex;
             gap: 20px;
             align-items: center;
             transform-style: preserve-3d;
+            box-shadow: 0 8px 32px rgba(0, 240, 255, 0.1);
         }
         .author-bio img {
             width: 80px;
             height: 80px;
             border-radius: 50%;
-            border: 2px solid var(--primary-color);
-            box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+            border: 2px solid var(--accent-2, #00f0ff);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
             object-fit: cover;
             transform: translateZ(20px);
         }
-        .author-info h4 { margin: 0 0 5px 0; color: #fff; font-size: 1.2rem; }
-        .author-info p { margin: 0; color: #a0a0a0; font-size: 0.95rem; line-height: 1.5; }
+        .author-info h4 { margin: 0 0 5px 0; color: var(--text-white); font-size: 1.2rem; }
+        .author-info p { margin: 0; color: var(--text-silver); font-size: 0.95rem; line-height: 1.5; }
 
         /* Interactive Star Rating */
         .rating-container {
@@ -141,7 +157,7 @@
             padding-top: 40px;
             border-top: 1px solid rgba(255,255,255,0.1);
         }
-        .rating-container h4 { color: #fff; margin-bottom: 15px; font-size: 1.1rem; font-weight: 500; }
+        .rating-container h4 { color: var(--text-white); margin-bottom: 15px; font-size: 1.1rem; font-weight: 500; }
         .stars {
             display: inline-flex;
             flex-direction: row-reverse;
@@ -150,16 +166,16 @@
         .stars input { display: none; }
         .stars label {
             color: rgba(255,255,255,0.2);
-            font-size: 2rem;
+            font-size: 2.5rem;
             cursor: pointer;
             transition: 0.2s, transform 0.2s;
         }
         .stars label:hover, .stars label:hover ~ label, .stars input:checked ~ label {
-            color: #ffd700;
-            text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+            color: var(--accent-1, #00ff66);
+            text-shadow: 0 0 20px rgba(0, 255, 102, 0.6);
         }
-        .stars label:hover { transform: scale(1.2); }
-        .rating-msg { margin-top: 15px; font-size: 0.9rem; color: var(--secondary-color); font-family: 'JetBrains Mono', monospace; height: 20px; opacity: 0; transition: opacity 0.3s; }
+        .stars label:hover { transform: scale(1.2) translateY(-5px); }
+        .rating-msg { margin-top: 15px; font-size: 0.95rem; color: var(--accent-2, #00f0ff); font-family: 'JetBrains Mono', monospace; height: 20px; opacity: 0; transition: opacity 0.3s; text-shadow: 0 0 10px rgba(0,240,255,0.4); }
 
         @media (max-width: 768px) {
             .article-container { margin: 100px 15px 40px 15px; padding: 25px 20px; }
@@ -174,19 +190,19 @@
     <canvas id="article-canvas"></canvas>
 
     <!-- Navigation -->
-    <nav id="navbar" style="background: rgba(4, 4, 6, 0.7); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05);">
-        <a href="index.html" class="nav-logo glitch" data-text="AKS." style="text-decoration: none;">AKS<span class="accent">.</span></a>
+    <nav id="navbar" style="background: rgba(5, 5, 5, 0.85); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; position: fixed; width: 100%; top: 0; z-index: 100; box-sizing: border-box;">
+        <a href="index.html" class="nav-logo glitch" data-text="AKS." style="text-decoration: none; font-size: 1.5rem; font-weight: 800; color: #fff;">AKS<span class="accent" style="color: var(--accent-1, #00ff66);">.</span></a>
         <div class="nav-links">
-            <a href="index.html#articles">← Back to Portfolio</a>
+            <a href="index.html#articles" style="color: #fff; text-decoration: none; font-weight: 500; font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase;">? Back to Portfolio</a>
         </div>
     </nav>
 
     <div class="article-container">
-        <a href="index.html#articles" class="back-btn"><i class="fas fa-chevron-left"></i> Back to Articles</a>
+        <a href="index.html#articles" class="back-btn"><i class="fas fa-chevron-left"></i> Portfolio</a>
         
         <div class="article-meta" id="article-meta" style="display: none;">
-            <span class="read-time-badge" id="read-time">🕒 Calculating...</span>
-            <span id="article-date">📅 2026</span>
+            <span class="read-time-badge" id="read-time">?? Calculating...</span>
+            <span id="article-date">?? 2026</span>
         </div>
 
         <div id="article-content" class="article-content">
@@ -206,7 +222,7 @@
 
         <!-- Rating System -->
         <div class="rating-container" id="rating-box" style="display: none;">
-            <h4>Enjoyed this article? Rate it:</h4>
+            <h4>Enjoyed this article? Leave a rating:</h4>
             <div class="stars">
                 <input type="radio" id="star5" name="rating" value="5"><label for="star5" class="fas fa-star"></label>
                 <input type="radio" id="star4" name="rating" value="4"><label for="star4" class="fas fa-star"></label>
