@@ -28,9 +28,7 @@ class ReviewResponse(BaseModel):
     suggestions: list
     severity: str
     approved: bool
-
-
-# Endpoints
+# Endpoints are meant to provide the way for the ending of the program until it fetches the tensor
 @app.get("/")
 def root():
     return {"status": "AI Code Reviewer is running"}
@@ -72,3 +70,5 @@ def review(req: ReviewRequest):
         severity=review_result.get("severity", "low"),
         approved=review_result.get("approved", False)
     )
+
+def return_tensor(min, max, std):
