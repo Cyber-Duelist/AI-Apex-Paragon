@@ -2172,6 +2172,10 @@ RULES:
     const getProjectExplanation = (title) => {
         const theme = document.documentElement.getAttribute('data-theme') || 'entity';
         const expls = {
+            "Nexus: Enterprise Churn Predictor": {
+                "entity": "This is an enterprise-grade AI risk mitigation platform. It processes live customer data through a highly optimized XGBoost model to predict churn probability, then utilizes LLaMA-3 via Groq to instantly generate personalized, explainable retention strategies.",
+                "ultraman": "Shuwatch! This system is a powerful predictive barrier! It anticipates customer churn like a Kaiju attack and deploys AI countermeasures to save them!"
+            },
             "SentinelAlpha": {
                 "entity": "This is a hedge fund-grade intelligence platform. It pulls real SEC filings from EDGAR, runs them through AI to extract risk factors and management sentiment, then generates a conviction score — just like the tools Citadel and Two Sigma pay millions for.",
                 "ultraman": "Shuwatch! This is the ultimate financial Kaiju detector! It scans corporate filings with laser precision to reveal hidden dangers before they attack the portfolio!"
