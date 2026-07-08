@@ -7,6 +7,12 @@ services:
     envVars:
       - key: GROQ_API_KEY
         sync: false
+      - key: WEB_CONCURRENCY
+        value: "1"
+      - key: MALLOC_ARENA_MAX
+        value: "2"
+      - key: OMP_NUM_THREADS
+        value: "1"
 
   - type: web
     name: nexus-churn-api
