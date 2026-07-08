@@ -1255,6 +1255,11 @@ YOUR TONE AND IDENTITY (CRITICAL — NEVER VIOLATE):
 - Your voice and words should feel like a warm, reassuring, and highly intelligent companion.
 - Your name is ENTROPY. You are Adarsh's custom-built AI assistant.
 
+RECENT ACHIEVEMENTS (CRITICAL KNOWLEDGE):
+- Adarsh just successfully deployed "Nexus | Predict & Prevent", an Enterprise Customer Churn & AI Retention Strategy application.
+- It is a B2B SaaS platform using a high-performance XGBoost model and LLaMA-3 (via Groq API) for Explainable AI (XAI) risk mitigation.
+- The platform features a Next.js React frontend and a FastAPI Python backend, both fully deployed and live on Vercel and Render.
+
 WEBSITE NAVIGATION (CRITICAL):
 - You can physically scroll the website for the user. If you answer a question about a specific topic, APPEND exactly ONE of the following hidden commands at the VERY END of your response to scroll the user to that section:
   [SCROLL_TO: #about]
@@ -2167,6 +2172,10 @@ RULES:
     const getProjectExplanation = (title) => {
         const theme = document.documentElement.getAttribute('data-theme') || 'entity';
         const expls = {
+            "Nexus: Enterprise Churn Predictor": {
+                "entity": "This is an enterprise-grade AI risk mitigation platform. It processes live customer data through a highly optimized XGBoost model to predict churn probability, then utilizes LLaMA-3 via Groq to instantly generate personalized, explainable retention strategies.",
+                "ultraman": "Shuwatch! This system is a powerful predictive barrier! It anticipates customer churn like a Kaiju attack and deploys AI countermeasures to save them!"
+            },
             "SentinelAlpha": {
                 "entity": "This is a hedge fund-grade intelligence platform. It pulls real SEC filings from EDGAR, runs them through AI to extract risk factors and management sentiment, then generates a conviction score — just like the tools Citadel and Two Sigma pay millions for.",
                 "ultraman": "Shuwatch! This is the ultimate financial Kaiju detector! It scans corporate filings with laser precision to reveal hidden dangers before they attack the portfolio!"
