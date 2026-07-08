@@ -24,7 +24,18 @@ from chunker import chunk_document
 from vector_store import get_collection, add_chunks, search, delete_collection
 from hallucination_control import rag_with_guard
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(title="PersonaDoc API", description="Production RAG API")
+
+# Allow requests from the Next-Gen frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # In production, restrict this to your Vercel URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 API_KEY = os.getenv("API_KEY", "supersecretkey")
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)

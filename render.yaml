@@ -3,7 +3,7 @@ services:
     name: persona-doc-api
     env: python
     buildCommand: pip install -r week_09/requirements.txt
-    startCommand: uvicorn week_09.persona_doc.main:app --host 0.0.0.0 --port $PORT
+    startCommand: cd week_09/persona_doc && uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: GROQ_API_KEY
         sync: false
