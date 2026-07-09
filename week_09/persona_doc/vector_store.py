@@ -55,13 +55,23 @@ def add_chunks(chunks: list[dict], collection):
             "char_end": chunk["char_end"]
         })
         
-    # Insert into the database. Chroma will automatically generate embeddings
-    # using its highly-optimized ONNX runtime default embedding function.
-    collection.add(
-        ids=ids,
-        documents=texts,
-        metadatas=metadatas
-    )
+    # Insert into the database in tiny batches of 10 chunks at a time.
+    # This prevents the ONNX embedding model from consuming too much memory
+    # and triggering a 512MB RAM Out-Of-Memory (OOM) crash on Render Free Tier.
+    batch_size = 10
+    for i in range(0, len(ids), batch_size):
+        batch_ids = ids[i:i+batch_size]
+        batch_texts = texts[i:i+batch_size]
+        batch_metadatas = metadatas[i:i+batch_size]
+        
+        collection.add(
+            ids=batch_ids,
+            documents=batch_texts,
+            metadatas=batch_metadatas
+        )
+        logger.info(f"Inserted batch {i//batch_size + 1}/{(len(ids) + batch_size - 1)//batch_size}")
+        
+    logger.info(f"Successfully added {len(chunks)} total chunks to ChromaDB.")
 
 def search(query: str, collection, top_k: int = 3, source_filter: str = None) -> list[dict]:
     """
