@@ -2,7 +2,7 @@ services:
   - type: web
     name: persona-doc-api
     env: python
-    buildCommand: pip install -r week_09/requirements.txt
+    buildCommand: pip install -r week_09/requirements.txt && python week_09/persona_doc/download_model.py
     startCommand: cd week_09/persona_doc && uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: GROQ_API_KEY
