@@ -2,6 +2,7 @@ import os
 import sys
 import shutil
 import logging
+import gc
 from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Security
 from fastapi.security.api_key import APIKeyHeader
 from fastapi.staticfiles import StaticFiles
@@ -122,13 +123,21 @@ def upload_document(file: UploadFile = File(...)):
             raise HTTPException(status_code=400, detail="Could not extract text. The document might be scanned, image-based, or corrupted. Please upload a text-searchable file.")
 
         chunks = chunk_document(pages, chunk_size=400, overlap=80)
+        length_pages = len(pages)
+        length_chunks = len(chunks)
+        
         add_chunks(chunks, collection)
         
         logger.info(f"Successfully indexed {file.filename} with {len(chunks)} chunks.")
+        
+        # Explicitly clear variables and garbage collect before responding
+        del pages, chunks
+        gc.collect()
+        
         return {
             "filename": file.filename,
-            "pages": len(pages),
-            "chunks": len(chunks),
+            "pages": length_pages,
+            "chunks": length_chunks,
             "status": "indexed"
         }
     except Exception as e:

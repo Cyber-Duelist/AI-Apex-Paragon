@@ -2,6 +2,7 @@ import os
 import sys
 import chromadb
 import logging
+import gc
 
 logger = logging.getLogger(__name__)
 
@@ -55,10 +56,10 @@ def add_chunks(chunks: list[dict], collection):
             "char_end": chunk["char_end"]
         })
         
-    # Insert into the database in tiny batches of 10 chunks at a time.
+    # Insert into the database in tiny batches of 5 chunks at a time.
     # This prevents the ONNX embedding model from consuming too much memory
     # and triggering a 512MB RAM Out-Of-Memory (OOM) crash on Render Free Tier.
-    batch_size = 10
+    batch_size = 5
     for i in range(0, len(ids), batch_size):
         batch_ids = ids[i:i+batch_size]
         batch_texts = texts[i:i+batch_size]
@@ -71,7 +72,15 @@ def add_chunks(chunks: list[dict], collection):
         )
         logger.info(f"Inserted batch {i//batch_size + 1}/{(len(ids) + batch_size - 1)//batch_size}")
         
+        # Aggressively force garbage collection to release ONNX tensors back to the OS
+        del batch_ids, batch_texts, batch_metadatas
+        gc.collect()
+        
     logger.info(f"Successfully added {len(chunks)} total chunks to ChromaDB.")
+    
+    # Final cleanup
+    del ids, texts, metadatas
+    gc.collect()
 
 def search(query: str, collection, top_k: int = 3, source_filter: str = None) -> list[dict]:
     """
