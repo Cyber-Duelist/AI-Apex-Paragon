@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+python-multipart
+groq
+python-dotenv
+pydantic
+chromadb
+PyMuPDF
+python-docx
+charset-normalizer
+onnxruntime
+tokenizers
