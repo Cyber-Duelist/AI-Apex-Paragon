@@ -2,14 +2,13 @@ import os
 import sys
 from dotenv import load_dotenv
 from groq import Groq
-from sentence_transformers import util
 
 # Ensure Python can find our local modules
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
 
-# Import the model directly from vector_store so we don't load it twice
-from vector_store import get_collection, search, model
+# Import the collection and search from vector_store
+from vector_store import get_collection, search
 
 load_dotenv()
 
