@@ -53,6 +53,8 @@ def add_chunks(chunks: list[dict], collection):
             "page": chunk["page"],
             "char_start": chunk["char_start"],
             "char_end": chunk["char_end"]
+        })
+        
     # Insert into the database. Chroma will automatically generate embeddings
     # using its highly-optimized ONNX runtime default embedding function.
     collection.add(
