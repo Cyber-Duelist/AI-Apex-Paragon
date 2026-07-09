@@ -36,6 +36,82 @@ def search_wikipedia(query: str) -> str:
     except Exception as e:
         return f"Search failed: {e}"
 
+def get_weather(city: str) -> str:
+    """Fetches real-time weather using wttr.in"""
+    try:
+        url = f"https://wttr.in/{urllib.parse.quote(city)}?format=j1"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req) as response:
+            data = json.loads(response.read())
+            temp = data['current_condition'][0]['temp_C']
+            desc = data['current_condition'][0]['weatherDesc'][0]['value']
+            return f"Weather in {city}: {temp}°C, {desc}."
+    except Exception as e:
+        return f"Weather search failed: {e}"
+
+def get_crypto_price(coin_id: str) -> str:
+    """Fetches crypto price using CoinGecko"""
+    try:
+        url = f"https://api.coingecko.com/api/v3/simple/price?ids={urllib.parse.quote(coin_id.lower())}&vs_currencies=usd"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req) as response:
+            data = json.loads(response.read())
+            if coin_id.lower() in data:
+                price = data[coin_id.lower()]["usd"]
+                return f"The current price of {coin_id} is ${price} USD."
+            return f"Coin '{coin_id}' not found."
+    except Exception as e:
+        return f"Crypto search failed: {e}"
+
+def calculate(expression: str) -> str:
+    """Safely evaluates a math expression"""
+    try:
+        import ast
+        import operator
+        allowed_operators = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul,
+                             ast.Div: operator.truediv, ast.Pow: operator.pow, ast.USub: operator.neg}
+        def eval_expr(node):
+            if isinstance(node, ast.Constant): return node.value
+            elif isinstance(node, ast.Num): return node.n # For older python versions
+            elif isinstance(node, ast.BinOp): return allowed_operators[type(node.op)](eval_expr(node.left), eval_expr(node.right))
+            elif isinstance(node, ast.UnaryOp): return allowed_operators[type(node.op)](eval_expr(node.operand))
+            else: raise TypeError(node)
+        result = eval_expr(ast.parse(expression, mode='eval').body)
+        return f"Result of {expression} is {result}"
+    except Exception as e:
+        return f"Calculation failed: {e}"
+
+def get_news(topic: str) -> str:
+    """Fetches top news headlines using Google News RSS"""
+    try:
+        url = f"https://news.google.com/rss/search?q={urllib.parse.quote(topic)}&hl=en-US&gl=US&ceid=US:en"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req) as response:
+            xml_data = response.read().decode('utf-8')
+            import re
+            titles = re.findall(r'<title>(.*?)</title>', xml_data)
+            headlines = titles[1:4] if len(titles) > 1 else []
+            if headlines:
+                return f"Top news for '{topic}': " + "; ".join(headlines)
+            return f"No news found for '{topic}'."
+    except Exception as e:
+        return f"News search failed: {e}"
+
+def get_stock_price(ticker: str) -> str:
+    """Fetches stock price using Yahoo Finance"""
+    try:
+        url = f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(ticker.upper())}"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req) as response:
+            data = json.loads(response.read())
+            result = data.get("chart", {}).get("result", [])
+            if result:
+                price = result[0]["meta"]["regularMarketPrice"]
+                return f"The current stock price of {ticker.upper()} is ${price}."
+            return f"Ticker '{ticker}' not found."
+    except Exception as e:
+        return f"Stock search failed: {e}"
+
 tools = [
     {
         "type": "function",
@@ -48,6 +124,76 @@ tools = [
                     "query": {"type": "string", "description": "The search query"}
                 },
                 "required": ["query"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_weather",
+            "description": "Fetches real-time weather data for a specific city.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "city": {"type": "string", "description": "The name of the city, e.g., 'New York', 'Tokyo'"}
+                },
+                "required": ["city"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_crypto_price",
+            "description": "Fetches the current real-time USD price of a cryptocurrency.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "coin_id": {"type": "string", "description": "The ID of the coin, e.g., 'bitcoin', 'ethereum', 'dogecoin'"}
+                },
+                "required": ["coin_id"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "calculate",
+            "description": "Safely evaluates a math expression. Use this instead of guessing math answers.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "expression": {"type": "string", "description": "The mathematical expression to calculate, e.g., '25 * 4', '(100 - 30) / 2'"}
+                },
+                "required": ["expression"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_news",
+            "description": "Fetches the latest top news headlines for a specific topic.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "topic": {"type": "string", "description": "The news topic, e.g., 'technology', 'artificial intelligence', 'politics'"}
+                },
+                "required": ["topic"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_stock_price",
+            "description": "Fetches the current real-time price of a stock using its ticker symbol.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "ticker": {"type": "string", "description": "The stock ticker symbol, e.g., 'AAPL' for Apple, 'TSLA' for Tesla"}
+                },
+                "required": ["ticker"]
             }
         }
     }
@@ -111,31 +257,45 @@ async def websocket_audio_endpoint(websocket: WebSocket):
             tool_calls = response_message.tool_calls
             
             if tool_calls:
-                print(f"Agent requested tool: {tool_calls[0].function.name}")
-                await websocket.send_text(json.dumps({"type": "ai_response_chunk", "text": "[Searching Web...] "}))
+                func_name = tool_calls[0].function.name
+                print(f"Agent requested tool: {func_name}")
+                await websocket.send_text(json.dumps({"type": "ai_response_chunk", "text": f"[Executing {func_name}...] "}))
                 
-                if tool_calls[0].function.name == "search_wikipedia":
-                    args = json.loads(tool_calls[0].function.arguments)
-                    search_result = search_wikipedia(args.get("query"))
-                    print(f"Tool Result: {search_result}")
-                    
-                    temp_messages.append(response_message)
-                    temp_messages.append({
-                        "tool_call_id": tool_calls[0].id,
-                        "role": "tool",
-                        "name": "search_wikipedia",
-                        "content": search_result,
-                    })
-                    
-                    stream_completion = await groq_client.chat.completions.create(
-                        model=model_name,
-                        messages=temp_messages,
-                        temperature=0.7,
-                        max_tokens=150,
-                        stream=True
-                    )
+                args = json.loads(tool_calls[0].function.arguments)
+                tool_result = ""
+                
+                if func_name == "search_wikipedia":
+                    tool_result = search_wikipedia(args.get("query", ""))
+                elif func_name == "get_weather":
+                    tool_result = get_weather(args.get("city", ""))
+                elif func_name == "get_crypto_price":
+                    tool_result = get_crypto_price(args.get("coin_id", ""))
+                elif func_name == "calculate":
+                    tool_result = calculate(args.get("expression", ""))
+                elif func_name == "get_news":
+                    tool_result = get_news(args.get("topic", ""))
+                elif func_name == "get_stock_price":
+                    tool_result = get_stock_price(args.get("ticker", ""))
                 else:
-                    stream_completion = None
+                    tool_result = "Tool not recognized."
+                    
+                print(f"Tool Result: {tool_result}")
+                
+                temp_messages.append(response_message)
+                temp_messages.append({
+                    "tool_call_id": tool_calls[0].id,
+                    "role": "tool",
+                    "name": func_name,
+                    "content": tool_result,
+                })
+                
+                stream_completion = await groq_client.chat.completions.create(
+                    model=model_name,
+                    messages=temp_messages,
+                    temperature=0.7,
+                    max_tokens=150,
+                    stream=True
+                )
             else:
                 stream_completion = await groq_client.chat.completions.create(
                     model=model_name,
