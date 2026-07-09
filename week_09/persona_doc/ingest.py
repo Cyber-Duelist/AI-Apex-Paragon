@@ -91,6 +91,7 @@ def ingest_document(filepath: str) -> list[dict]:
                         "page": i + 1,
                         "text": text.strip()
                     })
+            doc.close()
         except Exception as e:
             logger.error(f"Error reading PDF: {e}")
             
