@@ -36,6 +36,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [showHighRiskOnly, setShowHighRiskOnly] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(50);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const processData = async (data: any[]) => {
@@ -65,8 +66,7 @@ export default function Dashboard() {
       dynamicTyping: true,
       skipEmptyLines: true,
       complete: (results) => {
-        // Limit to 50 rows for frontend performance to prevent lagging
-        const data = results.data.slice(0, 50) as any[];
+        const data = results.data as any[];
         
         // Remove CustomerID if it exists so we don't send it to the backend for ML
         const cleanedData = data.map(row => {
@@ -298,7 +298,7 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody className="text-sm divide-y divide-zinc-800/50">
-                {displayedPredictions.map((pred, i) => (
+                {displayedPredictions.slice(0, visibleCount).map((pred, i) => (
                   <React.Fragment key={pred.index}>
                     <tr className="hover:bg-zinc-800/30 transition-colors">
                       {tableHeaders.map(header => (
@@ -362,6 +362,17 @@ export default function Dashboard() {
               </tbody>
             </table>
           </div>
+          
+          {visibleCount < displayedPredictions.length && (
+            <div className="p-4 border-t border-zinc-800 text-center">
+              <button 
+                onClick={() => setVisibleCount(prev => prev + 50)}
+                className="text-indigo-400 hover:text-indigo-300 text-sm font-medium transition-colors"
+              >
+                Load More ({displayedPredictions.length - visibleCount} remaining)
+              </button>
+            </div>
+          )}
         </div>
       )}
 
