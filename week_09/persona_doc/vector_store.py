@@ -2,7 +2,6 @@ import os
 import sys
 import chromadb
 import logging
-from sentence_transformers import SentenceTransformer
 
 logger = logging.getLogger(__name__)
 
@@ -13,8 +12,8 @@ sys.path.append(current_dir)
 from ingest import ingest_document
 from chunker import chunk_document
 
-# 1. Load the embedding model globally
-model = SentenceTransformer('all-MiniLM-L6-v2')
+# Note: We now rely on ChromaDB's default embedding function (ONNX runtime)
+# instead of PyTorch/SentenceTransformers to avoid OOM issues on Render.
 
 def get_collection():
     """
@@ -54,15 +53,10 @@ def add_chunks(chunks: list[dict], collection):
             "page": chunk["page"],
             "char_start": chunk["char_start"],
             "char_end": chunk["char_end"]
-        })
-        
-    # Generate embeddings and convert PyTorch tensors to standard Python lists
-    embeddings = model.encode(texts).tolist()
-
-    # Insert into the database
+    # Insert into the database. Chroma will automatically generate embeddings
+    # using its highly-optimized ONNX runtime default embedding function.
     collection.add(
         ids=ids,
-        embeddings=embeddings,
         documents=texts,
         metadatas=metadatas
     )
@@ -72,10 +66,9 @@ def search(query: str, collection, top_k: int = 3, source_filter: str = None) ->
     Embeds a user query, searches the database using Cosine Similarity,
     and returns the top matches with their original text and metadata.
     """
-    query_embedding = model.encode([query]).tolist()
-    
+    # Let Chroma embed the query automatically
     query_kwargs = {
-        "query_embeddings": query_embedding,
+        "query_texts": [query],
         "n_results": top_k
     }
     if source_filter:
