@@ -66,7 +66,8 @@ export default function Dashboard() {
       dynamicTyping: true,
       skipEmptyLines: true,
       complete: (results) => {
-        const data = results.data as any[];
+        // Limit to 5000 rows to prevent overwhelming the free-tier backend memory / payload limits
+        const data = results.data.slice(0, 5000) as any[];
         
         // Remove CustomerID if it exists so we don't send it to the backend for ML
         const cleanedData = data.map(row => {
