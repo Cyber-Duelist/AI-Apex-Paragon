@@ -71,6 +71,8 @@
     </style>
 </head>
 <body>
+    <!-- 3D WebGL Boids Background (Sakana AI Style) -->
+    <div id="vanta-bg" style="position: fixed; z-index: -1; width: 100vw; height: 100vh; top: 0; left: 0; opacity: 0.8;"></div>
 
     <h1>Synapse V</h1>
     <p class="subtitle">Omni-Modal AI (Vision + Voice + Tools)</p>
@@ -279,6 +281,35 @@
         // Init
         startWebcam();
         connectWebSocket();
+    </script>
+    
+    <!-- 3D WebGL Engine & Vanta Boids -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            VANTA.BIRDS({
+                el: "#vanta-bg",
+                mouseControls: true,
+                touchControls: true,
+                gyroControls: false,
+                minHeight: 200.00,
+                minWidth: 200.00,
+                scale: 1.00,
+                scaleMobile: 1.00,
+                backgroundColor: 0x0a0a0f, // Deep cyberpunk dark
+                color1: 0x00e5ff, // Cyan
+                color2: 0xa855f7, // Purple
+                colorMode: "variance",
+                birdSize: 1.50,
+                wingSpan: 30.00,
+                speedLimit: 4.00,
+                separation: 50.00,
+                alignment: 40.00,
+                cohesion: 40.00,
+                quantity: 4.00 // Optimized for performance
+            });
+        });
     </script>
 </body>
 </html>
