@@ -1,6 +1,11 @@
 import os
 import sys
 import shutil
+
+# Force HuggingFace to load the model from our bundled local cache
+current_dir = os.path.dirname(os.path.abspath(__file__))
+os.environ["HF_HOME"] = os.path.join(current_dir, ".hf_cache")
+
 import logging
 import gc
 from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Security
@@ -19,9 +24,6 @@ logger = logging.getLogger(__name__)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
-
-# Force HuggingFace to load the model from our bundled local cache
-os.environ["HF_HOME"] = os.path.join(current_dir, ".hf_cache")
 
 from ingest import ingest_document
 from chunker import chunk_document
