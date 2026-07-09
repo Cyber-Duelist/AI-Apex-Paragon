@@ -58,12 +58,26 @@
         .user-text { color: #00e5ff; font-weight: bold; }
         .ai-text { color: #a855f7; margin-top: 10px; }
         .status { margin-top: 20px; font-size: 0.9em; color: #888; }
+        
+        #webcam {
+            width: 240px;
+            height: 180px;
+            border-radius: 12px;
+            border: 2px solid #333;
+            margin-bottom: 20px;
+            object-fit: cover;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
     </style>
 </head>
 <body>
 
-    <h1>Entropy Voice AI</h1>
-    <p class="subtitle">Powered by Web Speech STT, LLaMA-3, and Edge-TTS</p>
+    <h1>Synapse V</h1>
+    <p class="subtitle">Omni-Modal AI (Vision + Voice + Tools)</p>
+
+    <!-- Webcam UI -->
+    <video id="webcam" autoplay playsinline muted></video>
+    <canvas id="capture-canvas" style="display: none;"></canvas>
 
     <button id="record-btn">
         <svg id="record-icon" viewBox="0 0 24 24">
@@ -88,6 +102,33 @@
         let isRecording = false;
         let isAiSpeaking = false;
         let recognition;
+        let webcamStream = null;
+        
+        const videoElement = document.getElementById('webcam');
+        const canvasElement = document.getElementById('capture-canvas');
+        const ctx = canvasElement.getContext('2d');
+
+        // --- WEBCAM INITIALIZATION ---
+        async function startWebcam() {
+            try {
+                webcamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                videoElement.srcObject = webcamStream;
+            } catch (err) {
+                console.error("Webcam access denied or unavailable.", err);
+            }
+        }
+        
+        // Capture frame every 3 seconds and send if connected
+        setInterval(() => {
+            if (ws && ws.readyState === WebSocket.OPEN && webcamStream && videoElement.videoWidth > 0) {
+                canvasElement.width = videoElement.videoWidth;
+                canvasElement.height = videoElement.videoHeight;
+                ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+                // Compress highly to keep payload small and inference fast
+                const base64Image = canvasElement.toDataURL('image/jpeg', 0.5); 
+                ws.send(JSON.stringify({ type: "vision_frame", image: base64Image }));
+            }
+        }, 3000);
         
         // --- WEBSOCKET CONNECTION ---
         function connectWebSocket() {
@@ -236,6 +277,7 @@
         }, 50);
 
         // Init
+        startWebcam();
         connectWebSocket();
     </script>
 </body>
