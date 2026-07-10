@@ -331,14 +331,27 @@ async def websocket_audio_endpoint(websocket: WebSocket):
                 raise Exception("All Groq keys failed.")
             
             # Text model: First do a non-streaming call to check if the LLM wants to use a tool
-            completion = await call_groq(
-                model=model_name,
-                messages=temp_messages,
-                temperature=0.7,
-                max_tokens=200,
-                tools=tools,
-                tool_choice="auto"
-            )
+            retry_count = 0
+            completion = None
+            while retry_count < 3:
+                try:
+                    completion = await call_groq(
+                        model=model_name,
+                        messages=temp_messages,
+                        temperature=0.7,
+                        max_tokens=200,
+                        tools=tools,
+                        tool_choice="auto"
+                    )
+                    break
+                except Exception as call_e:
+                    if "tool_use_failed" in str(call_e).lower() or "400" in str(call_e):
+                        retry_count += 1
+                        print(f"Groq API tool parsing hallucination (400), retrying... ({retry_count}/3)")
+                        if retry_count == 3:
+                            raise call_e
+                    else:
+                        raise call_e
             response_message = completion.choices[0].message
             tool_calls = response_message.tool_calls
             
