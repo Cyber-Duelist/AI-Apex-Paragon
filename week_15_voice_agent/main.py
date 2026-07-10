@@ -142,7 +142,7 @@ def get_stock_price(ticker: str) -> str:
 
 async def analyze_vision(query: str, base64_data: str) -> str:
     """Passes a webcam frame to Gemini Vision to answer a visual query."""
-    global current_gemini_key_idx
+    global current_gemini_key_idx, vision_model
     try:
         encoded_data = base64_data.split(",")[1] if "," in base64_data else base64_data
         image_data = base64.b64decode(encoded_data)
@@ -155,6 +155,10 @@ async def analyze_vision(query: str, base64_data: str) -> str:
             print(f"Quota exceeded! Rotating from Gemini API Key {current_gemini_key_idx + 1}")
             current_gemini_key_idx = (current_gemini_key_idx + 1) % len(gemini_keys)
             genai.configure(api_key=gemini_keys[current_gemini_key_idx])
+            vision_model = genai.GenerativeModel(
+                'gemini-flash-latest',
+                system_instruction="You are a highly precise visual AI. Identify objects literally and accurately. Do not guess, make jokes, or assume it is a trick. Keep responses under 2 sentences."
+            )
             try:
                 # Retry once with the new key
                 response = await vision_model.generate_content_async([query, img])
