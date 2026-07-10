@@ -259,7 +259,7 @@ tools = [
         "type": "function",
         "function": {
             "name": "look_at_webcam",
-            "description": "Uses the agent's computer vision to look at the webcam frame and answer questions about the user's surroundings or objects they are holding.",
+            "description": "CRITICAL: ONLY use this tool if the user EXPLICITLY asks you to look at the camera, see what they are holding, or asks what is in front of you. DO NOT use this tool for general questions, assumptions, or if the user does not explicitly reference your vision.",
             "parameters": {
                 "type": "object",
                 "properties": {
