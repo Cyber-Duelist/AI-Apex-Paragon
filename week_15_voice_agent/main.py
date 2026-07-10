@@ -19,7 +19,14 @@ load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env")
 app = FastAPI(title="Omni-Modal Voice Agent API")
 groq_client = AsyncGroq(api_key=os.getenv("GROQ_API_KEY"))
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+gemini_keys = [os.getenv(f"GEMINI_API_KEY_{i}") for i in range(1, 10) if os.getenv(f"GEMINI_API_KEY_{i}")]
+if not gemini_keys and os.getenv("GEMINI_API_KEY"):
+    gemini_keys.append(os.getenv("GEMINI_API_KEY"))
+current_gemini_key_idx = 0
+
+if gemini_keys:
+    genai.configure(api_key=gemini_keys[current_gemini_key_idx])
+
 vision_model = genai.GenerativeModel(
     'gemini-flash-latest',
     system_instruction="You are a highly precise visual AI. Identify objects literally and accurately. Do not guess, make jokes, or assume it is a trick. Keep responses under 2 sentences."
@@ -124,6 +131,7 @@ def get_stock_price(ticker: str) -> str:
 
 async def analyze_vision(query: str, base64_data: str) -> str:
     """Passes a webcam frame to Gemini Vision to answer a visual query."""
+    global current_gemini_key_idx
     try:
         encoded_data = base64_data.split(",")[1] if "," in base64_data else base64_data
         image_data = base64.b64decode(encoded_data)
@@ -131,6 +139,17 @@ async def analyze_vision(query: str, base64_data: str) -> str:
         response = await vision_model.generate_content_async([query, img])
         return response.text
     except Exception as e:
+        error_msg = str(e)
+        if "429" in error_msg and len(gemini_keys) > 1:
+            print(f"Quota exceeded! Rotating from Gemini API Key {current_gemini_key_idx + 1}")
+            current_gemini_key_idx = (current_gemini_key_idx + 1) % len(gemini_keys)
+            genai.configure(api_key=gemini_keys[current_gemini_key_idx])
+            try:
+                # Retry once with the new key
+                response = await vision_model.generate_content_async([query, img])
+                return response.text
+            except Exception as retry_e:
+                return f"ERROR: Vision analysis failed even after key rotation: {retry_e}"
         return f"ERROR: Vision analysis failed: {e}"
 
 tools = [
