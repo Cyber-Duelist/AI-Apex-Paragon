@@ -343,8 +343,8 @@ async def websocket_audio_endpoint(websocket: WebSocket):
                             try:
                                 return await groq_client.chat.completions.create(**kwargs)
                             except Exception as e:
-                                if "429" in str(e) and len(groq_keys) > 1:
-                                    print(f"Groq Rate limit hit on key {current_groq_key_idx + 1}, rotating...")
+                                if any(code in str(e) for code in ["429", "402"]) and len(groq_keys) > 1:
+                                    print(f"Groq limit hit on key {current_groq_key_idx + 1}, rotating...")
                                     current_groq_key_idx = (current_groq_key_idx + 1) % len(groq_keys)
                                     groq_client = AsyncGroq(api_key=groq_keys[current_groq_key_idx])
                                 else:
@@ -357,8 +357,8 @@ async def websocket_audio_endpoint(websocket: WebSocket):
                             try:
                                 return await deepseek_client.chat.completions.create(**kwargs)
                             except Exception as e:
-                                if "429" in str(e) and len(deepseek_keys) > 1:
-                                    print(f"DeepSeek Rate limit hit on key {current_deepseek_key_idx + 1}, rotating...")
+                                if any(code in str(e) for code in ["429", "402"]) and len(deepseek_keys) > 1:
+                                    print(f"DeepSeek limit hit on key {current_deepseek_key_idx + 1}, rotating...")
                                     current_deepseek_key_idx = (current_deepseek_key_idx + 1) % len(deepseek_keys)
                                     deepseek_client = AsyncOpenAI(api_key=deepseek_keys[current_deepseek_key_idx], base_url="https://api.deepseek.com")
                                 else:
