@@ -264,7 +264,7 @@ async def websocket_audio_endpoint(websocket: WebSocket):
         nonlocal latest_frame_base64
         await websocket.send_text(json.dumps({"type": "clear"}))
         
-        model_name = "llama-3.3-70b-versatile"
+        model_name = "llama-3.1-8b-instant"
         msg_content = user_text
         print("Using Groq Brain Omni-Modal Pipeline")
             
