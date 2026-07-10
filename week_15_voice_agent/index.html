@@ -5,68 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Free Streaming Voice Agent</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #121212;
-            color: #fff;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: #050a15;
+            color: #e0e6ed;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             margin: 0;
+            overflow: hidden;
         }
-        h1 { margin-bottom: 5px; color: #00e5ff; }
-        p.subtitle { color: #aaa; margin-bottom: 40px; }
+        h1 { margin-bottom: 5px; color: #4facfe; font-weight: 600; letter-spacing: 1px; }
+        p.subtitle { color: #8a9bb2; margin-bottom: 40px; font-weight: 300; }
         
         #record-btn {
-            background: linear-gradient(45deg, #00e5ff, #a855f7);
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             border: none;
             border-radius: 50%;
-            width: 120px;
-            height: 120px;
+            width: 100px;
+            height: 100px;
             cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
-            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.4);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            z-index: 10;
         }
-        #record-btn:hover { transform: scale(1.05); }
+        #record-btn:hover { transform: scale(1.08); box-shadow: 0 15px 35px rgba(79, 172, 254, 0.5); }
         #record-btn.recording {
-            animation: pulse 1.5s infinite;
-            background: linear-gradient(45deg, #ff006e, #a855f7);
-            box-shadow: 0 0 30px rgba(255, 0, 110, 0.6);
+            animation: pulse-soothing 2s infinite;
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
         }
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 20px rgba(255,0,110,0.5); }
-            50% { transform: scale(1.1); box-shadow: 0 0 40px rgba(255,0,110,0.8); }
-            100% { transform: scale(1); box-shadow: 0 0 20px rgba(255,0,110,0.5); }
+        @keyframes pulse-soothing {
+            0% { transform: scale(1); box-shadow: 0 0 20px rgba(79, 172, 254, 0.4); }
+            50% { transform: scale(1.15); box-shadow: 0 0 40px rgba(79, 172, 254, 0.7); }
+            100% { transform: scale(1); box-shadow: 0 0 20px rgba(79, 172, 254, 0.4); }
         }
-        #record-icon { width: 40px; height: 40px; fill: white; }
+        #record-icon { width: 32px; height: 32px; fill: white; }
         
         .transcript-box {
             margin-top: 40px;
-            width: 80%;
-            max-width: 600px;
-            background: #1e1e24;
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #333;
-            min-height: 100px;
+            width: 85%;
+            max-width: 650px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            min-height: 120px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
         }
-        .user-text { color: #00e5ff; font-weight: bold; }
-        .ai-text { color: #a855f7; margin-top: 10px; }
-        .status { margin-top: 20px; font-size: 0.9em; color: #888; }
+        .user-text { color: #8a9bb2; font-weight: 400; font-size: 1.05em; line-height: 1.5; }
+        .ai-text { color: #ffffff; margin-top: 15px; font-weight: 300; font-size: 1.15em; line-height: 1.6; }
+        .status { margin-top: 25px; font-size: 0.9em; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; }
         
         #webcam {
-            width: 240px;
-            height: 180px;
-            border-radius: 12px;
-            border: 2px solid #333;
-            margin-bottom: 20px;
+            width: 280px;
+            height: 210px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 25px;
             object-fit: cover;
-            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
     </style>
 </head>
@@ -208,9 +216,18 @@
                         if (ws && ws.readyState === WebSocket.OPEN) {
                             ws.send(JSON.stringify({ type: "user_speech", text: finalTranscript }));
                             aiTranscript.innerText = "Entropy: Thinking...";
-                            nextPlayTime = 0; // reset queue for new response
                             
-                            // Immediately halt recognition to prevent hearing itself start
+                            // Thinking state: fast glowing purple birds
+                            if (window.vantaEffect) {
+                                window.vantaEffect.setOptions({
+                                    color1: 0xc471ed,
+                                    color2: 0xf64f59,
+                                    speedLimit: 8.00,
+                                    separation: 20.00
+                                });
+                            }
+                            
+                            nextPlayTime = 0; // reset queue for new response
                             try { recognition.abort(); } catch(e){}
                         }
                     } else {
@@ -242,16 +259,46 @@
                 try { recognition.start(); } catch(e) {}
                 recordBtn.classList.add('recording');
                 statusText.innerText = "Listening...";
-                statusText.style.color = "#ff006e";
+                statusText.style.color = "#4facfe";
+                
+                // Listening state: Calm Cyan Birds
+                if (window.vantaEffect) {
+                    window.vantaEffect.setOptions({
+                        color1: 0x4facfe,
+                        color2: 0x00f2fe,
+                        speedLimit: 3.00,
+                        separation: 50.00
+                    });
+                }
             } else {
-                try { recognition.abort(); } catch(e) {} // ABORT clears the buffer!
+                try { recognition.abort(); } catch(e) {}
                 if (!isRecording) {
                     recordBtn.classList.remove('recording');
                     statusText.innerText = "Connected to Backend";
-                    statusText.style.color = "#00e5ff";
+                    statusText.style.color = "#8a9bb2";
+                    
+                    // Idle state: Slow gentle Deep Blue
+                    if (window.vantaEffect) {
+                        window.vantaEffect.setOptions({
+                            color1: 0x2b5876,
+                            color2: 0x4e4376,
+                            speedLimit: 2.00,
+                            separation: 60.00
+                        });
+                    }
                 } else {
                     statusText.innerText = "Entropy is speaking...";
-                    statusText.style.color = "#a855f7";
+                    statusText.style.color = "#e0e6ed";
+                    
+                    // Speaking state: Warm energetic Teal/Purple
+                    if (window.vantaEffect) {
+                        window.vantaEffect.setOptions({
+                            color1: 0xa18cd1,
+                            color2: 0xfbc2eb,
+                            speedLimit: 6.00,
+                            separation: 30.00
+                        });
+                    }
                 }
             }
         }
@@ -288,7 +335,7 @@
     <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            VANTA.BIRDS({
+            window.vantaEffect = VANTA.BIRDS({
                 el: "#vanta-bg",
                 mouseControls: true,
                 touchControls: true,
@@ -297,17 +344,17 @@
                 minWidth: 200.00,
                 scale: 1.00,
                 scaleMobile: 1.00,
-                backgroundColor: 0x0a0a0f, // Deep cyberpunk dark
-                color1: 0x00e5ff, // Cyan
-                color2: 0xa855f7, // Purple
+                backgroundColor: 0x050a15, // Soothing deep dark blue
+                color1: 0x2b5876, 
+                color2: 0x4e4376, 
                 colorMode: "variance",
                 birdSize: 1.50,
                 wingSpan: 30.00,
-                speedLimit: 4.00,
-                separation: 50.00,
+                speedLimit: 2.00,
+                separation: 60.00,
                 alignment: 40.00,
                 cohesion: 40.00,
-                quantity: 4.00 // Optimized for performance
+                quantity: 4.00 
             });
         });
     </script>
