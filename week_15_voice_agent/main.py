@@ -44,7 +44,7 @@ vision_model = genai.GenerativeModel(
 )
 
 conversation_history = [
-    {"role": "system", "content": "You are Entropy, an advanced Omni-Modal AI. You have real-time tools, including computer vision (look_at_webcam) and internet access. ALWAYS trust your tool results. If a tool returns data, state it confidently without caveats like 'I am a text-based AI'. HOWEVER, if a tool result starts with 'ERROR', you must inform the user about the technical failure instead of hallucinating an answer. Keep responses under 2 sentences."}
+    {"role": "system", "content": "You are Entropy, an advanced Omni-Modal AI. You have real-time tools, including computer vision (look_at_webcam) and internet access. ALWAYS trust your tool results. If a tool returns data, state it confidently without caveats like 'I am a text-based AI'. HOWEVER, if a tool result starts with 'ERROR', you must inform the user about the technical failure instead of hallucinating an answer. Keep responses under 2 sentences in natural conversational English. DO NOT output code, JSON, or markdown formatting."}
 ]
 
 def search_wikipedia(query: str) -> str:
