@@ -20,7 +20,10 @@ app = FastAPI(title="Omni-Modal Voice Agent API")
 groq_client = AsyncGroq(api_key=os.getenv("GROQ_API_KEY"))
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-vision_model = genai.GenerativeModel('gemini-2.5-flash')
+vision_model = genai.GenerativeModel(
+    'gemini-2.5-flash',
+    system_instruction="You are a highly precise visual AI. Identify objects literally and accurately. Do not guess, make jokes, or assume it is a trick. Keep responses under 2 sentences."
+)
 
 conversation_history = [
     {"role": "system", "content": "You are Entropy, a helpful, extremely concise, and witty AI assistant. Keep responses under 2 sentences to ensure fast voice generation."}

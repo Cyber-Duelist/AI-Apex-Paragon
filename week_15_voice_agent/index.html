@@ -126,8 +126,8 @@
                 canvasElement.width = videoElement.videoWidth;
                 canvasElement.height = videoElement.videoHeight;
                 ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-                // Compress highly to keep payload small and inference fast
-                const base64Image = canvasElement.toDataURL('image/jpeg', 0.5); 
+                // Use high quality compression to prevent visual hallucinations (e.g. mistaking a karambit ring for a mug handle)
+                const base64Image = canvasElement.toDataURL('image/jpeg', 0.9); 
                 ws.send(JSON.stringify({ type: "vision_frame", image: base64Image }));
             }
         }, 3000);
