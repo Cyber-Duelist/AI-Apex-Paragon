@@ -148,26 +148,25 @@ async def analyze_vision(query: str, base64_data: str) -> str:
         image_data = base64.b64decode(encoded_data)
         img = Image.open(BytesIO(image_data))
         strict_query = query + " (Respond ONLY in natural conversational English. DO NOT output JSON, bounding boxes, or code.)"
-        response = await vision_model.generate_content_async([strict_query, img])
-        return response.text
-    except Exception as e:
-        error_msg = str(e)
-        if "429" in error_msg and len(gemini_keys) > 1:
-            print(f"Quota exceeded! Rotating from Gemini API Key {current_gemini_key_idx + 1}")
-            current_gemini_key_idx = (current_gemini_key_idx + 1) % len(gemini_keys)
-            genai.configure(api_key=gemini_keys[current_gemini_key_idx])
-            vision_model = genai.GenerativeModel(
-                'gemini-1.5-flash',
-                system_instruction="You are a highly precise visual AI. Identify objects literally and accurately. Do not guess, make jokes, or assume it is a trick. Keep responses under 2 sentences."
-            )
+        
+        for _ in range(len(gemini_keys)):
             try:
-                # Retry once with the new key
-                strict_query = query + " (Respond ONLY in natural conversational English. DO NOT output JSON, bounding boxes, or code.)"
                 response = await vision_model.generate_content_async([strict_query, img])
                 return response.text
-            except Exception as retry_e:
-                return f"ERROR: Vision analysis failed even after key rotation: {retry_e}"
-        return f"ERROR: Vision analysis failed: {e}"
+            except Exception as e:
+                error_msg = str(e)
+                if "429" in error_msg and len(gemini_keys) > 1:
+                    print(f"Quota exceeded! Rotating from Gemini API Key {current_gemini_key_idx + 1}")
+                    current_gemini_key_idx = (current_gemini_key_idx + 1) % len(gemini_keys)
+                    genai.configure(api_key=gemini_keys[current_gemini_key_idx])
+                    vision_model = genai.GenerativeModel(
+                        'gemini-1.5-flash',
+                        system_instruction="You are a highly precise visual AI. Identify objects literally and accurately. Do not guess, make jokes, or assume it is a trick. Keep responses under 2 sentences."
+                    )
+                else:
+                    return f"ERROR: Vision analysis failed: {e}"
+                    
+        return "ERROR: Vision analysis failed: All API keys have exceeded their quotas."
 
 tools = [
     {
