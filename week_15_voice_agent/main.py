@@ -21,7 +21,7 @@ groq_client = AsyncGroq(api_key=os.getenv("GROQ_API_KEY"))
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 vision_model = genai.GenerativeModel(
-    'gemini-2.5-flash',
+    'gemini-flash-latest',
     system_instruction="You are a highly precise visual AI. Identify objects literally and accurately. Do not guess, make jokes, or assume it is a trick. Keep responses under 2 sentences."
 )
 
@@ -240,7 +240,7 @@ async def websocket_audio_endpoint(websocket: WebSocket):
         await websocket.send_text(json.dumps({"type": "clear"}))
         
         if latest_frame_base64:
-            print("Using Google Gemini 2.5 Flash for Vision")
+            print("Using Google Gemini Flash Latest for Vision")
             try:
                 # Decode base64 image
                 encoded_data = latest_frame_base64.split(",")[1] if "," in latest_frame_base64 else latest_frame_base64
