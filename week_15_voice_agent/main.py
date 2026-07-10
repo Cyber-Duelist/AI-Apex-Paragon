@@ -122,6 +122,17 @@ def get_stock_price(ticker: str) -> str:
     except Exception as e:
         return f"Stock search failed: {e}"
 
+async def analyze_vision(query: str, base64_data: str) -> str:
+    """Passes a webcam frame to Gemini Vision to answer a visual query."""
+    try:
+        encoded_data = base64_data.split(",")[1] if "," in base64_data else base64_data
+        image_data = base64.b64decode(encoded_data)
+        img = Image.open(BytesIO(image_data))
+        response = await vision_model.generate_content_async([query, img])
+        return response.text
+    except Exception as e:
+        return f"Vision analysis failed: {e}"
+
 tools = [
     {
         "type": "function",
@@ -206,6 +217,20 @@ tools = [
                 "required": ["ticker"]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "look_at_webcam",
+            "description": "Uses the agent's computer vision to look at the webcam frame and answer questions about the user's surroundings or objects they are holding.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "The specific question to ask the vision model about the frame."}
+                },
+                "required": ["query"]
+            }
+        }
     }
 ]
 
@@ -239,37 +264,9 @@ async def websocket_audio_endpoint(websocket: WebSocket):
         nonlocal latest_frame_base64
         await websocket.send_text(json.dumps({"type": "clear"}))
         
-        if latest_frame_base64:
-            print("Using Google Gemini Flash Latest for Vision")
-            try:
-                # Decode base64 image
-                encoded_data = latest_frame_base64.split(",")[1] if "," in latest_frame_base64 else latest_frame_base64
-                image_data = base64.b64decode(encoded_data)
-                img = Image.open(BytesIO(image_data))
-                
-                prompt = f"Look at my webcam frame and answer concisely: {user_text}"
-                response = await vision_model.generate_content_async([prompt, img])
-                
-                llm_response = response.text
-                print(f"Gemini: {llm_response}")
-                
-                await websocket.send_text(json.dumps({"type": "ai_response_chunk", "text": llm_response}))
-                await speak_text(llm_response)
-                
-                conversation_history.append({"role": "user", "content": user_text})
-                conversation_history.append({"role": "assistant", "content": llm_response})
-                
-                latest_frame_base64 = None
-                return # Exit early since Gemini handled the entire turn
-            except Exception as e:
-                print(f"Gemini Vision Error: {e}")
-                model_name = "llama-3.1-8b-instant"
-                msg_content = user_text
-                print("Falling back to standard text agent.")
-        else:
-            model_name = "llama-3.1-8b-instant"
-            msg_content = user_text
-            print("Using Standard Agent Model")
+        model_name = "llama-3.1-8b-instant"
+        msg_content = user_text
+        print("Using Groq Brain Omni-Modal Pipeline")
             
         temp_messages = conversation_history + [{"role": "user", "content": msg_content}]
         
@@ -278,9 +275,58 @@ async def websocket_audio_endpoint(websocket: WebSocket):
             tool_calls = None
             response_message = None
             
-            if latest_frame_base64:
-                # Vision model doesn't support tools in this pipeline, so just stream it immediately
-                # This prevents double-hitting the strict Vision API rate limits
+            # Text model: First do a non-streaming call to check if the LLM wants to use a tool
+            completion = await groq_client.chat.completions.create(
+                model=model_name,
+                messages=temp_messages,
+                temperature=0.7,
+                max_tokens=200,
+                tools=tools,
+                tool_choice="auto"
+            )
+            response_message = completion.choices[0].message
+            tool_calls = response_message.tool_calls
+            
+            if tool_calls:
+                func_name = tool_calls[0].function.name
+                print(f"Agent requested tool: {func_name}")
+                await websocket.send_text(json.dumps({"type": "ai_response_chunk", "text": f"[Executing {func_name}...] "}))
+                
+                args = json.loads(tool_calls[0].function.arguments)
+                tool_result = ""
+                
+                if func_name == "search_wikipedia":
+                    tool_result = search_wikipedia(args.get("query", ""))
+                elif func_name == "get_weather":
+                    tool_result = get_weather(args.get("city", ""))
+                elif func_name == "get_crypto_price":
+                    tool_result = get_crypto_price(args.get("coin_id", ""))
+                elif func_name == "calculate":
+                    tool_result = calculate(args.get("expression", ""))
+                elif func_name == "get_news":
+                    tool_result = get_news(args.get("topic", ""))
+                elif func_name == "get_stock_price":
+                    tool_result = get_stock_price(args.get("ticker", ""))
+                elif func_name == "look_at_webcam":
+                    if latest_frame_base64:
+                        tool_result = await analyze_vision(args.get("query", "Describe what is in front of the camera."), latest_frame_base64)
+                        latest_frame_base64 = None
+                    else:
+                        tool_result = "No webcam frame is currently available."
+                else:
+                    tool_result = "Tool not recognized."
+                    
+                print(f"Tool Result: {tool_result}")
+                
+                temp_messages.append(response_message)
+                temp_messages.append({
+                    "tool_call_id": tool_calls[0].id,
+                    "role": "tool",
+                    "name": func_name,
+                    "content": tool_result,
+                })
+                
+                # Stream the final response after the tool result is injected
                 stream_completion = await groq_client.chat.completions.create(
                     model=model_name,
                     messages=temp_messages,
@@ -289,69 +335,14 @@ async def websocket_audio_endpoint(websocket: WebSocket):
                     stream=True
                 )
             else:
-                # Text model: First do a non-streaming call to check if the LLM wants to use a tool
-                completion = await groq_client.chat.completions.create(
+                # No tool called, just stream a normal response to save latency
+                stream_completion = await groq_client.chat.completions.create(
                     model=model_name,
                     messages=temp_messages,
                     temperature=0.7,
-                    max_tokens=200,
-                    tools=tools,
-                    tool_choice="auto"
+                    max_tokens=150,
+                    stream=True
                 )
-                
-                response_message = completion.choices[0].message
-                tool_calls = response_message.tool_calls
-                
-                if tool_calls:
-                    func_name = tool_calls[0].function.name
-                    print(f"Agent requested tool: {func_name}")
-                    await websocket.send_text(json.dumps({"type": "ai_response_chunk", "text": f"[Executing {func_name}...] "}))
-                    
-                    args = json.loads(tool_calls[0].function.arguments)
-                    tool_result = ""
-                    
-                    if func_name == "search_wikipedia":
-                        tool_result = search_wikipedia(args.get("query", ""))
-                    elif func_name == "get_weather":
-                        tool_result = get_weather(args.get("city", ""))
-                    elif func_name == "get_crypto_price":
-                        tool_result = get_crypto_price(args.get("coin_id", ""))
-                    elif func_name == "calculate":
-                        tool_result = calculate(args.get("expression", ""))
-                    elif func_name == "get_news":
-                        tool_result = get_news(args.get("topic", ""))
-                    elif func_name == "get_stock_price":
-                        tool_result = get_stock_price(args.get("ticker", ""))
-                    else:
-                        tool_result = "Tool not recognized."
-                        
-                    print(f"Tool Result: {tool_result}")
-                    
-                    temp_messages.append(response_message)
-                    temp_messages.append({
-                        "tool_call_id": tool_calls[0].id,
-                        "role": "tool",
-                        "name": func_name,
-                        "content": tool_result,
-                    })
-                    
-                    # Stream the final response after the tool result is injected
-                    stream_completion = await groq_client.chat.completions.create(
-                        model=model_name,
-                        messages=temp_messages,
-                        temperature=0.7,
-                        max_tokens=150,
-                        stream=True
-                    )
-                else:
-                    # No tool called, just stream a normal response to save latency
-                    stream_completion = await groq_client.chat.completions.create(
-                        model=model_name,
-                        messages=temp_messages,
-                        temperature=0.7,
-                        max_tokens=150,
-                        stream=True
-                    )
                 
             llm_response = ""
             sentence_buffer = ""
