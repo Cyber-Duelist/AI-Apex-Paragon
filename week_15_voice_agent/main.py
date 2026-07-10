@@ -244,51 +244,13 @@ async def websocket_audio_endpoint(websocket: WebSocket):
         temp_messages = conversation_history + [{"role": "user", "content": msg_content}]
         
         try:
-            completion = await groq_client.chat.completions.create(
-                model=model_name,
-                messages=temp_messages,
-                temperature=0.7,
-                max_tokens=200,
-                tools=tools if not latest_frame_base64 else None,
-                tool_choice="auto" if not latest_frame_base64 else "none"
-            )
+            stream_completion = None
+            tool_calls = None
+            response_message = None
             
-            response_message = completion.choices[0].message
-            tool_calls = response_message.tool_calls
-            
-            if tool_calls:
-                func_name = tool_calls[0].function.name
-                print(f"Agent requested tool: {func_name}")
-                await websocket.send_text(json.dumps({"type": "ai_response_chunk", "text": f"[Executing {func_name}...] "}))
-                
-                args = json.loads(tool_calls[0].function.arguments)
-                tool_result = ""
-                
-                if func_name == "search_wikipedia":
-                    tool_result = search_wikipedia(args.get("query", ""))
-                elif func_name == "get_weather":
-                    tool_result = get_weather(args.get("city", ""))
-                elif func_name == "get_crypto_price":
-                    tool_result = get_crypto_price(args.get("coin_id", ""))
-                elif func_name == "calculate":
-                    tool_result = calculate(args.get("expression", ""))
-                elif func_name == "get_news":
-                    tool_result = get_news(args.get("topic", ""))
-                elif func_name == "get_stock_price":
-                    tool_result = get_stock_price(args.get("ticker", ""))
-                else:
-                    tool_result = "Tool not recognized."
-                    
-                print(f"Tool Result: {tool_result}")
-                
-                temp_messages.append(response_message)
-                temp_messages.append({
-                    "tool_call_id": tool_calls[0].id,
-                    "role": "tool",
-                    "name": func_name,
-                    "content": tool_result,
-                })
-                
+            if latest_frame_base64:
+                # Vision model doesn't support tools in this pipeline, so just stream it immediately
+                # This prevents double-hitting the strict Vision API rate limits
                 stream_completion = await groq_client.chat.completions.create(
                     model=model_name,
                     messages=temp_messages,
@@ -297,13 +259,69 @@ async def websocket_audio_endpoint(websocket: WebSocket):
                     stream=True
                 )
             else:
-                stream_completion = await groq_client.chat.completions.create(
+                # Text model: First do a non-streaming call to check if the LLM wants to use a tool
+                completion = await groq_client.chat.completions.create(
                     model=model_name,
                     messages=temp_messages,
                     temperature=0.7,
-                    max_tokens=150,
-                    stream=True
+                    max_tokens=200,
+                    tools=tools,
+                    tool_choice="auto"
                 )
+                
+                response_message = completion.choices[0].message
+                tool_calls = response_message.tool_calls
+                
+                if tool_calls:
+                    func_name = tool_calls[0].function.name
+                    print(f"Agent requested tool: {func_name}")
+                    await websocket.send_text(json.dumps({"type": "ai_response_chunk", "text": f"[Executing {func_name}...] "}))
+                    
+                    args = json.loads(tool_calls[0].function.arguments)
+                    tool_result = ""
+                    
+                    if func_name == "search_wikipedia":
+                        tool_result = search_wikipedia(args.get("query", ""))
+                    elif func_name == "get_weather":
+                        tool_result = get_weather(args.get("city", ""))
+                    elif func_name == "get_crypto_price":
+                        tool_result = get_crypto_price(args.get("coin_id", ""))
+                    elif func_name == "calculate":
+                        tool_result = calculate(args.get("expression", ""))
+                    elif func_name == "get_news":
+                        tool_result = get_news(args.get("topic", ""))
+                    elif func_name == "get_stock_price":
+                        tool_result = get_stock_price(args.get("ticker", ""))
+                    else:
+                        tool_result = "Tool not recognized."
+                        
+                    print(f"Tool Result: {tool_result}")
+                    
+                    temp_messages.append(response_message)
+                    temp_messages.append({
+                        "tool_call_id": tool_calls[0].id,
+                        "role": "tool",
+                        "name": func_name,
+                        "content": tool_result,
+                    })
+                    
+                    # Stream the final response after the tool result is injected
+                    stream_completion = await groq_client.chat.completions.create(
+                        model=model_name,
+                        messages=temp_messages,
+                        temperature=0.7,
+                        max_tokens=150,
+                        stream=True
+                    )
+                else:
+                    # No tool called, just stream a normal response to save latency
+                    stream_completion = await groq_client.chat.completions.create(
+                        model=model_name,
+                        messages=temp_messages,
+                        temperature=0.7,
+                        max_tokens=150,
+                        stream=True
+                    )
                 
             llm_response = ""
             sentence_buffer = ""
