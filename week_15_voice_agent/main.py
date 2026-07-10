@@ -167,6 +167,8 @@ async def analyze_vision(query: str, base64_data: str) -> str:
                     return f"ERROR: Vision analysis failed: {e}"
                     
         return "ERROR: Vision analysis failed: All API keys have exceeded their quotas."
+    except Exception as e:
+        return f"ERROR: Vision analysis failed to process image: {e}"
 
 tools = [
     {
