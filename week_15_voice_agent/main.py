@@ -9,11 +9,18 @@ from dotenv import load_dotenv
 import edge_tts
 from groq import AsyncGroq
 from pathlib import Path
+import google.generativeai as genai
+import base64
+from io import BytesIO
+from PIL import Image
 
 load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env")
 
 app = FastAPI(title="Omni-Modal Voice Agent API")
 groq_client = AsyncGroq(api_key=os.getenv("GROQ_API_KEY"))
+
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+vision_model = genai.GenerativeModel('gemini-1.5-flash')
 
 conversation_history = [
     {"role": "system", "content": "You are Entropy, a helpful, extremely concise, and witty AI assistant. Keep responses under 2 sentences to ensure fast voice generation."}
@@ -230,12 +237,32 @@ async def websocket_audio_endpoint(websocket: WebSocket):
         await websocket.send_text(json.dumps({"type": "clear"}))
         
         if latest_frame_base64:
-            # GROQ HAS DECOMMISSIONED `llama-3.2-11b-vision-preview`. 
-            # Temporarily falling back to text-only until they release a stable vision endpoint.
-            model_name = "llama-3.1-8b-instant"
-            msg_content = user_text
-            print("Vision endpoint decommissioned by Groq. Falling back to Standard Text Agent.")
-            latest_frame_base64 = None
+            print("Using Google Gemini 1.5 Flash for Vision")
+            try:
+                # Decode base64 image
+                encoded_data = latest_frame_base64.split(",")[1] if "," in latest_frame_base64 else latest_frame_base64
+                image_data = base64.b64decode(encoded_data)
+                img = Image.open(BytesIO(image_data))
+                
+                prompt = f"Look at my webcam frame and answer concisely: {user_text}"
+                response = await vision_model.generate_content_async([prompt, img])
+                
+                llm_response = response.text
+                print(f"Gemini: {llm_response}")
+                
+                await websocket.send_text(json.dumps({"type": "ai_response_chunk", "text": llm_response}))
+                await speak_text(llm_response)
+                
+                conversation_history.append({"role": "user", "content": user_text})
+                conversation_history.append({"role": "assistant", "content": llm_response})
+                
+                latest_frame_base64 = None
+                return # Exit early since Gemini handled the entire turn
+            except Exception as e:
+                print(f"Gemini Vision Error: {e}")
+                model_name = "llama-3.1-8b-instant"
+                msg_content = user_text
+                print("Falling back to standard text agent.")
         else:
             model_name = "llama-3.1-8b-instant"
             msg_content = user_text
