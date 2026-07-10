@@ -39,7 +39,7 @@ if gemini_keys:
     genai.configure(api_key=gemini_keys[current_gemini_key_idx])
 
 vision_model = genai.GenerativeModel(
-    'gemini-flash-latest',
+    'gemini-1.5-flash',
     system_instruction="You are a highly precise visual AI. Identify objects literally and accurately. Do not guess, make jokes, or assume it is a trick. Keep responses under 2 sentences."
 )
 
@@ -157,7 +157,7 @@ async def analyze_vision(query: str, base64_data: str) -> str:
             current_gemini_key_idx = (current_gemini_key_idx + 1) % len(gemini_keys)
             genai.configure(api_key=gemini_keys[current_gemini_key_idx])
             vision_model = genai.GenerativeModel(
-                'gemini-flash-latest',
+                'gemini-1.5-flash',
                 system_instruction="You are a highly precise visual AI. Identify objects literally and accurately. Do not guess, make jokes, or assume it is a trick. Keep responses under 2 sentences."
             )
             try:
