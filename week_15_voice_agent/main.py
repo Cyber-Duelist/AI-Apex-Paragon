@@ -8,6 +8,7 @@ import urllib.parse
 from dotenv import load_dotenv
 import edge_tts
 from groq import AsyncGroq
+from openai import AsyncOpenAI
 from pathlib import Path
 import google.generativeai as genai
 import base64
@@ -17,7 +18,17 @@ from PIL import Image
 load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env")
 
 app = FastAPI(title="Omni-Modal Voice Agent API")
-groq_client = AsyncGroq(api_key=os.getenv("GROQ_API_KEY"))
+
+groq_keys = [os.getenv(f"GROQ_API_KEY_{i}") for i in range(1, 10) if os.getenv(f"GROQ_API_KEY_{i}")]
+if not groq_keys and os.getenv("GROQ_API_KEY"):
+    groq_keys.append(os.getenv("GROQ_API_KEY"))
+current_groq_key_idx = 0
+groq_client = AsyncGroq(api_key=groq_keys[current_groq_key_idx]) if groq_keys else None
+
+openai_keys = [os.getenv(f"OPENAI_API_KEY_{i}") for i in range(1, 10) if os.getenv(f"OPENAI_API_KEY_{i}")]
+if not openai_keys and os.getenv("OPENAI_API_KEY"):
+    openai_keys.append(os.getenv("OPENAI_API_KEY"))
+openai_client = AsyncOpenAI(api_key=openai_keys[0]) if openai_keys else None
 
 gemini_keys = [os.getenv(f"GEMINI_API_KEY_{i}") for i in range(1, 10) if os.getenv(f"GEMINI_API_KEY_{i}")]
 if not gemini_keys and os.getenv("GEMINI_API_KEY"):
@@ -294,8 +305,22 @@ async def websocket_audio_endpoint(websocket: WebSocket):
             tool_calls = None
             response_message = None
             
+            async def call_groq(**kwargs):
+                global current_groq_key_idx, groq_client
+                for _ in range(len(groq_keys)):
+                    try:
+                        return await groq_client.chat.completions.create(**kwargs)
+                    except Exception as e:
+                        if "429" in str(e) and len(groq_keys) > 1:
+                            print(f"Groq Rate limit hit on key {current_groq_key_idx + 1}, rotating...")
+                            current_groq_key_idx = (current_groq_key_idx + 1) % len(groq_keys)
+                            groq_client = AsyncGroq(api_key=groq_keys[current_groq_key_idx])
+                        else:
+                            raise e
+                raise Exception("All Groq keys failed.")
+            
             # Text model: First do a non-streaming call to check if the LLM wants to use a tool
-            completion = await groq_client.chat.completions.create(
+            completion = await call_groq(
                 model=model_name,
                 messages=temp_messages,
                 temperature=0.7,
@@ -346,7 +371,7 @@ async def websocket_audio_endpoint(websocket: WebSocket):
                 })
                 
                 # Stream the final response after the tool result is injected
-                stream_completion = await groq_client.chat.completions.create(
+                stream_completion = await call_groq(
                     model=model_name,
                     messages=temp_messages,
                     temperature=0.7,
@@ -355,7 +380,7 @@ async def websocket_audio_endpoint(websocket: WebSocket):
                 )
             else:
                 # No tool called, just stream a normal response to save latency
-                stream_completion = await groq_client.chat.completions.create(
+                stream_completion = await call_groq(
                     model=model_name,
                     messages=temp_messages,
                     temperature=0.7,
@@ -381,11 +406,45 @@ async def websocket_audio_endpoint(websocket: WebSocket):
                         
                 if sentence_buffer.strip():
                     await speak_text(sentence_buffer.strip())
+               if llm_response.strip():
+                conversation_history.append({"role": "user", "content": user_text})
+                conversation_history.append({"role": "assistant", "content": llm_response})
+                
+        except Exception as main_e:
+            print(f"Groq Pipeline Failed: {main_e}. Falling back to OpenAI!")
+            if openai_client:
+                try:
+                    stream_completion = await openai_client.chat.completions.create(
+                        model="gpt-4o-mini",
+                        messages=temp_messages,
+                        temperature=0.7,
+                        max_tokens=150,
+                        stream=True
+                    )
+                    llm_response = ""
+                    sentence_buffer = ""
+                    async for chunk in stream_completion:
+                        token = chunk.choices[0].delta.content or ""
+                        llm_response += token
+                        sentence_buffer += token
+                        if token:
+                            await websocket.send_text(json.dumps({"type": "ai_response_chunk", "text": token}))
+                        if any(p in token for p in ['.', '!', '?', '\n']):
+                            await speak_text(sentence_buffer.strip())
+                            sentence_buffer = ""
+                    if sentence_buffer.strip():
+                        await speak_text(sentence_buffer.strip())
                     
-            conversation_history.append({"role": "user", "content": user_text})
-            conversation_history.append({"role": "assistant", "content": llm_response})
-            print(f"Entropy: {llm_response}")
-            
+                    if llm_response.strip():
+                        conversation_history.append({"role": "user", "content": user_text})
+                        conversation_history.append({"role": "assistant", "content": llm_response})
+                except Exception as oe:
+                    print(f"OpenAI Fallback failed: {oe}")
+                    await speak_text("My systems are currently experiencing critical API failures.")
+            else:
+                await speak_text("My systems are currently experiencing critical API failures.")
+                
+            return
         except asyncio.CancelledError:
             print("Generation interrupted.")
             raise
