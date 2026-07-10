@@ -304,7 +304,11 @@ async def websocket_audio_endpoint(websocket: WebSocket):
         msg_content = user_text
         print("Using Groq Brain Omni-Modal Pipeline")
             
-        temp_messages = conversation_history + [{"role": "user", "content": msg_content}]
+        import datetime
+        current_time = datetime.datetime.now().strftime("%A, %B %d, %Y %I:%M %p")
+        system_time_msg = {"role": "system", "content": f"System Context: The current exact date and time is {current_time}."}
+        
+        temp_messages = conversation_history + [system_time_msg, {"role": "user", "content": msg_content}]
         
         try:
             stream_completion = None
