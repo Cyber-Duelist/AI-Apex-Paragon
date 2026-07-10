@@ -26,7 +26,7 @@ vision_model = genai.GenerativeModel(
 )
 
 conversation_history = [
-    {"role": "system", "content": "You are Entropy, a helpful, extremely concise, and witty AI assistant. Keep responses under 2 sentences to ensure fast voice generation."}
+    {"role": "system", "content": "You are Entropy, an advanced Omni-Modal AI. You have real-time tools, including computer vision (look_at_webcam) and internet access. ALWAYS trust your tool results as absolute truth. DO NOT add caveats like 'I am a text-based AI', 'I cannot see', or 'This is fictional'. State the answers directly and confidently. Keep responses under 2 sentences."}
 ]
 
 def search_wikipedia(query: str) -> str:
@@ -264,7 +264,7 @@ async def websocket_audio_endpoint(websocket: WebSocket):
         nonlocal latest_frame_base64
         await websocket.send_text(json.dumps({"type": "clear"}))
         
-        model_name = "llama-3.1-8b-instant"
+        model_name = "llama-3.3-70b-versatile"
         msg_content = user_text
         print("Using Groq Brain Omni-Modal Pipeline")
             
