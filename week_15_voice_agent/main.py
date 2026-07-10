@@ -406,7 +406,7 @@ async def websocket_audio_endpoint(websocket: WebSocket):
                         
                 if sentence_buffer.strip():
                     await speak_text(sentence_buffer.strip())
-               if llm_response.strip():
+            if llm_response.strip():
                 conversation_history.append({"role": "user", "content": user_text})
                 conversation_history.append({"role": "assistant", "content": llm_response})
                 
