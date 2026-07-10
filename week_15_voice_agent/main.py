@@ -372,7 +372,23 @@ async def websocket_audio_endpoint(websocket: WebSocket):
                     
                 print(f"Tool Result: {tool_result}")
                 
-                temp_messages.append(response_message)
+                # Convert the message object to a standard dict to prevent cross-API serialization crashes
+                safe_response_message = {
+                    "role": "assistant",
+                    "content": response_message.content or "",
+                    "tool_calls": [
+                        {
+                            "id": tc.id,
+                            "type": "function",
+                            "function": {
+                                "name": tc.function.name,
+                                "arguments": tc.function.arguments
+                            }
+                        } for tc in tool_calls
+                    ]
+                }
+                
+                temp_messages.append(safe_response_message)
                 temp_messages.append({
                     "tool_call_id": tool_calls[0].id,
                     "role": "tool",
@@ -420,18 +436,96 @@ async def websocket_audio_endpoint(websocket: WebSocket):
                 print(f"Entropy: {llm_response}")
                 conversation_history.append({"role": "user", "content": user_text})
                 conversation_history.append({"role": "assistant", "content": llm_response})
+                if len(conversation_history) > 11:
+                    conversation_history[:] = [conversation_history[0]] + conversation_history[-10:]
                 
+        except (WebSocketDisconnect, RuntimeError) as ws_err:
+            print("WebSocket disconnected during Groq pipeline.")
+            return
         except Exception as main_e:
             print(f"Groq Pipeline Failed: {main_e}. Falling back to OpenAI!")
             if openai_client:
                 try:
-                    stream_completion = await openai_client.chat.completions.create(
+                    completion = await openai_client.chat.completions.create(
                         model="gpt-4o-mini",
                         messages=temp_messages,
                         temperature=0.7,
-                        max_tokens=150,
-                        stream=True
+                        max_tokens=200,
+                        tools=tools,
+                        tool_choice="auto"
                     )
+                    response_message = completion.choices[0].message
+                    tool_calls = response_message.tool_calls
+                    
+                    if tool_calls:
+                        func_name = tool_calls[0].function.name
+                        print(f"OpenAI fallback requested tool: {func_name}")
+                        await websocket.send_text(json.dumps({"type": "ai_response_chunk", "text": f"[Executing {func_name}...] "}))
+                        
+                        args = json.loads(tool_calls[0].function.arguments)
+                        tool_result = ""
+                        
+                        if func_name == "search_wikipedia":
+                            tool_result = search_wikipedia(args.get("query", ""))
+                        elif func_name == "get_weather":
+                            tool_result = get_weather(args.get("city", ""))
+                        elif func_name == "get_crypto_price":
+                            tool_result = get_crypto_price(args.get("coin_id", ""))
+                        elif func_name == "calculate":
+                            tool_result = calculate(args.get("expression", ""))
+                        elif func_name == "get_news":
+                            tool_result = get_news(args.get("topic", ""))
+                        elif func_name == "get_stock_price":
+                            tool_result = get_stock_price(args.get("ticker", ""))
+                        elif func_name == "look_at_webcam":
+                            if latest_frame_base64:
+                                tool_result = await analyze_vision(args.get("query", "Describe what is in front of the camera."), latest_frame_base64)
+                                latest_frame_base64 = None
+                            else:
+                                tool_result = "No webcam frame is currently available."
+                        else:
+                            tool_result = "Tool not recognized."
+                            
+                        print(f"Tool Result: {tool_result}")
+                        
+                        safe_response_message = {
+                            "role": "assistant",
+                            "content": response_message.content or "",
+                            "tool_calls": [
+                                {
+                                    "id": tc.id,
+                                    "type": "function",
+                                    "function": {
+                                        "name": tc.function.name,
+                                        "arguments": tc.function.arguments
+                                    }
+                                } for tc in tool_calls
+                            ]
+                        }
+                        temp_messages.append(safe_response_message)
+                        temp_messages.append({
+                            "tool_call_id": tool_calls[0].id,
+                            "role": "tool",
+                            "name": func_name,
+                            "content": tool_result,
+                        })
+                        
+                        stream_completion = await openai_client.chat.completions.create(
+                            model="gpt-4o-mini",
+                            messages=temp_messages,
+                            temperature=0.7,
+                            max_tokens=150,
+                            stream=True
+                        )
+                    else:
+                        stream_completion = await openai_client.chat.completions.create(
+                            model="gpt-4o-mini",
+                            messages=temp_messages,
+                            temperature=0.7,
+                            max_tokens=150,
+                            stream=True
+                        )
+                        
                     llm_response = ""
                     sentence_buffer = ""
                     async for chunk in stream_completion:
@@ -447,8 +541,11 @@ async def websocket_audio_endpoint(websocket: WebSocket):
                         await speak_text(sentence_buffer.strip())
                     
                     if llm_response.strip():
+                        print(f"Entropy Fallback: {llm_response}")
                         conversation_history.append({"role": "user", "content": user_text})
                         conversation_history.append({"role": "assistant", "content": llm_response})
+                        if len(conversation_history) > 11:
+                            conversation_history[:] = [conversation_history[0]] + conversation_history[-10:]
                 except Exception as oe:
                     print(f"OpenAI Fallback failed: {oe}")
                     await speak_text("My systems are currently experiencing critical API failures.")
