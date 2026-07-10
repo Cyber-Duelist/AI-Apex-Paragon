@@ -331,32 +331,41 @@ async def websocket_audio_endpoint(websocket: WebSocket):
             response_message = None
             
             async def call_llm(**kwargs):
-                if primary_brain == "groq":
-                    global current_groq_key_idx, groq_client
-                    for _ in range(len(groq_keys)):
-                        try:
-                            return await groq_client.chat.completions.create(**kwargs)
-                        except Exception as e:
-                            if "429" in str(e) and len(groq_keys) > 1:
-                                print(f"Groq Rate limit hit on key {current_groq_key_idx + 1}, rotating...")
-                                current_groq_key_idx = (current_groq_key_idx + 1) % len(groq_keys)
-                                groq_client = AsyncGroq(api_key=groq_keys[current_groq_key_idx])
-                            else:
-                                raise e
-                    raise Exception("All Groq keys failed.")
-                else:
-                    global current_deepseek_key_idx, deepseek_client
-                    for _ in range(len(deepseek_keys)):
-                        try:
-                            return await deepseek_client.chat.completions.create(**kwargs)
-                        except Exception as e:
-                            if "429" in str(e) and len(deepseek_keys) > 1:
-                                print(f"DeepSeek Rate limit hit on key {current_deepseek_key_idx + 1}, rotating...")
-                                current_deepseek_key_idx = (current_deepseek_key_idx + 1) % len(deepseek_keys)
-                                deepseek_client = AsyncOpenAI(api_key=deepseek_keys[current_deepseek_key_idx], base_url="https://api.deepseek.com")
-                            else:
-                                raise e
-                    raise Exception("All DeepSeek keys failed.")
+                global current_groq_key_idx, groq_client
+                global current_deepseek_key_idx, deepseek_client
+                
+                provider_order = ["groq", "deepseek"] if primary_brain == "groq" else ["deepseek", "groq"]
+                
+                for provider in provider_order:
+                    if provider == "groq" and groq_client:
+                        kwargs["model"] = "llama-3.1-8b-instant"
+                        for _ in range(len(groq_keys)):
+                            try:
+                                return await groq_client.chat.completions.create(**kwargs)
+                            except Exception as e:
+                                if "429" in str(e) and len(groq_keys) > 1:
+                                    print(f"Groq Rate limit hit on key {current_groq_key_idx + 1}, rotating...")
+                                    current_groq_key_idx = (current_groq_key_idx + 1) % len(groq_keys)
+                                    groq_client = AsyncGroq(api_key=groq_keys[current_groq_key_idx])
+                                else:
+                                    break # Not a rate limit error, try next provider
+                        print("Groq provider failed or exhausted, cascading to next provider...")
+                        
+                    elif provider == "deepseek" and deepseek_client:
+                        kwargs["model"] = "deepseek-chat"
+                        for _ in range(len(deepseek_keys)):
+                            try:
+                                return await deepseek_client.chat.completions.create(**kwargs)
+                            except Exception as e:
+                                if "429" in str(e) and len(deepseek_keys) > 1:
+                                    print(f"DeepSeek Rate limit hit on key {current_deepseek_key_idx + 1}, rotating...")
+                                    current_deepseek_key_idx = (current_deepseek_key_idx + 1) % len(deepseek_keys)
+                                    deepseek_client = AsyncOpenAI(api_key=deepseek_keys[current_deepseek_key_idx], base_url="https://api.deepseek.com")
+                                else:
+                                    break # Not a rate limit error, try next provider
+                        print("DeepSeek provider failed or exhausted, cascading to next provider...")
+                        
+                raise Exception("All primary and secondary provider keys failed.")
             
             # Text model: First do a non-streaming call to check if the LLM wants to use a tool
             retry_count = 0
