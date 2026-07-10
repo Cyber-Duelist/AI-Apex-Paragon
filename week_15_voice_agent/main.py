@@ -393,37 +393,6 @@ async def websocket_audio_endpoint(websocket: WebSocket):
             tool_calls = response_message.tool_calls
             
             if tool_calls:
-                func_name = tool_calls[0].function.name
-                print(f"Agent requested tool: {func_name}")
-                await websocket.send_text(json.dumps({"type": "ai_response_chunk", "text": f"[Executing {func_name}...] "}))
-                
-                args = json.loads(tool_calls[0].function.arguments)
-                tool_result = ""
-                
-                if func_name == "search_wikipedia":
-                    tool_result = search_wikipedia(args.get("query", ""))
-                elif func_name == "get_weather":
-                    tool_result = get_weather(args.get("city", ""))
-                elif func_name == "get_crypto_price":
-                    tool_result = get_crypto_price(args.get("coin_id", ""))
-                elif func_name == "calculate":
-                    tool_result = calculate(args.get("expression", ""))
-                elif func_name == "get_news":
-                    tool_result = get_news(args.get("topic", ""))
-                elif func_name == "get_stock_price":
-                    tool_result = get_stock_price(args.get("ticker", ""))
-                elif func_name == "look_at_webcam":
-                    if latest_frame_base64:
-                        tool_result = await analyze_vision(args.get("query", "Describe what is in front of the camera."), latest_frame_base64)
-                        latest_frame_base64 = None
-                    else:
-                        tool_result = "No webcam frame is currently available."
-                else:
-                    tool_result = "Tool not recognized."
-                    
-                print(f"Tool Result: {tool_result}")
-                
-                # Convert the message object to a standard dict to prevent cross-API serialization crashes
                 safe_response_message = {
                     "role": "assistant",
                     "content": response_message.content or "",
@@ -438,14 +407,49 @@ async def websocket_audio_endpoint(websocket: WebSocket):
                         } for tc in tool_calls
                     ]
                 }
-                
                 temp_messages.append(safe_response_message)
-                temp_messages.append({
-                    "tool_call_id": tool_calls[0].id,
-                    "role": "tool",
-                    "name": func_name,
-                    "content": tool_result,
-                })
+                
+                for tool_call in tool_calls:
+                    func_name = tool_call.function.name
+                    print(f"Agent requested tool: {func_name}")
+                    await websocket.send_text(json.dumps({"type": "ai_response_chunk", "text": f"[Executing {func_name}...] "}))
+                    
+                    try:
+                        args = json.loads(tool_call.function.arguments)
+                    except json.JSONDecodeError:
+                        args = {}
+                        
+                    tool_result = ""
+                    
+                    if func_name == "search_wikipedia":
+                        tool_result = search_wikipedia(args.get("query", ""))
+                    elif func_name == "get_weather":
+                        tool_result = get_weather(args.get("city", ""))
+                    elif func_name == "get_crypto_price":
+                        tool_result = get_crypto_price(args.get("coin_id", ""))
+                    elif func_name == "calculate":
+                        tool_result = calculate(args.get("expression", ""))
+                    elif func_name == "get_news":
+                        tool_result = get_news(args.get("topic", ""))
+                    elif func_name == "get_stock_price":
+                        tool_result = get_stock_price(args.get("ticker", ""))
+                    elif func_name == "look_at_webcam":
+                        if latest_frame_base64:
+                            tool_result = await analyze_vision(args.get("query", "Describe what is in front of the camera."), latest_frame_base64)
+                            latest_frame_base64 = None
+                        else:
+                            tool_result = "No webcam frame is currently available."
+                    else:
+                        tool_result = "Tool not recognized."
+                        
+                    print(f"Tool Result: {tool_result}")
+                    
+                    temp_messages.append({
+                        "tool_call_id": tool_call.id,
+                        "role": "tool",
+                        "name": func_name,
+                        "content": tool_result,
+                    })
                 
                 # Stream the final response after the tool result is injected
                 stream_completion = await call_llm(
@@ -509,36 +513,6 @@ async def websocket_audio_endpoint(websocket: WebSocket):
                     tool_calls = response_message.tool_calls
                     
                     if tool_calls:
-                        func_name = tool_calls[0].function.name
-                        print(f"OpenAI fallback requested tool: {func_name}")
-                        await websocket.send_text(json.dumps({"type": "ai_response_chunk", "text": f"[Executing {func_name}...] "}))
-                        
-                        args = json.loads(tool_calls[0].function.arguments)
-                        tool_result = ""
-                        
-                        if func_name == "search_wikipedia":
-                            tool_result = search_wikipedia(args.get("query", ""))
-                        elif func_name == "get_weather":
-                            tool_result = get_weather(args.get("city", ""))
-                        elif func_name == "get_crypto_price":
-                            tool_result = get_crypto_price(args.get("coin_id", ""))
-                        elif func_name == "calculate":
-                            tool_result = calculate(args.get("expression", ""))
-                        elif func_name == "get_news":
-                            tool_result = get_news(args.get("topic", ""))
-                        elif func_name == "get_stock_price":
-                            tool_result = get_stock_price(args.get("ticker", ""))
-                        elif func_name == "look_at_webcam":
-                            if latest_frame_base64:
-                                tool_result = await analyze_vision(args.get("query", "Describe what is in front of the camera."), latest_frame_base64)
-                                latest_frame_base64 = None
-                            else:
-                                tool_result = "No webcam frame is currently available."
-                        else:
-                            tool_result = "Tool not recognized."
-                            
-                        print(f"Tool Result: {tool_result}")
-                        
                         safe_response_message = {
                             "role": "assistant",
                             "content": response_message.content or "",
@@ -554,12 +528,48 @@ async def websocket_audio_endpoint(websocket: WebSocket):
                             ]
                         }
                         temp_messages.append(safe_response_message)
-                        temp_messages.append({
-                            "tool_call_id": tool_calls[0].id,
-                            "role": "tool",
-                            "name": func_name,
-                            "content": tool_result,
-                        })
+                        
+                        for tool_call in tool_calls:
+                            func_name = tool_call.function.name
+                            print(f"OpenAI fallback requested tool: {func_name}")
+                            await websocket.send_text(json.dumps({"type": "ai_response_chunk", "text": f"[Executing {func_name}...] "}))
+                            
+                            try:
+                                args = json.loads(tool_call.function.arguments)
+                            except json.JSONDecodeError:
+                                args = {}
+                                
+                            tool_result = ""
+                            
+                            if func_name == "search_wikipedia":
+                                tool_result = search_wikipedia(args.get("query", ""))
+                            elif func_name == "get_weather":
+                                tool_result = get_weather(args.get("city", ""))
+                            elif func_name == "get_crypto_price":
+                                tool_result = get_crypto_price(args.get("coin_id", ""))
+                            elif func_name == "calculate":
+                                tool_result = calculate(args.get("expression", ""))
+                            elif func_name == "get_news":
+                                tool_result = get_news(args.get("topic", ""))
+                            elif func_name == "get_stock_price":
+                                tool_result = get_stock_price(args.get("ticker", ""))
+                            elif func_name == "look_at_webcam":
+                                if latest_frame_base64:
+                                    tool_result = await analyze_vision(args.get("query", "Describe what is in front of the camera."), latest_frame_base64)
+                                    latest_frame_base64 = None
+                                else:
+                                    tool_result = "No webcam frame is currently available."
+                            else:
+                                tool_result = "Tool not recognized."
+                                
+                            print(f"Tool Result: {tool_result}")
+                            
+                            temp_messages.append({
+                                "tool_call_id": tool_call.id,
+                                "role": "tool",
+                                "name": func_name,
+                                "content": tool_result,
+                            })
                         
                         stream_completion = await openai_client.chat.completions.create(
                             model="gpt-4o-mini",
