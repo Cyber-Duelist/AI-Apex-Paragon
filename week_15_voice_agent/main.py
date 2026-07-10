@@ -25,6 +25,12 @@ if not deepseek_keys and os.getenv("DEEPSEEK_API_KEY"):
 current_deepseek_key_idx = 0
 deepseek_client = AsyncOpenAI(api_key=deepseek_keys[current_deepseek_key_idx], base_url="https://api.deepseek.com") if deepseek_keys else None
 
+groq_keys = [os.getenv(f"GROQ_API_KEY_{i}") for i in range(1, 10) if os.getenv(f"GROQ_API_KEY_{i}")]
+if not groq_keys and os.getenv("GROQ_API_KEY"):
+    groq_keys.append(os.getenv("GROQ_API_KEY"))
+current_groq_key_idx = 0
+groq_client = AsyncGroq(api_key=groq_keys[current_groq_key_idx]) if groq_keys else None
+
 openai_keys = [os.getenv(f"OPENAI_API_KEY_{i}") for i in range(1, 10) if os.getenv(f"OPENAI_API_KEY_{i}")]
 if not openai_keys and os.getenv("OPENAI_API_KEY"):
     openai_keys.append(os.getenv("OPENAI_API_KEY"))
@@ -301,9 +307,17 @@ async def websocket_audio_endpoint(websocket: WebSocket):
         nonlocal latest_frame_base64
         await websocket.send_text(json.dumps({"type": "clear"}))
         
-        model_name = "deepseek-chat"
+        primary_brain = os.getenv("PRIMARY_BRAIN", "deepseek").lower()
+        
+        if primary_brain == "groq" and groq_client:
+            model_name = "llama-3.1-8b-instant"
+            print("Using Groq Brain Omni-Modal Pipeline")
+        else:
+            primary_brain = "deepseek"
+            model_name = "deepseek-chat"
+            print("Using DeepSeek Omni-Modal Pipeline")
+            
         msg_content = user_text
-        print("Using DeepSeek Omni-Modal Pipeline")
             
         import datetime
         current_time = datetime.datetime.now().strftime("%A, %B %d, %Y %I:%M %p")
@@ -317,18 +331,32 @@ async def websocket_audio_endpoint(websocket: WebSocket):
             response_message = None
             
             async def call_llm(**kwargs):
-                global current_deepseek_key_idx, deepseek_client
-                for _ in range(len(deepseek_keys)):
-                    try:
-                        return await deepseek_client.chat.completions.create(**kwargs)
-                    except Exception as e:
-                        if "429" in str(e) and len(deepseek_keys) > 1:
-                            print(f"DeepSeek Rate limit hit on key {current_deepseek_key_idx + 1}, rotating...")
-                            current_deepseek_key_idx = (current_deepseek_key_idx + 1) % len(deepseek_keys)
-                            deepseek_client = AsyncOpenAI(api_key=deepseek_keys[current_deepseek_key_idx], base_url="https://api.deepseek.com")
-                        else:
-                            raise e
-                raise Exception("All DeepSeek keys failed.")
+                if primary_brain == "groq":
+                    global current_groq_key_idx, groq_client
+                    for _ in range(len(groq_keys)):
+                        try:
+                            return await groq_client.chat.completions.create(**kwargs)
+                        except Exception as e:
+                            if "429" in str(e) and len(groq_keys) > 1:
+                                print(f"Groq Rate limit hit on key {current_groq_key_idx + 1}, rotating...")
+                                current_groq_key_idx = (current_groq_key_idx + 1) % len(groq_keys)
+                                groq_client = AsyncGroq(api_key=groq_keys[current_groq_key_idx])
+                            else:
+                                raise e
+                    raise Exception("All Groq keys failed.")
+                else:
+                    global current_deepseek_key_idx, deepseek_client
+                    for _ in range(len(deepseek_keys)):
+                        try:
+                            return await deepseek_client.chat.completions.create(**kwargs)
+                        except Exception as e:
+                            if "429" in str(e) and len(deepseek_keys) > 1:
+                                print(f"DeepSeek Rate limit hit on key {current_deepseek_key_idx + 1}, rotating...")
+                                current_deepseek_key_idx = (current_deepseek_key_idx + 1) % len(deepseek_keys)
+                                deepseek_client = AsyncOpenAI(api_key=deepseek_keys[current_deepseek_key_idx], base_url="https://api.deepseek.com")
+                            else:
+                                raise e
+                    raise Exception("All DeepSeek keys failed.")
             
             # Text model: First do a non-streaming call to check if the LLM wants to use a tool
             retry_count = 0
@@ -347,7 +375,7 @@ async def websocket_audio_endpoint(websocket: WebSocket):
                 except Exception as call_e:
                     if "tool_use_failed" in str(call_e).lower() or "400" in str(call_e):
                         retry_count += 1
-                        print(f"DeepSeek API tool parsing hallucination (400), retrying... ({retry_count}/3)")
+                        print(f"{primary_brain.capitalize()} API tool parsing hallucination (400), retrying... ({retry_count}/3)")
                         if retry_count == 3:
                             raise call_e
                     else:
@@ -454,10 +482,10 @@ async def websocket_audio_endpoint(websocket: WebSocket):
                     conversation_history[:] = [conversation_history[0]] + conversation_history[-10:]
                 
         except (WebSocketDisconnect, RuntimeError) as ws_err:
-            print("WebSocket disconnected during DeepSeek pipeline.")
+            print(f"WebSocket disconnected during {primary_brain} pipeline.")
             return
         except Exception as main_e:
-            print(f"DeepSeek Pipeline Failed: {main_e}. Falling back to OpenAI!")
+            print(f"{primary_brain.capitalize()} Pipeline Failed: {main_e}. Falling back to OpenAI!")
             if openai_client:
                 try:
                     completion = await openai_client.chat.completions.create(
