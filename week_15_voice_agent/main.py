@@ -230,12 +230,12 @@ async def websocket_audio_endpoint(websocket: WebSocket):
         await websocket.send_text(json.dumps({"type": "clear"}))
         
         if latest_frame_base64:
-            model_name = "llama-3.2-11b-vision-preview"
-            msg_content = [
-                {"type": "text", "text": f"Look at my webcam frame: {user_text}"},
-                {"type": "image_url", "image_url": {"url": latest_frame_base64}}
-            ]
-            print("Using Vision Model")
+            # GROQ HAS DECOMMISSIONED `llama-3.2-11b-vision-preview`. 
+            # Temporarily falling back to text-only until they release a stable vision endpoint.
+            model_name = "llama-3.1-8b-instant"
+            msg_content = user_text
+            print("Vision endpoint decommissioned by Groq. Falling back to Standard Text Agent.")
+            latest_frame_base64 = None
         else:
             model_name = "llama-3.1-8b-instant"
             msg_content = user_text
