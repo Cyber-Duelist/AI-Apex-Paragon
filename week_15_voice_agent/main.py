@@ -20,7 +20,7 @@ app = FastAPI(title="Omni-Modal Voice Agent API")
 groq_client = AsyncGroq(api_key=os.getenv("GROQ_API_KEY"))
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-vision_model = genai.GenerativeModel('gemini-1.5-flash')
+vision_model = genai.GenerativeModel('gemini-2.5-flash')
 
 conversation_history = [
     {"role": "system", "content": "You are Entropy, a helpful, extremely concise, and witty AI assistant. Keep responses under 2 sentences to ensure fast voice generation."}
@@ -237,7 +237,7 @@ async def websocket_audio_endpoint(websocket: WebSocket):
         await websocket.send_text(json.dumps({"type": "clear"}))
         
         if latest_frame_base64:
-            print("Using Google Gemini 1.5 Flash for Vision")
+            print("Using Google Gemini 2.5 Flash for Vision")
             try:
                 # Decode base64 image
                 encoded_data = latest_frame_base64.split(",")[1] if "," in latest_frame_base64 else latest_frame_base64
