@@ -147,7 +147,8 @@ async def analyze_vision(query: str, base64_data: str) -> str:
         encoded_data = base64_data.split(",")[1] if "," in base64_data else base64_data
         image_data = base64.b64decode(encoded_data)
         img = Image.open(BytesIO(image_data))
-        response = await vision_model.generate_content_async([query, img])
+        strict_query = query + " (Respond ONLY in natural conversational English. DO NOT output JSON, bounding boxes, or code.)"
+        response = await vision_model.generate_content_async([strict_query, img])
         return response.text
     except Exception as e:
         error_msg = str(e)
@@ -161,7 +162,8 @@ async def analyze_vision(query: str, base64_data: str) -> str:
             )
             try:
                 # Retry once with the new key
-                response = await vision_model.generate_content_async([query, img])
+                strict_query = query + " (Respond ONLY in natural conversational English. DO NOT output JSON, bounding boxes, or code.)"
+                response = await vision_model.generate_content_async([strict_query, img])
                 return response.text
             except Exception as retry_e:
                 return f"ERROR: Vision analysis failed even after key rotation: {retry_e}"
