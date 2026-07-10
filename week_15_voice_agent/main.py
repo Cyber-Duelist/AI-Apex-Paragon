@@ -26,7 +26,7 @@ vision_model = genai.GenerativeModel(
 )
 
 conversation_history = [
-    {"role": "system", "content": "You are Entropy, an advanced Omni-Modal AI. You have real-time tools, including computer vision (look_at_webcam) and internet access. ALWAYS trust your tool results as absolute truth. DO NOT add caveats like 'I am a text-based AI', 'I cannot see', or 'This is fictional'. State the answers directly and confidently. Keep responses under 2 sentences."}
+    {"role": "system", "content": "You are Entropy, an advanced Omni-Modal AI. You have real-time tools, including computer vision (look_at_webcam) and internet access. ALWAYS trust your tool results. If a tool returns data, state it confidently without caveats like 'I am a text-based AI'. HOWEVER, if a tool result starts with 'ERROR', you must inform the user about the technical failure instead of hallucinating an answer. Keep responses under 2 sentences."}
 ]
 
 def search_wikipedia(query: str) -> str:
@@ -44,7 +44,7 @@ def search_wikipedia(query: str) -> str:
                 return f"Wikipedia top result for '{query}': {snippet}"
             return "No results found on Wikipedia."
     except Exception as e:
-        return f"Search failed: {e}"
+        return f"ERROR: Search failed: {e}"
 
 def get_weather(city: str) -> str:
     """Fetches real-time weather using wttr.in"""
@@ -57,7 +57,7 @@ def get_weather(city: str) -> str:
             desc = data['current_condition'][0]['weatherDesc'][0]['value']
             return f"Weather in {city}: {temp}°C, {desc}."
     except Exception as e:
-        return f"Weather search failed: {e}"
+        return f"ERROR: Weather search failed: {e}"
 
 def get_crypto_price(coin_id: str) -> str:
     """Fetches crypto price using CoinGecko"""
@@ -71,7 +71,7 @@ def get_crypto_price(coin_id: str) -> str:
                 return f"The current price of {coin_id} is ${price} USD."
             return f"Coin '{coin_id}' not found."
     except Exception as e:
-        return f"Crypto search failed: {e}"
+        return f"ERROR: Crypto search failed: {e}"
 
 def calculate(expression: str) -> str:
     """Safely evaluates a math expression"""
@@ -89,7 +89,7 @@ def calculate(expression: str) -> str:
         result = eval_expr(ast.parse(expression, mode='eval').body)
         return f"Result of {expression} is {result}"
     except Exception as e:
-        return f"Calculation failed: {e}"
+        return f"ERROR: Calculation failed: {e}"
 
 def get_news(topic: str) -> str:
     """Fetches top news headlines using Google News RSS"""
@@ -105,7 +105,7 @@ def get_news(topic: str) -> str:
                 return f"Top news for '{topic}': " + "; ".join(headlines)
             return f"No news found for '{topic}'."
     except Exception as e:
-        return f"News search failed: {e}"
+        return f"ERROR: News search failed: {e}"
 
 def get_stock_price(ticker: str) -> str:
     """Fetches stock price using Yahoo Finance"""
@@ -120,7 +120,7 @@ def get_stock_price(ticker: str) -> str:
                 return f"The current stock price of {ticker.upper()} is ${price}."
             return f"Ticker '{ticker}' not found."
     except Exception as e:
-        return f"Stock search failed: {e}"
+        return f"ERROR: Stock search failed: {e}"
 
 async def analyze_vision(query: str, base64_data: str) -> str:
     """Passes a webcam frame to Gemini Vision to answer a visual query."""
@@ -131,7 +131,7 @@ async def analyze_vision(query: str, base64_data: str) -> str:
         response = await vision_model.generate_content_async([query, img])
         return response.text
     except Exception as e:
-        return f"Vision analysis failed: {e}"
+        return f"ERROR: Vision analysis failed: {e}"
 
 tools = [
     {
