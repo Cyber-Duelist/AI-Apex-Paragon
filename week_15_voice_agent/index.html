@@ -99,7 +99,7 @@
 
     <div class="transcript-box">
         <div class="user-text" id="user-transcript">You: ...</div>
-        <div class="ai-text" id="ai-transcript">JARVIS: ...</div>
+        <div class="ai-text" id="ai-transcript">Entropy: ...</div>
     </div>
 
     <script>
@@ -159,7 +159,7 @@
                         if (payload.type === "ai_response_chunk") {
                             aiTranscript.innerText += payload.text;
                         } else if (payload.type === "clear") {
-                            aiTranscript.innerText = "JARVIS: ";
+                            aiTranscript.innerText = "Entropy: ";
                         }
                     } catch(e) { console.error(e); }
                 } else if (event.data instanceof ArrayBuffer) {
@@ -215,7 +215,7 @@
                         finalTranscript += event.results[i][0].transcript;
                         if (ws && ws.readyState === WebSocket.OPEN) {
                             ws.send(JSON.stringify({ type: "user_speech", text: finalTranscript }));
-                            aiTranscript.innerText = "JARVIS: Thinking...";
+                            aiTranscript.innerText = "Entropy: Thinking...";
                             
                             // Thinking state: fast glowing purple birds
                             if (window.vantaEffect) {
@@ -293,7 +293,7 @@
                         });
                     }
                 } else {
-                    statusText.innerText = "JARVIS is speaking...";
+                    statusText.innerText = "Entropy is speaking...";
                     statusText.style.color = "#e0e6ed";
                     
                     // Speaking state: Warm energetic Teal/Purple
