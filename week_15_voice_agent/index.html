@@ -5,101 +5,182 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Free Streaming Voice Agent</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+        :root {
+            /* Dark Mode Core */
+            --bg-base: #09090b;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --accent-color: #6366f1; 
+            
+            /* Glass Material */
+            --glass-bg: rgba(24, 24, 27, 0.5);
+            --glass-border-top: rgba(255, 255, 255, 0.15);
+            --glass-border-bottom: rgba(255, 255, 255, 0.05);
+            --glass-hover: rgba(39, 39, 42, 0.7);
+            
+            /* Mic Button Special */
+            --mic-bg: rgba(99, 102, 241, 0.15);
+            --mic-color: #818cf8;
+            
+            /* Accents & Effects */
+            --accent-glow: 0 0 35px rgba(99, 102, 241, 0.2);
+            --shadow-ambient: 0 24px 48px -12px rgba(0, 0, 0, 0.6);
+            
+            --spring: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        [data-theme="light"] {
+            /* Light Mode Core */
+            --bg-base: #f8fafc;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --accent-color: #4f46e5;
+            
+            /* Glass Material */
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border-top: rgba(255, 255, 255, 1);
+            --glass-border-bottom: rgba(255, 255, 255, 0.5);
+            --glass-hover: rgba(255, 255, 255, 0.95);
+            
+            /* Mic Button Special */
+            --mic-bg: rgba(79, 70, 229, 0.1);
+            --mic-color: #4f46e5;
+            
+            /* Accents & Effects */
+            --accent-glow: 0 0 40px rgba(79, 70, 229, 0.15);
+            --shadow-ambient: 0 20px 40px -8px rgba(0, 0, 0, 0.1);
+        }
+
+        * { box-sizing: border-box; }
         body {
-            font-family: 'Inter', 'Segoe UI', sans-serif;
-            background: #050a15;
-            color: #e0e6ed;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            margin: 0;
             overflow: hidden;
+            transition: background-color 0.8s ease, color 0.8s ease;
         }
-        h1 { margin-bottom: 5px; color: #4facfe; font-weight: 600; letter-spacing: 1px; }
-        p.subtitle { color: #8a9bb2; margin-bottom: 40px; font-weight: 300; }
-        
-        #record-btn {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            border: none;
-            border-radius: 50%;
-            width: 100px;
-            height: 100px;
-            cursor: pointer;
-            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.4);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+
+        #vanta-bg {
+            position: absolute;
+            z-index: 0;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .content-layer {
             position: relative;
             z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
         }
-        #record-btn:hover { transform: scale(1.08); box-shadow: 0 15px 35px rgba(79, 172, 254, 0.5); }
-        #record-btn.recording {
-            animation: pulse-soothing 2s infinite;
-            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
-        }
-        @keyframes pulse-soothing {
-            0% { transform: scale(1); box-shadow: 0 0 20px rgba(79, 172, 254, 0.4); }
-            50% { transform: scale(1.15); box-shadow: 0 0 40px rgba(79, 172, 254, 0.7); }
-            100% { transform: scale(1); box-shadow: 0 0 20px rgba(79, 172, 254, 0.4); }
-        }
-        #record-icon { width: 32px; height: 32px; fill: white; }
-        
-        .transcript-box {
-            margin-top: 40px;
-            width: 85%;
-            max-width: 650px;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            padding: 25px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            min-height: 120px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-        }
-        .user-text { color: #8a9bb2; font-weight: 400; font-size: 1.05em; line-height: 1.5; }
-        .ai-text { color: #ffffff; margin-top: 15px; font-weight: 300; font-size: 1.15em; line-height: 1.6; }
-        .status { margin-top: 25px; font-size: 0.9em; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; }
+
+        h1 { margin: 0 0 4px 0; color: var(--text-primary); font-weight: 700; letter-spacing: -0.02em; font-size: 2.2rem; }
+        p.subtitle { color: var(--text-secondary); margin: 0 0 48px 0; font-weight: 400; font-size: 0.95rem; letter-spacing: 0.05em; text-transform: uppercase; }
         
         #webcam {
             width: 280px;
             height: 210px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 25px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border-bottom);
+            border-top: 1px solid var(--glass-border-top);
+            margin-bottom: 32px;
             object-fit: cover;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            box-shadow: var(--shadow-ambient);
+            background: #000;
         }
+
+        #record-btn {
+            background: var(--mic-bg);
+            border: 1px solid var(--glass-border-bottom);
+            border-top: 1px solid var(--glass-border-top);
+            border-radius: 50%;
+            width: 96px;
+            height: 96px;
+            cursor: pointer;
+            box-shadow: var(--shadow-ambient);
+            transition: all 0.5s var(--spring);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+        }
+
+        #record-btn:hover { transform: scale(1.05) translateY(-2px); background: var(--glass-hover); box-shadow: var(--shadow-ambient), var(--accent-glow); }
+        
+        #record-btn.recording {
+            animation: pulse-luxury 2.5s var(--spring) infinite;
+            background: var(--accent-color);
+            border-color: transparent;
+        }
+        #record-btn.recording svg { fill: #ffffff; }
+        
+        @keyframes pulse-luxury {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+            50% { transform: scale(1.08); box-shadow: 0 0 0 25px rgba(99, 102, 241, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+        
+        #record-icon { width: 36px; height: 36px; fill: var(--mic-color); transition: fill 0.4s ease; }
+        
+        .status { margin-top: 32px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-secondary); transition: color 0.4s ease; }
+
+        .transcript-box {
+            margin-top: 24px;
+            width: 85%;
+            max-width: 360px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(32px) saturate(200%);
+            -webkit-backdrop-filter: blur(32px) saturate(200%);
+            padding: 24px 28px;
+            border-radius: 24px;
+            border: 1px solid var(--glass-border-bottom);
+            border-top: 1px solid var(--glass-border-top);
+            min-height: 120px;
+            box-shadow: var(--shadow-ambient);
+            transition: all 0.5s var(--spring);
+        }
+
+        .user-text { color: var(--accent-color); font-weight: 600; font-size: 0.95rem; line-height: 1.6; margin-bottom: 12px; }
+        .ai-text { color: var(--text-primary); font-weight: 400; font-size: 1.05rem; line-height: 1.6; }
     </style>
 </head>
-<body>
-    <!-- 3D WebGL Boids Background (Sakana AI Style) -->
-    <div id="vanta-bg" style="position: fixed; z-index: -1; width: 100vw; height: 100vh; top: 0; left: 0; opacity: 0.8;"></div>
+<body data-theme="dark">
+    <div id="vanta-bg"></div>
 
-    <h1>Synapse V</h1>
-    <p class="subtitle">Omni-Modal AI (Vision + Voice + Tools)</p>
+    <div class="content-layer">
+        <h1>ENVOY</h1>
+        <p class="subtitle">Omni-Modal Assistant</p>
 
-    <!-- Webcam UI -->
-    <video id="webcam" autoplay playsinline muted></video>
-    <canvas id="capture-canvas" style="display: none;"></canvas>
+        <!-- Webcam UI -->
+        <video id="webcam" autoplay playsinline muted></video>
+        <canvas id="capture-canvas" style="display: none;"></canvas>
 
-    <button id="record-btn">
-        <svg id="record-icon" viewBox="0 0 24 24">
-            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3zm5 10c0 2.8-2.2 5-5 5s-5-2.2-5-5H5c0 3.5 2.6 6.4 6 6.9V22h2v-3.1c3.4-.5 6-3.4 6-6.9h-2z"/>
-        </svg>
-    </button>
+        <button id="record-btn">
+            <svg id="record-icon" viewBox="0 0 24 24">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3zm5 10c0 2.8-2.2 5-5 5s-5-2.2-5-5H5c0 3.5 2.6 6.4 6 6.9V22h2v-3.1c3.4-.5 6-3.4 6-6.9h-2z"/>
+            </svg>
+        </button>
 
-    <div class="status" id="status-text">Disconnected</div>
+        <div class="status" id="status-text">Disconnected</div>
 
-    <div class="transcript-box">
-        <div class="user-text" id="user-transcript">You: ...</div>
-        <div class="ai-text" id="ai-transcript">Entropy: ...</div>
+        <div class="transcript-box">
+            <div class="user-text" id="user-transcript">You: ...</div>
+            <div class="ai-text" id="ai-transcript">Entropy: ...</div>
+        </div>
     </div>
 
     <script>
@@ -111,7 +192,6 @@
         let ws;
         let isRecording = false;
         let isAiSpeaking = false;
-        let recognition;
         let webcamStream = null;
         
         const videoElement = document.getElementById('webcam');
@@ -124,31 +204,31 @@
                 webcamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                 videoElement.srcObject = webcamStream;
             } catch (err) {
-                console.error("Webcam access denied or unavailable.", err);
+                console.error("Webcam Error:", err);
+                statusText.innerText = "Webcam denied/missing";
             }
         }
-        
-        // Capture frame every 3 seconds and send if connected
-        setInterval(() => {
-            if (ws && ws.readyState === WebSocket.OPEN && webcamStream && videoElement.videoWidth > 0) {
-                canvasElement.width = videoElement.videoWidth;
-                canvasElement.height = videoElement.videoHeight;
-                ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-                // Use high quality compression to prevent visual hallucinations (e.g. mistaking a karambit ring for a mug handle)
-                const base64Image = canvasElement.toDataURL('image/jpeg', 0.9); 
-                ws.send(JSON.stringify({ type: "vision_frame", image: base64Image }));
-            }
-        }, 3000);
-        
-        // --- WEBSOCKET CONNECTION ---
+
+        function captureFrameBase64() {
+            if (!webcamStream) return null;
+            canvasElement.width = videoElement.videoWidth;
+            canvasElement.height = videoElement.videoHeight;
+            ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+            return canvasElement.toDataURL('image/jpeg', 0.5).split(',')[1];
+        }
+
+        // --- AUDIO ENGINE ---
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let nextPlayTime = 0;
+
         function connectWebSocket() {
-            ws = new WebSocket(`ws://${window.location.host}/ws/stream`);
-            ws.binaryType = 'arraybuffer';
+            ws = new WebSocket("ws://127.0.0.1:8000/ws/stream");
+            ws.binaryType = "arraybuffer";
 
             ws.onopen = () => {
                 if (!isRecording) {
                     statusText.innerText = "Connected to Backend";
-                    statusText.style.color = "#00e5ff";
+                    statusText.style.color = "var(--text-secondary)";
                 }
             };
 
@@ -168,141 +248,127 @@
             };
 
             ws.onclose = () => {
-                statusText.innerText = "Disconnected. Reconnecting...";
-                statusText.style.color = "#ff006e";
-                setTimeout(connectWebSocket, 2000);
+                statusText.innerText = "Disconnected. Retrying...";
+                statusText.style.color = "#ff4757";
+                setTimeout(connectWebSocket, 3000);
             };
+            
+            setInterval(() => {
+                if (isRecording && ws && ws.readyState === WebSocket.OPEN) {
+                    const frame = captureFrameBase64();
+                    if (frame) {
+                        ws.send(JSON.stringify({ type: "image", data: frame }));
+                    }
+                }
+            }, 2000);
         }
-
-        // --- AUDIO PLAYBACK QUEUE ---
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        let nextPlayTime = 0;
 
         async function playAudioChunk(arrayBuffer) {
             try {
-                const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                // Since audio from pocket-tts is sent as raw Float32 24kHz
+                const float32Data = new Float32Array(arrayBuffer);
+                const audioBuffer = audioContext.createBuffer(1, float32Data.length, 24000);
+                audioBuffer.getChannelData(0).set(float32Data);
+
                 const source = audioContext.createBufferSource();
                 source.buffer = audioBuffer;
                 source.connect(audioContext.destination);
 
                 const currentTime = audioContext.currentTime;
-                if (nextPlayTime < currentTime) {
-                    nextPlayTime = currentTime;
+                // Add a tiny 0.05s buffer delay to prevent microscopic network jitter clicks
+                if (nextPlayTime < currentTime + 0.05) {
+                    nextPlayTime = currentTime + 0.05;
                 }
                 
                 source.start(nextPlayTime);
                 nextPlayTime += audioBuffer.duration;
             } catch (err) {
-                console.error("Error decoding audio chunk", err);
+                console.error("Error decoding raw audio chunk", err);
             }
         }
 
-        // --- SPEECH TO TEXT ---
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = true;
-
-            recognition.onresult = (event) => {
-                if (isAiSpeaking) return;
-
-                let finalTranscript = '';
-                let interimTranscript = '';
-
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript;
+        // --- NATIVE PYTHON SPEECH RECOGNITION BRIDGE ---
+        async function startNativeListening() {
+            if (isAiSpeaking || !isRecording) return;
+            try {
+                const response = await fetch("http://127.0.0.1:8001/listen");
+                const data = await response.json();
+                
+                if (data.status === "success" && data.text) {
+                    if (!isAiSpeaking && isRecording) {
+                        userTranscript.innerText = "You: " + data.text;
                         if (ws && ws.readyState === WebSocket.OPEN) {
-                            ws.send(JSON.stringify({ type: "user_speech", text: finalTranscript }));
+                            ws.send(JSON.stringify({ type: "user_speech", text: data.text }));
                             aiTranscript.innerText = "Entropy: Thinking...";
                             
-                            // Thinking state: fast glowing purple birds
                             if (window.vantaEffect) {
                                 window.vantaEffect.setOptions({
-                                    color1: 0xc471ed,
-                                    color2: 0xf64f59,
+                                    color1: 0x6366f1,
+                                    color2: 0x818cf8, 
                                     speedLimit: 10.00,
                                     separation: 100.00,
                                     cohesion: 100.00,
                                     alignment: 10.00
                                 });
                             }
-                            
-                            nextPlayTime = 0; // reset queue for new response
-                            try { recognition.abort(); } catch(e){}
+                            nextPlayTime = 0;
                         }
                     } else {
-                        interimTranscript += event.results[i][0].transcript;
+                        console.log("Ignored transcript because AI is speaking (Echo cancellation).");
                     }
                 }
-                userTranscript.innerText = "You: " + (finalTranscript || interimTranscript);
-            };
-
-            // Restart recognition if it ends unexpectedly, but only if it's supposed to be listening
-            recognition.onend = () => {
-                if (isRecording && !isAiSpeaking) {
-                    try { recognition.start(); } catch(e) {}
-                }
-            };
-
-            recognition.onerror = (event) => {
-                if (event.error !== 'aborted') {
-                    console.error("Speech recognition error", event.error);
-                }
-            };
-        } else {
-            alert("Your browser does not support Web Speech API. Please use Chrome.");
+            } catch (err) {
+                console.error("Native Listen Error:", err);
+            }
+            
+            if (isRecording && !isAiSpeaking) {
+                setTimeout(startNativeListening, 100);
+            }
         }
 
         // --- STATE MACHINE ---
         function updateRecognitionState() {
             if (isRecording && !isAiSpeaking) {
-                try { recognition.start(); } catch(e) {}
+                startNativeListening();
                 recordBtn.classList.add('recording');
                 statusText.innerText = "Listening...";
-                statusText.style.color = "#4facfe";
+                statusText.style.color = "var(--accent-color)";
                 
-                // Listening state: Calm Cyan Birds
                 if (window.vantaEffect) {
                     window.vantaEffect.setOptions({
-                        color1: 0x4facfe,
-                        color2: 0x00f2fe,
-                        speedLimit: 4.00,
-                        separation: 50.00,
-                        cohesion: 50.00,
-                        alignment: 50.00
+                        color1: 0x4f46e5,
+                        color2: 0x818cf8,
+                        speedLimit: 2.00,
+                        separation: 70.00,
+                        cohesion: 25.00,
+                        alignment: 25.00
                     });
                 }
             } else {
-                try { recognition.abort(); } catch(e) {}
+                recordBtn.classList.remove('recording');
                 if (!isRecording) {
-                    recordBtn.classList.remove('recording');
-                    statusText.innerText = "Connected to Backend";
-                    statusText.style.color = "#8a9bb2";
-                    
-                    // Idle state: Slow gentle Deep Blue
+                    statusText.innerText = "Paused";
+                    statusText.style.color = "var(--text-secondary)";
                     if (window.vantaEffect) {
                         window.vantaEffect.setOptions({
-                            color1: 0x2b5876,
-                            color2: 0x4e4376,
+                            color1: 0x4f46e5,
+                            color2: 0x818cf8,
                             speedLimit: 2.00,
-                            separation: 60.00,
-                            cohesion: 20.00,
-                            alignment: 20.00
+                            separation: 70.00,
+                            cohesion: 25.00,
+                            alignment: 25.00
                         });
                     }
                 } else {
                     statusText.innerText = "Entropy is speaking...";
-                    statusText.style.color = "#e0e6ed";
+                    statusText.style.color = "var(--text-primary)";
                     
-                    // Speaking state: Warm energetic Teal/Purple
                     if (window.vantaEffect) {
                         window.vantaEffect.setOptions({
                             color1: 0xa18cd1,
                             color2: 0xfbc2eb,
-                            speedLimit: 5.00,
-                            separation: 30.00,
+                            speedLimit: 6.00,
+                            separation: 40.00,
                             cohesion: 60.00,
                             alignment: 80.00
                         });
@@ -324,7 +390,6 @@
 
         recordBtn.addEventListener('click', toggleRecording);
 
-        // Monitor audio queue with a 50ms interval and 0.5s padding for reverb
         setInterval(() => {
             const currentlySpeaking = (nextPlayTime > 0 && audioContext.currentTime < nextPlayTime + 0.6);
             if (currentlySpeaking !== isAiSpeaking) {
@@ -341,7 +406,9 @@
     <!-- 3D WebGL Engine & Vanta Boids -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js"></script>
+    
     <script>
+        // Setup Vanta & Theme Sync
         document.addEventListener('DOMContentLoaded', () => {
             window.vantaEffect = VANTA.BIRDS({
                 el: "#vanta-bg",
@@ -352,18 +419,30 @@
                 minWidth: 200.00,
                 scale: 1.00,
                 scaleMobile: 1.00,
-                backgroundColor: 0x050a15, // Soothing deep dark blue
-                color1: 0x2b5876, 
-                color2: 0x4e4376, 
+                backgroundColor: 0x09090b, 
+                color1: 0x4f46e5, 
+                color2: 0x818cf8, 
                 colorMode: "variance",
-                birdSize: 1.50,
-                wingSpan: 30.00,
+                birdSize: 1.20,
+                wingSpan: 28.00,
                 speedLimit: 2.00,
-                separation: 60.00,
-                alignment: 20.00,
-                cohesion: 20.00,
+                separation: 70.00,
+                alignment: 25.00,
+                cohesion: 25.00,
                 quantity: 4.00 
             });
+            
+            const bc = new BroadcastChannel('envoy_theme');
+            bc.onmessage = function (ev) {
+                document.documentElement.setAttribute('data-theme', ev.data.theme);
+                if (window.vantaEffect) {
+                    if (ev.data.theme === 'light') {
+                        window.vantaEffect.setOptions({ backgroundColor: 0xf8fafc, color1: 0x3730a3, color2: 0x6366f1 });
+                    } else {
+                        window.vantaEffect.setOptions({ backgroundColor: 0x09090b, color1: 0x4f46e5, color2: 0x818cf8 });
+                    }
+                }
+            };
         });
     </script>
 </body>

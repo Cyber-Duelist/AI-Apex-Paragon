@@ -7,3 +7,4 @@ websockets
 openai
 google-generativeai
 pillow
+duckduckgo-search

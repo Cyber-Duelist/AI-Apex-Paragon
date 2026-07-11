@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENVOY Dashboard</title>
+    <!-- Premium Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* === UI/UX MASTERCLASS: VARIABLES === */
+        :root {
+            /* Dark Mode Core (VisionOS / macOS inspired) */
+            --bg-base: #09090b;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.55);
+            
+            /* Glass Material */
+            --glass-bg: rgba(24, 24, 27, 0.45);
+            --glass-border-top: rgba(255, 255, 255, 0.15);
+            --glass-border-bottom: rgba(255, 255, 255, 0.05);
+            --glass-hover: rgba(39, 39, 42, 0.65);
+            
+            /* Accents & Effects */
+            --accent-glow: 0 0 30px rgba(99, 102, 241, 0.15);
+            --accent-border: rgba(99, 102, 241, 0.6);
+            --shadow-ambient: 0 24px 48px -12px rgba(0, 0, 0, 0.5);
+            --shadow-hard: 0 8px 16px -4px rgba(0, 0, 0, 0.4);
+            
+            /* Animation Physics */
+            --spring: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        [data-theme="light"] {
+            /* Light Mode Core */
+            --bg-base: #f8fafc;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            
+            /* Glass Material */
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border-top: rgba(255, 255, 255, 1);
+            --glass-border-bottom: rgba(255, 255, 255, 0.5);
+            --glass-hover: rgba(255, 255, 255, 0.95);
+            
+            /* Accents & Effects */
+            --accent-glow: 0 0 40px rgba(79, 70, 229, 0.1);
+            --accent-border: rgba(79, 70, 229, 0.4);
+            --shadow-ambient: 0 20px 40px -8px rgba(0, 0, 0, 0.08);
+            --shadow-hard: 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* === GLOBAL RESETS === */
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.8s ease, color 0.8s ease;
+        }
+
+        /* === BACKGROUND & BRANDING === */
+        #vanta-bg {
+            position: absolute;
+            z-index: 0;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .brand {
+            position: absolute;
+            top: 48px;
+            left: 56px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            z-index: 10;
+            color: var(--text-primary);
+            opacity: 0.9;
+        }
+
+        /* === UI CONTROLS === */
+        #theme-toggle {
+            position: absolute;
+            top: 40px;
+            right: 56px;
+            width: 48px;
+            height: 48px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border-bottom);
+            border-top: 1px solid var(--glass-border-top);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            box-shadow: var(--shadow-hard);
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            z-index: 10;
+            transition: all 0.5s var(--spring);
+        }
+
+        #theme-toggle:hover {
+            transform: scale(1.1) translateY(-2px);
+            background: var(--glass-hover);
+            box-shadow: var(--shadow-ambient), var(--accent-glow);
+        }
+
+        /* === MAIN DASHBOARD CONTENT === */
+        .content-layer {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        #clock {
+            font-size: clamp(6rem, 12vw, 9rem);
+            font-weight: 300;
+            letter-spacing: -0.04em;
+            line-height: 1;
+            margin: 0;
+            color: var(--text-primary);
+            font-feature-settings: "tnum" 1;
+            /* Text shadow to ensure it stands out perfectly against the birds */
+            text-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        #date {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            margin-top: 8px;
+            margin-bottom: 64px;
+        }
+
+        /* === SEARCH COMPONENT === */
+        .search-container {
+            width: 100%;
+            max-width: 680px;
+            margin-bottom: 64px;
+            padding: 0 24px;
+            position: relative;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 24px 32px;
+            font-size: 1.25rem;
+            font-weight: 400;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border-bottom);
+            border-top: 1px solid var(--glass-border-top);
+            border-radius: 24px;
+            backdrop-filter: blur(32px) saturate(200%);
+            -webkit-backdrop-filter: blur(32px) saturate(200%);
+            box-shadow: var(--shadow-ambient);
+            outline: none;
+            transition: all 0.5s var(--spring);
+        }
+
+        input[type="text"]:focus {
+            background: var(--glass-hover);
+            border-color: var(--accent-border);
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: var(--shadow-ambient), var(--accent-glow);
+        }
+
+        input[type="text"]::placeholder {
+            color: var(--text-secondary);
+            font-weight: 300;
+        }
+
+        /* === WIDGETS DOCK === */
+        .widgets {
+            display: flex;
+            gap: 24px;
+        }
+
+        .widget {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 120px;
+            height: 120px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border-bottom);
+            border-top: 1px solid var(--glass-border-top);
+            border-radius: 28px; /* App icon curvature */
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            text-decoration: none;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            transition: all 0.5s var(--spring);
+            box-shadow: var(--shadow-hard);
+        }
+
+        .widget i {
+            font-size: 2.2rem;
+            margin-bottom: 14px;
+            color: var(--text-primary);
+            transition: color 0.5s var(--spring), transform 0.5s var(--spring);
+        }
+
+        .widget:hover {
+            transform: translateY(-8px) scale(1.05);
+            background: var(--glass-hover);
+            border-color: var(--accent-border);
+            box-shadow: var(--shadow-ambient), var(--accent-glow);
+        }
+        
+        .widget:hover i {
+            transform: scale(1.1);
+            color: var(--text-primary); /* Keeps color solid on hover */
+        }
+        
+        /* Custom hover colors for brands */
+        .widget.github:hover i { color: #ffffff; }
+        .widget.youtube:hover i { color: #ff0000; }
+        .widget.twitter:hover i { color: #1da1f2; }
+    </style>
+</head>
+<body>
+    
+    <div id="vanta-bg"></div>
+
+    <div class="brand">E N V O Y</div>
+
+    <button id="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+        <i class="fas fa-moon" id="theme-icon"></i>
+    </button>
+
+    <div class="content-layer">
+        <h1 id="clock">00:00</h1>
+        <p id="date">DAY, MONTH 00</p>
+
+        <div class="search-container">
+            <input type="text" id="search" placeholder="Search the web or enter URL..." autofocus>
+        </div>
+
+        <div class="widgets">
+            <a href="https://github.com" class="widget github">
+                <i class="fab fa-github"></i>
+                GitHub
+            </a>
+            <a href="https://youtube.com" class="widget youtube">
+                <i class="fab fa-youtube"></i>
+                YouTube
+            </a>
+            <a href="https://twitter.com" class="widget twitter">
+                <i class="fab fa-twitter"></i>
+                Twitter
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.birds.min.js"></script>
+    <script>
+        // High-end Vanta Configuration
+        document.addEventListener('DOMContentLoaded', () => {
+            window.vantaEffect = VANTA.BIRDS({
+                el: "#vanta-bg",
+                mouseControls: true,
+                touchControls: true,
+                gyroControls: false,
+                minHeight: 200.00,
+                minWidth: 200.00,
+                scale: 1.00,
+                scaleMobile: 1.00,
+                backgroundColor: 0x09090b, 
+                color1: 0x4f46e5, // Deep Indigo
+                color2: 0x818cf8, // Light Indigo
+                colorMode: "variance",
+                birdSize: 1.20,
+                wingSpan: 28.00,
+                speedLimit: 2.00,
+                separation: 70.00,
+                alignment: 25.00,
+                cohesion: 25.00,
+                quantity: 4.00 
+            });
+        });
+
+        // Precision Clock Logic
+        function updateClock() {
+            const now = new Date();
+            let h = now.getHours();
+            let m = now.getMinutes();
+            h = h < 10 ? '0' + h : h;
+            m = m < 10 ? '0' + m : m;
+            document.getElementById('clock').innerText = `${h}:${m}`;
+
+            const options = { weekday: 'long', month: 'long', day: 'numeric' };
+            document.getElementById('date').innerText = now.toLocaleDateString('en-US', options).toUpperCase();
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Search Bar Logic
+        document.getElementById('search').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                let query = this.value;
+                if (query.includes('.') && !query.includes(' ')) {
+                    window.location.href = query.startsWith('http') ? query : 'https://' + query;
+                } else {
+                    window.location.href = 'https://www.google.com/search?q=' + encodeURIComponent(query);
+                }
+            }
+        });
+
+        // Seamless Theme Toggle Logic
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            
+            const icon = document.getElementById('theme-icon');
+            if (newTheme === 'light') {
+                icon.className = 'fas fa-sun';
+            } else {
+                icon.className = 'fas fa-moon';
+            }
+            
+            if (window.vantaEffect) {
+                if (newTheme === 'light') {
+                    window.vantaEffect.setOptions({ backgroundColor: 0xf8fafc, color1: 0x3730a3, color2: 0x6366f1 });
+                } else {
+                    window.vantaEffect.setOptions({ backgroundColor: 0x09090b, color1: 0x4f46e5, color2: 0x818cf8 });
+                }
+            }
+            
+            fetch("http://127.0.0.1:8001/theme", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ theme: newTheme })
+            }).catch(e => console.log(e));
+        }
+    </script>
+</body>
+</html>
