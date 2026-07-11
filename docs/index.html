@@ -455,15 +455,15 @@
                 </div>
 
                 <div class="project-card glass-card">
-                    <span class="project-badge">NEW</span>
-                    <h3>Synapse V: Omni-Modal Agent</h3>
-                    <p>A real-time Omni-Modal AI featuring live webcam vision streaming, autonomous Wikipedia tool calling, and ultra-low latency voice (STT/TTS) interaction over WebSockets. Watch it see, hear, and search the live web.</p>
+                    <span class="project-badge" style="background: rgba(99, 102, 241, 0.2); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.4);">DESKTOP APP</span>
+                    <h3>Envoy: Omni-Modal AI Dashboard</h3>
+                    <p>A real-time Omni-Modal AI built on a custom <strong>PyQt5 Chromium</strong> browser. Features live webcam vision streaming, <strong>Vanta.js WebGL</strong> premium frosted-glass UI, and zero-latency <strong>Kyutai / Pocket-TTS</strong> voice interactions over WebSockets.</p>
                     <div class="project-tech">
-                        <span>Python</span><span>FastAPI</span><span>WebSockets</span><span>LLaMA-3.2-Vision</span><span>Agentic Workflow</span>
+                        <span>PyQt5</span><span>FastAPI</span><span>Kyutai TTS</span><span>WebSockets</span><span>LLaMA-3.2-Vision</span>
                     </div>
                     <div class="project-links">
                         <a href="https://github.com/Cyber-Duelist/AI-Apex-Paragon/tree/main/week_15_voice_agent" target="_blank">View on GitHub <i class="fab fa-github"></i></a>
-                        <span class="live-demo-link demo-building">Demo Building... ⏳</span>
+                        <span class="live-demo-link" style="color: #94a3b8; border-color: #475569; background: rgba(71, 85, 105, 0.1); cursor: default;">Desktop App Only 🖥️</span>
                     </div>
                 </div>
                 <div class="project-card glass-card">
@@ -586,6 +586,20 @@
                         <div class="bp-node output">Verified LLM Output</div>
                     </div>
                 </div>
+
+                <!-- Envoy Blueprint -->
+                <div class="blueprint-card glass-card">
+                    <h3>4. Envoy Omni-Modal AI</h3>
+                    <div class="blueprint-diagram">
+                        <div class="bp-node user"><i class="fas fa-desktop"></i> PyQt5 Chromium UI<br><small>(Envoy Dashboard)</small></div>
+                        <div class="bp-arrow">&#10140; <br><small>WebSockets</small></div>
+                        <div class="bp-node core"><i class="fas fa-server"></i> FastAPI Backend<br><small>(main.py)</small></div>
+                        <div class="bp-arrow split-arrow">
+                            <div class="bp-path">&#10140; <div class="bp-node model"><i class="fas fa-volume-up"></i> Kyutai Pocket-TTS<br><small>(Zero Latency)</small></div></div>
+                            <div class="bp-path">&#10140; <div class="bp-node vision"><i class="fas fa-eye"></i> Vision AI<br><small>(LLaMA 3.2)</small></div></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -618,7 +632,7 @@
                 </div>
 
                 <!-- ML Project Placeholder -->
-                <div class="project-card" style="border-color: var(--accent-color);">
+                <div class="project-card featured glass-card" style="border-color: var(--accent-color);">
                     <div class="project-glow"></div>
                     <span class="project-badge" style="background: rgba(255, 0, 110, 0.2); color: var(--accent-color); border: 1px solid rgba(255, 0, 110, 0.4);">PREDICTIVE MODELING</span>
                     <h3>Nexus: Enterprise Churn Predictor</h3>
