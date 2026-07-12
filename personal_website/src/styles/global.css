@@ -139,10 +139,15 @@ body {
   min-height: 100vh;
   width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   position: relative;
-  padding: 2rem;
+  padding: 15vh 1.5rem;
+}
+
+.scene::before,
+.scene::after {
+  content: '';
+  flex: 1;
 }
 
 .scene--void {
@@ -351,16 +356,25 @@ body {
   text-shadow: 0 0 10px var(--signal-cyan);
 }
 
+.mt-10 {
+  margin-top: 2.5rem;
+}
+
 /* Connect / Outro */
+#scene-connect .scene-content {
+  text-align: center;
+}
+
 .connect-links {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  align-items: center;
+  gap: 1.5rem;
 }
 
 .magnetic-link {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(3rem, 6vw, 5rem);
+  font-size: clamp(1.5rem, 6vw, 4rem);
   color: var(--text-dim);
   text-decoration: none;
   transition: color 0.3s;

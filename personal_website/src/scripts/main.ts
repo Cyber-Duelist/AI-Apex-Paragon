@@ -123,8 +123,8 @@ function initCinematicScroll() {
         duration: 1.5,
         ease: 'power3.out',
         scrollTrigger: {
-          trigger: scene,
-          start: 'top 85%',
+          trigger: scene.parentElement,
+          start: 'top 75%',
           toggleActions: 'play none none reverse'
         }
       }
@@ -161,7 +161,7 @@ function initCinematicScroll() {
         ease: 'power3.out',
         scrollTrigger: {
           trigger: fragment,
-          start: 'top 85%',
+          start: 'top 95%',
           toggleActions: 'play none none reverse'
         }
       }
