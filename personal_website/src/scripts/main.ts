@@ -111,23 +111,21 @@ function initCinematicScroll() {
   });
 
   scenes.forEach((scene) => {
-    // Skip hero since we custom animate it above
     if (scene.closest('#scene-hero')) {
       return;
     }
 
     gsap.fromTo(scene, 
-      { opacity: 0, y: 150 },
+      { opacity: 0, y: 100 },
       { 
         opacity: 1, 
         y: 0, 
-        duration: 2.0,
-        ease: 'expo.out',
+        duration: 1.5,
+        ease: 'power3.out',
         scrollTrigger: {
           trigger: scene,
           start: 'top 85%',
-          end: 'top 30%',
-          scrub: 1.5, // Smoother scrub
+          toggleActions: 'play none none reverse'
         }
       }
     );
@@ -159,12 +157,12 @@ function initCinematicScroll() {
         opacity: 1,
         x: 0,
         y: 0,
-        ease: 'expo.out',
+        duration: 1.2,
+        ease: 'power3.out',
         scrollTrigger: {
           trigger: fragment,
           start: 'top 85%',
-          end: 'top 40%',
-          scrub: 1.5,
+          toggleActions: 'play none none reverse'
         }
       }
     );
