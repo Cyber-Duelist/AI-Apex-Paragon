@@ -234,28 +234,43 @@ body {
 .floating-tags {
   position: relative;
   width: 100%;
-  height: 60vh;
+  margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
 }
 
 .float-tag {
-  position: absolute;
   font-family: 'IBM Plex Mono', monospace;
-  font-size: clamp(1rem, 2vw, 2rem);
+  font-size: clamp(0.85rem, 2vw, 1.2rem);
   color: rgba(255,255,255,0.9);
-  padding: 1rem 2rem;
+  padding: 0.8rem 1.2rem;
   border: 1px solid rgba(0, 240, 255, 0.2);
   border-radius: 100px;
-  background: rgba(10, 10, 15, 0.3);
+  background: rgba(10, 10, 15, 0.7);
   backdrop-filter: blur(16px);
-  box-shadow: 0 4px 30px rgba(0, 240, 255, 0.05), inset 0 0 20px rgba(0, 240, 255, 0.05);
   will-change: transform;
 }
-.float-tag:nth-child(1) { top: 10%; left: 5%; }
-.float-tag:nth-child(2) { top: 30%; right: 10%; }
-.float-tag:nth-child(3) { top: 50%; left: 20%; }
-.float-tag:nth-child(4) { top: 70%; right: 20%; }
-.float-tag:nth-child(5) { top: 80%; left: 10%; }
-.float-tag:nth-child(6) { top: 20%; left: 40%; }
+
+@media (min-width: 768px) {
+  .floating-tags {
+    height: 60vh;
+    display: block;
+    margin-top: 4rem;
+  }
+  .float-tag {
+    position: absolute;
+    font-size: clamp(1rem, 2vw, 2rem);
+    padding: 1rem 2rem;
+  }
+  .float-tag:nth-child(1) { top: 10%; left: 5%; }
+  .float-tag:nth-child(2) { top: 30%; right: 10%; }
+  .float-tag:nth-child(3) { top: 50%; left: 20%; }
+  .float-tag:nth-child(4) { top: 70%; right: 20%; }
+  .float-tag:nth-child(5) { top: 80%; left: 10%; }
+  .float-tag:nth-child(6) { top: 20%; left: 40%; }
+}
 
 /* Fragments (Systems) */
 .system-fragments {
