@@ -8,6 +8,33 @@ gsap.registerPlugin(ScrollTrigger);
 function initCinematicScroll() {
   const curtain = document.getElementById('load-curtain');
   
+  // Custom Cursor
+  const cursor = document.querySelector('.cursor') as HTMLElement;
+  const cursorDot = document.querySelector('.cursor-dot') as HTMLElement;
+  
+  if (cursor && cursorDot) {
+    if (window.matchMedia('(pointer: fine)').matches) {
+      window.addEventListener('mousemove', (e) => {
+        gsap.to(cursorDot, { x: e.clientX, y: e.clientY, xPercent: -50, yPercent: -50, duration: 0 });
+        gsap.to(cursor, { x: e.clientX, y: e.clientY, xPercent: -50, yPercent: -50, duration: 0.15, ease: 'power2.out' });
+      });
+      
+      document.querySelectorAll('a, button, .magnetic-link').forEach(link => {
+        link.addEventListener('mouseenter', () => {
+          cursor.classList.add('hover');
+          cursorDot.style.transform = 'translate(-50%, -50%) scale(0.5)';
+        });
+        link.addEventListener('mouseleave', () => {
+          cursor.classList.remove('hover');
+          cursorDot.style.transform = 'translate(-50%, -50%) scale(1)';
+        });
+      });
+    } else {
+      cursor.style.display = 'none';
+      cursorDot.style.display = 'none';
+    }
+  }
+
   // Scramble text intro
   const headline = document.getElementById('hero-headline');
   const role = document.getElementById('hero-role');

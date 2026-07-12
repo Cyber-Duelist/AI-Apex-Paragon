@@ -36,29 +36,6 @@ body {
   font-weight: 700;
 }
 
-/* Custom Cursor */
-.cursor {
-  position: fixed;
-  top: 0; left: 0;
-  width: 40px; height: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999;
-  transform: translate(-50%, -50%);
-  transition: width 0.3s, height 0.3s, background-color 0.3s;
-}
-
-.cursor-dot {
-  position: fixed;
-  top: 0; left: 0;
-  width: 6px; height: 6px;
-  background: var(--signal-cyan);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 10000;
-  transform: translate(-50%, -50%);
-}
 
 /* Noise & Vignette Overlays */
 .noise-overlay {
@@ -101,6 +78,15 @@ body {
   background-color: rgba(0, 240, 255, 0.1);
   border-color: rgba(0, 240, 255, 0.5);
   box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+}
+
+@media (pointer: coarse) {
+  .cursor, .cursor-dot {
+    display: none !important;
+  }
+  *, *::before, *::after {
+    cursor: auto !important;
+  }
 }
 
 .cursor-dot {
@@ -185,7 +171,7 @@ body {
 
 .cinematic-heading {
   font-family: 'Playfair Display', serif;
-  font-size: 5rem;
+  font-size: clamp(2.5rem, 10vw, 5rem);
   letter-spacing: -2px;
   margin-bottom: 1rem;
   background: linear-gradient(135deg, #fff 0%, #aab2c0 100%);
@@ -275,7 +261,7 @@ body {
 
 .fragment {
   max-width: 600px;
-  padding: 3rem;
+  padding: clamp(1.5rem, 5vw, 3rem);
   border-left: 2px solid var(--signal-cyan);
   background: linear-gradient(90deg, rgba(0, 240, 255, 0.05) 0%, transparent 100%);
   transform-style: preserve-3d;
