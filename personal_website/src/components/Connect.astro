@@ -1,0 +1,39 @@
+---
+import { site } from '../data/site';
+---
+
+<section class="section connect" id="connect" data-signal-anchor data-pipeline-stage="4">
+  <p class="section-label">06 — Verified output</p>
+  <h2 class="connect__cta">
+    Request <span>resolved.</span>
+  </h2>
+  <div class="connect__rows">
+    <div class="connect__row">
+      <span class="connect__label">Email</span>
+      <span class="connect__value">
+        <a href={`mailto:${site.email}`}>{site.email}</a>
+      </span>
+    </div>
+    <div class="connect__row">
+      <span class="connect__label">GitHub</span>
+      <span class="connect__value">
+        <a href={site.github} target="_blank" rel="noopener noreferrer">Cyber-Duelist/AI-Apex-Paragon</a>
+      </span>
+    </div>
+    <div class="connect__row">
+      <span class="connect__label">LinkedIn</span>
+      <span class="connect__value">
+        <a href={site.linkedin} target="_blank" rel="noopener noreferrer">i-am-entity</a>
+      </span>
+    </div>
+    <div class="connect__row">
+      <span class="connect__label">Phone</span>
+      <span class="connect__value">
+        <a href={`tel:${site.phone.replace(/[^+\d]/g, '')}`}>{site.phone}</a>
+      </span>
+    </div>
+  </div>
+  <p class="connect__terminal" id="connect-terminal" data-resolved-point>
+    ▸ signal complete — {site.handle} ready for inbound requests
+  </p>
+</section>

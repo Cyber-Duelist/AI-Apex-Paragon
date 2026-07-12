@@ -1,0 +1,22 @@
+---
+import { capabilityDomains } from '../data/site';
+---
+
+<section class="section capabilities" id="capabilities" data-signal-anchor data-pipeline-stage="2">
+  <p class="section-label">02 — Known domains</p>
+  <h2 class="section-title">Capabilities</h2>
+  <div class="capability-domains">
+    {
+      capabilityDomains.map((domain) => (
+        <div class="capability-domain">
+          <h3 class="capability-domain__name">{domain.name}</h3>
+          <div class="tag-map">
+            {domain.tags.map((tag) => (
+              <span class="skill-tag">{tag}</span>
+            ))}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</section>

@@ -1,0 +1,21 @@
+---
+import { site, routingRules } from '../data/site';
+---
+
+<section class="section identity" id="identity" data-signal-anchor data-pipeline-stage="1">
+  <p class="section-label">01 — Router resolves caller</p>
+  <h2 class="section-title section-title--amber">Identity</h2>
+  <p class="identity__bio">{site.bio}</p>
+  <div class="routing-grid">
+    {
+      routingRules.map((rule) => (
+        <article class="routing-card">
+          <p class="routing-card__condition">{rule.condition}</p>
+          <p class="routing-card__domain">→ route to: {rule.domain}</p>
+          <p class="routing-card__arrow">└─</p>
+          <p class="routing-card__routes">{rule.routes.join(' · ')}</p>
+        </article>
+      ))
+    }
+  </div>
+</section>

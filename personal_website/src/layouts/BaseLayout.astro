@@ -1,0 +1,52 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'Adarsh Kumar Singh — AI Systems Engineer',
+  description = 'Portfolio of Adarsh Kumar Singh (Entity) — autonomous AI systems, multi-agent orchestration, production RAG, enterprise guardrails.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Playfair+Display:ital,wght@1,700&display=swap"
+      rel="stylesheet"
+    />
+    <title>{title}</title>
+  </head>
+  <body>
+    <!-- Human Touch: Noise Overlay & Cursors -->
+    <div class="noise-overlay"></div>
+    <div class="vignette-overlay"></div>
+    <div class="cursor"></div>
+    <div class="cursor-dot"></div>
+
+    <!-- Black Hole Canvas -->
+    <canvas id="wormhole-canvas"></canvas>
+
+    <div class="load-curtain" id="load-curtain" aria-hidden="true"></div>
+    
+    <div class="scroll-container">
+      <slot />
+    </div>
+
+    <script>
+      import '../scripts/main.ts';
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  @import '../styles/global.css';
+</style>

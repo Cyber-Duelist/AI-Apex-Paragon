@@ -1,0 +1,30 @@
+---
+import { architecturePipelines } from '../data/site';
+---
+
+<section class="section architecture" id="architecture" data-signal-anchor data-pipeline-stage="3">
+  <p class="section-label">04 — Pipeline made visible</p>
+  <h2 class="section-title">Architecture</h2>
+  <p class="dim" style="margin-bottom: 2.5rem;">
+    Scroll to move a request through each pipeline — nodes illuminate with your scroll position.
+  </p>
+  <div class="architecture__pipelines">
+    {
+      architecturePipelines.map((pipeline) => (
+        <div class="pipeline" data-pipeline>
+          <h3 class="pipeline__name">{pipeline.name}</h3>
+          <div class="pipeline__chain" data-pipeline-chain>
+            {pipeline.flow.map((step, i) => (
+              <div class="pipeline__step" data-pipeline-step>
+                {i > 0 && <div class="pipeline__connector" data-pipeline-connector></div>}
+                <div class="pipeline__node" data-pipeline-node>
+                  {step}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</section>

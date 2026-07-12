@@ -1,0 +1,35 @@
+---
+import { pipelineStages } from '../data/site';
+---
+
+<svg class="signal-overlay" id="signal-overlay" aria-hidden="true">
+  <path
+    id="main-signal-path"
+    fill="none"
+    stroke="var(--signal-cyan)"
+    stroke-width="1.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    opacity="0.85"
+  ></path>
+  <path
+    id="preview-signal-path"
+    fill="none"
+    stroke="var(--signal-cyan)"
+    stroke-width="1"
+    stroke-linecap="round"
+    stroke-dasharray="4 6"
+    opacity="0.25"
+  ></path>
+</svg>
+<div class="signal-glow" id="signal-glow" aria-hidden="true"></div>
+
+<nav class="pipeline-nav" id="pipeline-nav" aria-label="Pipeline stages">
+  {
+    pipelineStages.map((stage, i) => (
+      <span class="pipeline-nav__item" data-stage={i} data-section={stage.toLowerCase().replace(/[^a-z]+/g, '-')}>
+        {String(i + 1).padStart(2, '0')} — {stage}
+      </span>
+    ))
+  }
+</nav>

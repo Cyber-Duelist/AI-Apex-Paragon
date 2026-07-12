@@ -1,0 +1,453 @@
+@import './tokens.css';
+
+:root {
+  --ink: #000000;
+  --ink-raised: #0a0a0f;
+  --text-main: rgba(255, 255, 255, 0.85);
+  --text-dim: rgba(255, 255, 255, 0.5);
+  --signal-cyan: #00f0ff;
+  --signal-amber: #ffb000;
+  --warm-gold: #ffb84d;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  cursor: none !important; /* Hide default cursor */
+}
+
+html {
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: var(--text-main);
+  background: var(--ink);
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--ink);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.serif-accent {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 700;
+}
+
+/* Custom Cursor */
+.cursor {
+  position: fixed;
+  top: 0; left: 0;
+  width: 40px; height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s, background-color 0.3s;
+}
+
+.cursor-dot {
+  position: fixed;
+  top: 0; left: 0;
+  width: 6px; height: 6px;
+  background: var(--signal-cyan);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  transform: translate(-50%, -50%);
+}
+
+/* Noise & Vignette Overlays */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  transition: opacity 0.5s;
+}
+
+.vignette-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1; /* Below content, above canvas */
+  pointer-events: none;
+  background: radial-gradient(circle at center, transparent 40%, rgba(5, 5, 8, 0.95) 100%);
+}
+
+/* Custom Cursor */
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--signal-cyan);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s, background-color 0.3s, border-color 0.3s;
+}
+
+.cursor.hover {
+  width: 60px;
+  height: 60px;
+  background-color: rgba(0, 240, 255, 0.1);
+  border-color: rgba(0, 240, 255, 0.5);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+}
+
+.cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  background: var(--signal-cyan);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px var(--signal-cyan);
+}
+
+/* Load Curtain */
+.load-curtain {
+  position: fixed;
+  inset: 0;
+  background: var(--ink);
+  z-index: 5; /* Behind text, above canvas */
+  transition: opacity 1.2s ease-in-out;
+}
+
+#scene-hero .scene-content {
+  opacity: 1;
+}
+.load-curtain.is-done {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Canvas Void */
+#wormhole-canvas {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: 0; pointer-events: none;
+}
+
+/* Cinematic Container */
+.cinematic-container {
+  position: relative;
+  z-index: 10;
+  will-change: transform;
+}
+
+/* Scenes */
+.scene {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 2rem;
+}
+
+.scene--void {
+  min-height: 200vh; /* Massive gap to let the black hole dominate */
+}
+
+.scene-content {
+  max-width: 900px;
+  width: 100%;
+  z-index: 10;
+  opacity: 0; /* Hidden by default, GSAP will fade in */
+  will-change: transform, opacity;
+}
+
+/* Typography */
+.cinematic-title {
+  font-size: clamp(3rem, 6vw, 6rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 2rem;
+}
+
+.glow-text {
+  text-shadow: 0 0 40px rgba(0, 240, 255, 0.3);
+}
+
+.cinematic-heading {
+  font-family: 'Playfair Display', serif;
+  font-size: 5rem;
+  letter-spacing: -2px;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #fff 0%, #aab2c0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtext {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  font-weight: 400;
+  color: var(--text-dim);
+}
+
+.cinematic-role {
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--signal-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.9rem;
+  margin-top: 2rem;
+}
+
+.cinematic-heading {
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--signal-amber);
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 3rem;
+  opacity: 0.7;
+}
+
+.cinematic-body {
+  font-size: clamp(1.5rem, 3vw, 3rem);
+  line-height: 1.4;
+  color: var(--text-dim);
+}
+
+.cinematic-body .highlight {
+  color: #fff;
+  font-size: 1.1em;
+}
+
+/* Floating Elements */
+.spread-out {
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.floating-tags {
+  position: relative;
+  width: 100%;
+  height: 60vh;
+}
+
+.float-tag {
+  position: absolute;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(1rem, 2vw, 2rem);
+  color: rgba(255,255,255,0.9);
+  padding: 1rem 2rem;
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 100px;
+  background: rgba(10, 10, 15, 0.3);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 4px 30px rgba(0, 240, 255, 0.05), inset 0 0 20px rgba(0, 240, 255, 0.05);
+  will-change: transform;
+}
+.float-tag:nth-child(1) { top: 10%; left: 5%; }
+.float-tag:nth-child(2) { top: 30%; right: 10%; }
+.float-tag:nth-child(3) { top: 50%; left: 20%; }
+.float-tag:nth-child(4) { top: 70%; right: 20%; }
+.float-tag:nth-child(5) { top: 80%; left: 10%; }
+.float-tag:nth-child(6) { top: 20%; left: 40%; }
+
+/* Fragments (Systems) */
+.system-fragments {
+  display: flex;
+  flex-direction: column;
+  gap: 15vh; /* Massive spacing to force scrolling */
+  padding-bottom: 20vh;
+  perspective: 1000px; /* For 3D Tilt */
+}
+
+.fragment {
+  max-width: 600px;
+  padding: 3rem;
+  border-left: 2px solid var(--signal-cyan);
+  background: linear-gradient(90deg, rgba(0, 240, 255, 0.05) 0%, transparent 100%);
+  transform-style: preserve-3d;
+  transition: box-shadow 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.fragment-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 0% 50%, rgba(255, 184, 77, 0.08), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.fragment:hover .fragment-glow {
+  opacity: 1;
+}
+
+/* Chromatic Hover Effect */
+.fragment.is-glitching {
+  animation: chromatic-glitch 0.2s cubic-bezier(.25, .46, .45, .94) both infinite;
+}
+
+@keyframes chromatic-glitch {
+  0% { text-shadow: 2px 0 0 red, -2px 0 0 blue; transform: translate(1px, 1px); }
+  25% { text-shadow: -2px 0 0 red, 2px 0 0 blue; transform: translate(-1px, -1px); }
+  50% { text-shadow: 2px 0 0 red, -2px 0 0 blue; transform: translate(-1px, 1px); }
+  75% { text-shadow: -2px 0 0 red, 2px 0 0 blue; transform: translate(1px, -1px); }
+  100% { text-shadow: 2px 0 0 red, -2px 0 0 blue; transform: translate(1px, 1px); }
+}
+
+.fragment h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #fff;
+  transform: translateZ(30px);
+  position: relative;
+}
+
+.fragment p {
+  font-size: 1.2rem;
+  color: var(--text-dim);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+  transform: translateZ(20px);
+  position: relative;
+}
+
+.fragment-link {
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--signal-cyan);
+  text-decoration: none;
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transform: translateZ(40px);
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.fragment-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0%;
+  height: 1px;
+  background: var(--signal-cyan);
+  transition: width 0.4s cubic-bezier(0.77, 0, 0.175, 1);
+  box-shadow: 0 0 8px var(--signal-cyan);
+}
+
+.fragment-link:hover::after {
+  width: 100%;
+}
+
+.fragment-link:hover {
+  text-shadow: 0 0 10px var(--signal-cyan);
+}
+
+/* Connect / Outro */
+.connect-links {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.magnetic-link {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(3rem, 6vw, 5rem);
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.3s;
+  display: inline-block;
+}
+
+.magnetic-link:hover {
+  color: #fff;
+  font-style: italic;
+}
+
+/* Scroll Indicator */
+.scroll-indicator {
+  position: absolute;
+  bottom: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0;
+}
+
+.scroll-text {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.3em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.scroll-capsule {
+  width: 24px;
+  height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.scroll-dot {
+  width: 4px;
+  height: 4px;
+  background: var(--signal-cyan);
+  border-radius: 50%;
+  margin-top: 6px;
+  animation: scroll-drop 1.5s cubic-bezier(0.77, 0, 0.175, 1) infinite;
+  box-shadow: 0 0 10px var(--signal-cyan);
+}
+
+@keyframes scroll-drop {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(20px); opacity: 0; }
+}
+
+/* Human Touch Classes */
+.signature-text {
+  font-family: 'Caveat', cursive;
+  font-size: 2.5rem;
+  color: var(--warm-gold);
+  transform: rotate(-2deg);
+  display: inline-block;
+  opacity: 0.9;
+  text-shadow: 0 0 20px rgba(255, 184, 77, 0.3);
+  letter-spacing: normal;
+  text-transform: none;
+}
+.poetic-quote {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1.5rem;
+  color: var(--warm-gold);
+  margin-bottom: 1rem;
+}

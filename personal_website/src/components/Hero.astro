@@ -1,0 +1,22 @@
+---
+import { site } from '../data/site';
+---
+
+<section class="hero" id="hero" data-signal-anchor data-pipeline-stage="0">
+  <h1 class="hero__headline" id="hero-headline" data-scramble={site.headline}>
+    <span class="serif-accent">{site.headline}</span>
+  </h1>
+  <p class="hero__sub">{site.subheadline}</p>
+  <div class="hero__ctas">
+    <a class="btn btn--primary" href="#systems">View Systems</a>
+    <a class="btn" href={site.resumePdf} target="_blank" rel="noopener noreferrer">Download CV</a>
+    <a class="btn" href={site.github} target="_blank" rel="noopener noreferrer">GitHub</a>
+  </div>
+  <div class="hero__stats">
+    <span><strong>{site.stats.weeksBuilding}</strong> weeks building</span>
+    <span>·</span>
+    <span><strong>{site.stats.systemsShipped}</strong> systems shipped</span>
+    <span>·</span>
+    <span><strong>{site.stats.certifications}</strong> certifications</span>
+  </div>
+</section>

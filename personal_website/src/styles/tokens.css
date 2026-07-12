@@ -1,0 +1,17 @@
+:root {
+  --ink: #0a0c10;
+  --ink-raised: #12151b;
+  --line: #1e232c;
+  --paper: #ece7da;
+  --paper-dim: #8b8f99;
+  --signal-amber: #e8a23c;
+  --signal-cyan: #45d0de;
+
+  --font-mono: 'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace;
+  --font-sans: 'IBM Plex Sans', 'Inter', system-ui, sans-serif;
+  --font-serif: 'Playfair Display', serif;
+
+  --signal-x: 2.5rem;
+  --section-pad: clamp(1.5rem, 4vw, 4rem);
+  --max-width: 72rem;
+}

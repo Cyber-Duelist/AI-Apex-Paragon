@@ -1,0 +1,39 @@
+---
+import { projects } from '../data/site';
+---
+
+<section class="section systems" id="systems" data-signal-anchor data-pipeline-stage="3">
+  <div class="systems__header">
+    <p class="section-label">03 — Multi-agent swarm</p>
+    <h2 class="section-title">Systems</h2>
+    <p class="dim">Nine production systems — scroll vertically to traverse the swarm.</p>
+  </div>
+  <div class="systems__track-wrap" id="systems-wrap">
+    <div class="systems__track" id="systems-track">
+      {
+        projects.map((project) => (
+          <article class="system-node" data-system-node>
+            <div class="system-node__branch" data-branch></div>
+            <p class="system-node__index">{project.index}</p>
+            <p class="system-node__category">{project.category}</p>
+            <h3 class="system-node__title">{project.title}</h3>
+            <p class="system-node__desc">{project.desc}</p>
+            <div class="system-node__tags">
+              {project.tags.map((tag) => (
+                <span class="system-node__tag">{tag}</span>
+              ))}
+            </div>
+            <div class="system-node__links">
+              <a href={project.code} target="_blank" rel="noopener noreferrer">Code</a>
+              {project.demo ? (
+                <a href={project.demo} target="_blank" rel="noopener noreferrer">Demo</a>
+              ) : (
+                <span class="dim">Desktop / building</span>
+              )}
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
