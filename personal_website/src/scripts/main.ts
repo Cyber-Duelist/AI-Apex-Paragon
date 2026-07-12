@@ -131,20 +131,23 @@ function initCinematicScroll() {
     );
   });
 
-  // Floating Tags Parallax
-  const tags = document.querySelectorAll('.float-tag');
-  tags.forEach((tag) => {
-    const speed = parseFloat(tag.getAttribute('data-speed') || '1');
-    gsap.to(tag, {
-      y: -200 * speed,
-      rotation: speed * 15,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: '#scene-capabilities',
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: true
-      }
+  // Floating Tags Parallax (Desktop Only to prevent overlapping on tightly packed mobile flex layout)
+  let mm = gsap.matchMedia();
+  mm.add("(min-width: 768px)", () => {
+    const tags = document.querySelectorAll('.float-tag');
+    tags.forEach((tag) => {
+      const speed = parseFloat(tag.getAttribute('data-speed') || '1');
+      gsap.to(tag, {
+        y: -200 * speed,
+        rotation: speed * 15,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '#scene-capabilities',
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: true
+        }
+      });
     });
   });
 
