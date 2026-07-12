@@ -54,7 +54,7 @@ body {
   inset: 0;
   z-index: 1; /* Below content, above canvas */
   pointer-events: none;
-  background: radial-gradient(circle at center, transparent 40%, rgba(5, 5, 8, 0.95) 100%);
+  background: radial-gradient(circle at center, rgba(5, 5, 8, 0.6) 0%, rgba(5, 5, 8, 0.95) 100%);
 }
 
 /* Custom Cursor */
@@ -162,6 +162,16 @@ body {
   will-change: transform, opacity;
 }
 
+.text-focus {
+  background: rgba(10, 10, 15, 0.7);
+  backdrop-filter: blur(16px);
+  padding: 3rem 2rem;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  text-align: center;
+}
+
 /* Typography */
 .cinematic-title {
   font-size: clamp(3rem, 6vw, 6rem);
@@ -200,15 +210,7 @@ body {
   margin-top: 2rem;
 }
 
-.cinematic-heading {
-  font-family: 'IBM Plex Mono', monospace;
-  color: var(--signal-amber);
-  font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  margin-bottom: 3rem;
-  opacity: 0.7;
-}
+
 
 .cinematic-body {
   font-size: clamp(1.5rem, 3vw, 3rem);
@@ -268,11 +270,14 @@ body {
   max-width: 600px;
   padding: clamp(1.5rem, 5vw, 3rem);
   border-left: 2px solid var(--signal-cyan);
-  background: linear-gradient(90deg, rgba(0, 240, 255, 0.05) 0%, transparent 100%);
+  background: rgba(10, 10, 15, 0.7);
+  backdrop-filter: blur(16px);
   transform-style: preserve-3d;
   transition: box-shadow 0.3s;
   position: relative;
   overflow: hidden;
+  border-radius: 0 16px 16px 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .fragment-glow {
@@ -363,6 +368,12 @@ body {
 /* Connect / Outro */
 #scene-connect .scene-content {
   text-align: center;
+  background: rgba(10, 10, 15, 0.7);
+  backdrop-filter: blur(20px);
+  padding: 3rem 1.5rem;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
 }
 
 .connect-links {
